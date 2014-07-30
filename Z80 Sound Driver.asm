@@ -4362,7 +4362,7 @@ z80_SFXPointers:
 		dw	zmake68kPtr(Sound_DB),zmake68kPtr(Sound_DB),zmake68kPtr(Sound_DB),zmake68kPtr(Sound_DB)
 ; ---------------------------------------------------------------------------
 	if $ > zVariablesStart-60h
-		fatal "Your Z80 tables won't fit before its variables. It's \{$-zVariablesStart}h bytes past the start of music data \{zVariablesStart}h"
+		fatal "Your Z80 tables won't fit before the z80 stack. It's \{$-(zVariablesStart-60h)}h bytes past the start of the bottom of the stack, at \{zVariablesStart-60h}h"
 	endif
 
 z80_SoundDriverPointersEnd:
