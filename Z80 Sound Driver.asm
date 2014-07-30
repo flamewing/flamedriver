@@ -58,7 +58,9 @@ zID_SFXPointers = 6
 zID_FreqFlutterPointers = 8
 zID_PSGTonePointers = 0Ah
 ; ---------------------------------------------------------------------------
+	if SonicDriverVer < 5
 z80_stack				=	2000h
+	endif
 ; equates: standard (for Genesis games) addresses in the memory map
 zYM2612_A0				=	4000h
 zYM2612_D0				=	4001h
@@ -75,6 +77,9 @@ zSpecFM3Freqs           =	zVariablesStart
 zSpecFM3FreqsSFX        =	zSpecFM3Freqs + 8
 	else
 zVariablesStart         =	1C00h
+	endif
+	if SonicDriverVer >= 5
+z80_stack				=	zVariablesStart
 	endif
 
 zPalFlag				=	1C02h
@@ -128,16 +133,24 @@ PlaySegaPCMFlag			=	1C3Fh
 ; Now starts song and SFX z80 RAM
 ; Max number of music channels: 6 FM + 3 PSG or 1 DAC + 5 FM + 3 PSG
 zTracksStart			=	1C40h
-zSongFM6_DAC			=	zTracksStart+0*zTrackSz		; Music DAC or FM6 track
+zSongDAC				=	zTracksStart+0*zTrackSz
 zSongFM1				=	zTracksStart+1*zTrackSz
 zSongFM2				=	zTracksStart+2*zTrackSz
 zSongFM3				=	zTracksStart+3*zTrackSz
 zSongFM4				=	zTracksStart+4*zTrackSz
 zSongFM5				=	zTracksStart+5*zTrackSz
+	if SonicDriverVer >= 5
+zSongFM6				=	zTracksStart+6*zTrackSz
+zSongPSG1				=	zTracksStart+7*zTrackSz
+zSongPSG2				=	zTracksStart+8*zTrackSz
+zSongPSG3				=	zTracksStart+9*zTrackSz
+zTracksEnd				=	zTracksStart+10*zTrackSz
+	else
 zSongPSG1				=	zTracksStart+6*zTrackSz
 zSongPSG2				=	zTracksStart+7*zTrackSz
 zSongPSG3				=	zTracksStart+8*zTrackSz
 zTracksEnd				=	zTracksStart+9*zTrackSz
+	endif
 ; This is RAM for backup of songs (e.g., for 1-up jingle)
 zTracksSaveStart		=	zTracksEnd
 zSaveSongFM6_DAC		=	zTracksSaveStart+0*zTrackSz
@@ -146,10 +159,18 @@ zSaveSongFM2			=	zTracksSaveStart+2*zTrackSz
 zSaveSongFM3			=	zTracksSaveStart+3*zTrackSz
 zSaveSongFM4			=	zTracksSaveStart+4*zTrackSz
 zSaveSongFM5			=	zTracksSaveStart+5*zTrackSz
+	if SonicDriverVer >= 5
+zSaveSongFM6			=	zTracksSaveStart+6*zTrackSz
+zSaveSongPSG1			=	zTracksSaveStart+7*zTrackSz
+zSaveSongPSG2			=	zTracksSaveStart+8*zTrackSz
+zSaveSongPSG3			=	zTracksSaveStart+9*zTrackSz
+zTracksSaveEnd			=	zTracksSaveStart+10*zTrackSz
+	else
 zSaveSongPSG1			=	zTracksSaveStart+6*zTrackSz
 zSaveSongPSG2			=	zTracksSaveStart+7*zTrackSz
 zSaveSongPSG3			=	zTracksSaveStart+8*zTrackSz
 zTracksSaveEnd			=	zTracksSaveStart+9*zTrackSz
+	endif
 ; This is RAM for SFX channels
 ; Note this overlaps with the save RAM for 1-up sound, above
 ; Max number of SFX channels: 4 FM + 3 PSG
@@ -629,8 +650,8 @@ zlocCheckFadeIn:
 		ld	a, (zFadeToPrevFlag)			; Get fade-to-previous flag
 		cp	0FFh							; Is it 0FFh?
 		call	z, zFadeInToPrevious		; Fade to previous if yes
-		ld	ix, zTracksStart				; ix = track RAM
-		bit	7, (ix+zTrackPlaybackControl)	; Is FM6/DAC track playing?
+		ld	ix, zSongDAC					; ix = DAC track RAM
+		bit	7, (ix+zTrackPlaybackControl)	; Is DAC track playing?
 		call	nz, zUpdateDACTrack			; Branch if yes
 		ld	b, (zTracksEnd-zSongFM1)/zTrackSz	; Number of tracks
 		ld	ix, zSongFM1					; ix = FM1 track RAM
@@ -1067,6 +1088,7 @@ zKeyOff:
 zKeyOnOff:
 		ld	a, 28h							; Write to KEY ON/OFF port
 	if fix_sndbugs
+		res	6, (ix+zTrackPlaybackControl)	; From Dyna Brothers 2, but in a better place; clear flag to sustain frequency
 		jp	zWriteFMI						; Send it
 	else
 		call	zWriteFMI					; Send it
@@ -1685,9 +1707,13 @@ zBGMLoad:
 		adc	a, h							; a += h, plus 1 if a + l overflowed the 8-bit register
 		sub	l								; Now, a = high byte of offset into music entry
 		ld	h, a							; hl is the offset to the music bank
+	if fix_sndbugs
+		ld	a, (hl)							; Get bank for the song to play
+	else
 		ld	(loc_5EB+1), hl					; Store into next instruction (self-modifying code)
 loc_5EB:
 		ld	a, (z80_MusicBanks)				; self-modified code; a is set to correct bank for the song to play
+	endif
 		ld	(zSongBank), a					; Save the song's bank...
 		bankswitch2							; ... then bank switch to it
 		ld	a, 0B6h							; Set Panning / AMS / FMS
@@ -1996,6 +2022,8 @@ zGetSFXChannelPointers:
 		push	hl							; Save hl
 		pop	ix								; ix = track RAM
 		pop	af								; Restore af
+		; This is where there is code in other drivers to load the special SFX
+		; channel pointers to iy
 		ld	hl, zSFXOverriddenChannel		; Pointer table for the overridden music track
 		rst	PointerTableOffset				; hl = RAM destination to mark as overridden
 		ret
@@ -2049,7 +2077,11 @@ zSFXOverriddenChannel:
 		dw  zSongFM3						; FM3
 		dw  zSongFM4						; FM4
 		dw  zSongFM5						; FM5
-		dw  zSongFM6_DAC					; FM6 or DAC
+	if SonicDriverVer >= 5
+		dw  zSongFM6						; FM6
+	else
+		dw  zSongDAC						; DAC
+	endif
 		dw  zSongPSG1						; PSG1
 		dw  zSongPSG2						; PSG2
 		dw  zSongPSG3						; PSG3
@@ -2082,7 +2114,8 @@ zPauseUnpause:
 		ld	b, (zSongPSG1-zSongFM1)/zTrackSz	; Number of tracks
 	else
 		; DANGER! This treats a PSG channel as if it were an FM channel. This
-		; will break AMS/FMS/pan for FM1.
+		; will break AMS/FMS/pan for FM1. This bug happens because older drivers
+		; had 6 FM channels, and probably used loads of hard-coded numbers.
 
 		ld	b, (zSongPSG2-zSongFM1)/zTrackSz	; Number of tracks
 	endif
@@ -2141,7 +2174,10 @@ zFadeOutMusic:
 ;sub_869
 zHaltDACPSG:
 		xor	a								; a = 0
-		ld	(zTracksStart), a				; Halt FM6/DAC
+		ld	(zSongDAC), a					; Halt DAC
+	if SonicDriverVer >= 5
+		ld	(zSongFM6), a					; Halt FM6 -- Note that notes continue to play
+	endif
 		ld	(zSongPSG3), a					; Halt PSG3
 		ld	(zSongPSG1), a					; Halt PSG1
 		ld	(zSongPSG2), a					; Halt PSG2
@@ -2176,7 +2212,7 @@ zDoMusicFadeOut:
 		ld	a, (zSongBank)					; a = current music bank ID
 		bankswitch2							; Bank switch to music bank
 		ld	ix, zTracksStart				; ix = pointer to track RAM
-		ld	b, (zSongPSG1-zTracksStart)/zTrackSz	; Number of tracks
+		ld	b, (zSongPSG1-zTracksStart)/zTrackSz	; Number of FM+DAC tracks
 
 -		inc	(ix+zTrackVolume)				; Decrease volume
 		jp	p, +							; If still positive, branch
@@ -2215,7 +2251,7 @@ zDoMusicFadeIn:
 		ret	nz								; Branch if it is not yet zero
 		ld	a, (zFadeDelayTimeout)			; Get current fade delay timeout
 		ld	(zFadeDelay), a					; Reset to starting fade delay
-		ld	b, (zSongPSG1-zSongFM1)/zTrackSz	; Number of tracks
+		ld	b, (zSongPSG1-zSongFM1)/zTrackSz	; Number of FM tracks
 		ld	ix, zSongFM1					; ix = start of FM1 RAM
 		ld	de, zTrackSz					; Spacing between tracks
 
@@ -2232,7 +2268,7 @@ zDoMusicFadeIn:
 		dec	a								; Decrement it
 		ld	(zFadeInTimeout), a				; Then store it back
 		ret	nz								; Return if still fading
-		ld	b, (zTracksEnd-zSongPSG1)/zTrackSz	; Number of tracks
+		ld	b, (zTracksEnd-zSongPSG1)/zTrackSz	; Number of PSG tracks
 		ld	ix, zSongPSG1					; ix = start of PSG RAM
 		ld	de, zTrackSz					; Spacing between tracks
 
@@ -2240,7 +2276,7 @@ zDoMusicFadeIn:
 		add	ix, de							; Advance to next track
 		djnz	-							; Loop for all tracks
 		
-		ld	ix, zTracksStart				; ix = start of DAC/FM6 RAM
+		ld	ix, zSongDAC					; ix = start of DAC RAM
 		res	2, (ix+zTrackPlaybackControl)	; Clear 'SFX is overriding' bit
 		ret
 ; End of function zDoMusicFadeIn
@@ -2253,7 +2289,11 @@ zMusicFade:
 		; The following block sets to zero the z80 RAM from 1C0Dh to 1FD4h
 		ld	hl, zFadeOutTimeout				; Starting source address for copy
 		ld	de, zFadeDelay					; Starting destination address for copy
+	if fix_sndbugs
+		ld	bc, zTracksSaveEnd-zFadeDelay	; Length of copy
+	else
 		ld	bc, zTracksSaveEnd+34h-zFadeDelay	; Length of copy; where does the 34h comes from?
+	endif
 		ld	(hl), 0							; Initial value of zero
 		ldir								; while (--length) *de++ = *hl++
 
@@ -2261,7 +2301,15 @@ zMusicFade:
 		ld	(zTempoSpeedup), a				; Fade in normal speed
 		
 		ld	ix, zFMDACInitBytes				; Initialization data for channels
+	if fix_sndbugs
+		ld	b, (zSongPSG1-zSongFM1)/zTrackSz	; Number of channels
+	else
+		; DANGER! This treats a PSG channel as if it were an FM channel. This
+		; will break AMS/FMS/pan for FM1. This bug happens because older drivers
+		; had 6 FM channels, and probably used loads of hard-coded numbers.
+
 		ld	b, (zSongPSG2-zSongFM1)/zTrackSz	; Number of channels
+	endif
 
 -		push	bc							; Save bc for loop
 		call	zFMSilenceChannel			; Silence track's channel
@@ -2270,8 +2318,10 @@ zMusicFade:
 		inc	ix								; But skip the 80h
 		pop	bc								; Restore bc for loop counter
 		djnz	-							; Loop while b > 0
-		
+
+	if fix_sndbugs=0
 		ld	b, 7							; Unused
+	endif
 		xor	a								; a = 0
 		ld	(zFadeOutTimeout), a			; Set fade timeout to zero... again
 		call	zPSGSilenceAll				; Silence PSG
@@ -2310,7 +2360,7 @@ zPauseAudio:
 		call	zPSGSilenceAll				; Redundant, as function falls-through to it anyway
 		push	bc							; Save bc
 		push	af							; Save af
-		ld	b, 3							; FM1/FM2/FM3
+		ld	b, (zSongFM4-zSongFM1)/zTrackSz	; FM1/FM2/FM3
 		ld	a, 0B4h							; Command to select AMS/FMS/panning register (FM1)
 		ld	c, 0							; AMS=FMS=panning=0
 
@@ -2320,7 +2370,7 @@ zPauseAudio:
 		inc	a								; Advance to next channel
 		djnz	-							; Loop for all channels
 
-		ld	b, 2							; FM4 and FM5, but not FM6
+		ld	b, (zSongPSG1-zSongFM4)/zTrackSz	; FM4 and FM5, and FM6 for driver >= 5
 		ld	a, 0B4h							; Command to select AMS/FMS/panning register
 
 -		push	af							; Save af
@@ -2330,7 +2380,7 @@ zPauseAudio:
 		djnz	-							; Loop for all channels
 
 		ld	c, 0							; Note off for all operators
-		ld	b, 6							; 5 FM channels + 1 gap between FM3 and FM4 (NOT FM6)
+		ld	b, (zSongPSG1-zSongFM1)/zTrackSz+1	; FM channels + gap between FM3 and FM4
 		ld	a, 28h							; Command to send note on/off
 
 -		push	af							; Save af
@@ -2349,7 +2399,7 @@ zPauseAudio:
 ;sub_9BC
 zPSGSilenceAll:
 		push	bc							; Save bc
-		ld	b, 4							; Loop 4 times: 3 PSG channels + noise channel
+		ld	b, (zTracksEnd-zSongPSG1)/zTrackSz+1	; Loop 4 times: 3 PSG channels + noise channel
 		ld	a, 9Fh							; Command to silence PSG1
 
 -		ld	(zPSG), a						; Write command
@@ -2372,7 +2422,7 @@ TempoWait:
 		add	a, (hl)							; a += tempo accumulator
 		ld	(hl), a							; Store it as new accumulator value
 		ret	nc								; If the addition did not overflow, return
-		ld	hl, zTracksStart+zTrackDurationTimeout		; Duration timeout of first track
+		ld	hl, zTracksStart+zTrackDurationTimeout	; Duration timeout of first track
 		ld	de, zTrackSz					; Spacing between tracks
 		ld	b, (zTracksEnd-zTracksStart)/zTrackSz	; Number of tracks
 
@@ -2485,11 +2535,11 @@ zFadeInToPrevious:
 		ld	de, zTracksStart				; Start of track data
 		ld	bc, zTracksSaveEnd-zTracksSaveStart	; Number of bytes to copy
 		ldir								; while (bc-- > 0) *de++ = *hl++;
-		ld	a, (zTracksStart)				; a = FM6/DAC track playback control
+		ld	a, (zSongDAC+zTrackPlaybackControl)	; a = FM6/DAC track playback control
 		or	84h								; Set 'track is playing' and 'track is resting' flags
-		ld	(zTracksStart), a				; Set new value
+		ld	(zSongDAC+zTrackPlaybackControl), a	; Set new value
 		ld	ix, zSongFM1					; ix = pointer to FM1 track RAM
-		ld	b, (zTracksEnd-zSongFM1)/zTrackSz	; Number of tracks
+		ld	b, (zTracksEnd-zSongFM1)/zTrackSz	; Number of FM+PSG tracks
 
 -		ld	a, (ix+zTrackPlaybackControl)	; a = track playback control
 		or	84h								; Set 'track is playing' and 'track is resting' flags
@@ -2579,20 +2629,29 @@ zUpdateDACTrack_cont:
 +
 		ld	(ix+zTrackSavedDAC), a			; Store new DAC sample
 		cp	NoteRest						; Is it a rest?
-		jp	z, ++							; Branch if yes
+		jp	z, zUpdateDACTrack_GetDuration	; Branch if yes
 		res	7, a							; Clear bit 7
 		push	de							; Save de
+	if SonicDriverVer>=5
+		ld	hl, zSongFM6					; Get pointer to FM6 track
+		set	2, (hl)							; Mark track as being overridden
+	endif
 		ex	af, af'							; Save af
 		call	zKeyOffIfActive				; Kill note (will do nothing if 'do not attack' is on)
 		call	zFM3NormalMode				; Set FM3 to normal mode
 		ex	af, af'							; Restore af
-		ld	ix, zTracksStart				; ix = pointer to start of track data
+		ld	ix, zSongDAC					; ix = pointer to DAC track data
 		bit	2, (ix+zTrackPlaybackControl)	; Is SFX overriding DAC channel?
 		jp	nz, +							; Branch if yes
 		ld	(zDACIndex), a					; Queue DAC sample
 +
 		pop	de								; Restore de
-+
+	if SonicDriverVer>=5
+		ld	hl, zSongFM6					; Get pointer to FM6 track
+		res	2, (hl)							; Clear track as being overridden (?)
+	endif
+
+zUpdateDACTrack_GetDuration:
 		ld	a, (de)							; Get note duration
 		inc	de								; Advance pointer
 		or	a								; Is it a duration?
@@ -2688,6 +2747,10 @@ zExtraCoordFlagSwitchTable:
 ;sub_C4D
 cfPlayDACSample:
 		ld	(zDACIndex), a					; Set next DAC sample to the parameter byte
+	if SonicDriverVer>=5
+		ld	hl, zSongDAC					; Get pointer to FM6 track
+		set	2, (hl)							; Mark track as being overridden
+	endif
 		ret
 ; End of function cfPlayDACSample
 
@@ -3850,7 +3913,7 @@ zDoFlutter:
 		jr	z, zDoFlutterRest				; Branch if yes
 		cp	80h								; Is it a command to reset flutter?
 		jr	z, zDoFlutterReset				; Branch if yes
-		
+
 		inc	bc								; Increment flutter index
 		; DANGER! Will read data from code segment and use it as if it were valid!
 		; In order to get here, the flutter value would have to be:
@@ -4409,7 +4472,7 @@ z80_UniVoiceBank:
 	    db  20h, 36h, 35h, 30h, 31h,0DFh,0DFh, 9Fh, 9Fh,   7,   6,   9,   6
 		db         7,   6,   6,   8, 20h, 10h, 10h,0F8h, 19h, 37h, 13h, 80h				; 850
 
-	if $ > zVariablesStart
+	if $ > zVariablesStart-60h
 		fatal "Your Z80 tables won't fit before its variables. It's \{$-zVariablesStart}h bytes past the start of music data \{zVariablesStart}h"
 	endif
 
