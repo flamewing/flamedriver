@@ -54,8 +54,8 @@ zID_MusicPointers0 = 0
 zID_UniVoiceBank = 2
 zID_MusicPointers4 = 4
 zID_SFXPointers = 6
-zID_FreqFlutterPointers = 8
-zID_PSGTonePointers = 0Ah
+zID_ModEnvPointers = 8
+zID_VolEnvPointers = 0Ah
 ; ---------------------------------------------------------------------------
 ; equates: standard (for Genesis games) addresses in the memory map
 zYM2612_A0				=	4000h
@@ -73,6 +73,7 @@ z80_stack_top			=	z80_stack-60h
 zSpecFM3Freqs			=	zVariablesStart
 zSpecFM3FreqsSFX		=	zSpecFM3Freqs + 8
 
+zQueueVariables			=	1C00h
 zPalFlag				=	1C02h
 zPalDblUpdCounter		=	1C04h
 zSoundQueue0			=	1C05h
@@ -185,7 +186,7 @@ zTrackDataPointerLow	=  3
 zTrackDataPointerHigh	=  4
 zTrackKeyOffset			=  5
 zTrackVolume			=  6
-zTrackModulationCtrl	=  7				; Modulation is on if nonzero. If only bit 7 is set, then it is normal modulation; otherwise, this-1 is index on frequency flutter pointer table
+zTrackModulationCtrl	=  7				; Modulation is on if nonzero. If only bit 7 is set, then it is normal modulation; otherwise, this-1 is index on modulation envelope pointer table
 zTrackVoiceIndex		=  8				; FM instrument/PSG voice
 zTrackStackPointer		=  9				; For call subroutine coordination flag
 zTrackAMSFMSPan			= 0Ah
@@ -201,11 +202,11 @@ zTrackFreqHigh          = 0Eh				; For FM/PSG channels
 zTrackVoiceSongID       = 0Fh				; For using voices from a different song
 zTrackFreqDisplacement  = 10h
 zTrackUnk11h            = 11h
-zTrackVolFlutter        = 17h				; Used for dynamic volume adjustments
+zTrackVolEnv            = 17h				; Used for dynamic volume adjustments
 ; ---------------------------------
 ; Alternate names for same offsets:
-zTrackFMFlutter         = 18h
-zTrackFMFlutterMask     = 19h
+zTrackFMVolEnv          = 18h
+zTrackFMVolEnvMask      = 19h
 zTrackPSGNoise          = 1Ah
 ; ---------------------------------
 zTrackHaveSSGEGFlag     = 18h				; For FM channels, if track has SSG-EG data
@@ -223,7 +224,7 @@ zTrackModulationPtrHigh = 21h
 ; Alternate names for same offset:
 zTrackModulationValLow  = 22h
 ; ---------------------------------
-zTrackFreqFlutterSens   = 22h
+zTrackModEnvSens        = 22h
 ; ---------------------------------
 zTrackModulationValHigh = 23h
 zTrackModulationWait    = 24h
@@ -231,7 +232,7 @@ zTrackModulationWait    = 24h
 ; Alternate names for same offset:
 zTrackModulationSpeed   = 25h
 ; ---------------------------------
-zTrackFreqFlutterIndex  = 25h
+zTrackModEnvIndex       = 25h
 ; ---------------------------------
 zTrackModulationDelta   = 26h
 zTrackModulationSteps   = 27h
@@ -267,10 +268,11 @@ bankswitch2 macro
 
 bankswitch3 macro
 		ld	b, 8
--
+
+.bankloop:
 		ld	(zBankRegister), a
 		rrca
-		djnz	-
+		djnz	.bankloop
 		xor	a
 		ld	(zBankRegister), a
     endm
@@ -396,22 +398,25 @@ zVInt:	rsttarget
 		push	iy							; Save iy
 		exx									; Save bc,de,hl
 
--		ld	a, r							; Get memory refresh register
+.doupdate:
+		ld	a, r							; Get memory refresh register
 		ld	(unk_1C17), a					; Save it
 		call	zUpdateEverything			; Update all tracks
 		ld	a, (zPalFlag)					; Get PAL flag
 		or	a								; Is it set?
-		jr	z, ++							; Branch if not (NTSC)
+		jr	z, .not_pal						; Branch if not (NTSC)
 		ld	a, (zPalDblUpdCounter)			; Get PAL double-update timeout counter
 		or	a								; Is it zero?
-		jr	nz, +							; Branch if not
+		jr	nz, .pal_timer					; Branch if not
 		ld	a, 5							; Set it back to 5...
 		ld	(zPalDblUpdCounter), a			; ... and save it
-		jp	-								; Go again
-+
+		jp	.doupdate						; Go again
+
+.pal_timer:
 		dec	a								; Decrease PAL double-update timeout counter
 		ld	(zPalDblUpdCounter), a			; Store it
-+
+
+.not_pal:
 		ld	a, (zDACIndex)					; Get index of playing DAC sample
 		and	7Fh								; Strip 'DAC playing' bit
 		ld	c, a							; c = a
@@ -432,10 +437,11 @@ zInitAudioDriver:
 			; The following instruction block keeps the z80 in a tight loop.
 		ld	c, 0							; c = 0
 
--		ld	b, 0							; b = 0
+.loop:
+		ld	b, 0							; b = 0
 		djnz	$							; Loop in this instruction, decrementing b each iteration, until b = 0
 		dec	c								; c--
-		jr	z, -							; Loop if c = 0
+		jr	z, .loop						; Loop if c = 0
 		
 		call	zMusicFade					; Stop all music
 		ld	a, zmake68kBank(DacBank2)		; Set song bank to second DAC bank (default value)
@@ -569,26 +575,28 @@ zUpdateMusic:
 		call	zDoMusicFadeIn				; Check if music should be faded in and fade if needed
 		ld	a, (zFadeToPrevFlag)			; Get fade-to-prev flag
 		cp	MusID_1UP-1						; Is it still 1-Up?
-		jr	nz, zlocCheckFadeIn				; Branch if not
+		jr	nz, .check_fade_in				; Branch if not
 		ld	a, (zMusicNumber)				; Get next music to play
 		cp	MusID_1UP						; Is it another 1-Up?
-		jr	z, +							; Branch if yes
+		jr	z, .clr_queue					; Branch if yes
 		cp	MusID__End-1					; Is it music (except credits song)?
-		jr	c, ++							; Branch if not
-+
+		jr	c, .clr_sfx						; Branch if not
+
+.clr_queue:
 		xor	a								; a = 0
 		ld	(zMusicNumber), a				; Clear queue entry
-+
+
+.clr_sfx:
 		xor	a								; a = 0
 		ld	(zSFXNumber0), a				; Clear first queued SFX
 		ld	(zSFXNumber1), a				; Clear second queued SFX
-		jr	+
+		jr	.update_music
 
 ;loc_149
-zlocCheckFadeIn:
+.check_fade_in:
 		ld	a, (zFadeToPrevFlag)			; Get fade-to-previous flag
 		cp	0FFh							; Is it 0FFh?
-		jr	z, +							; Branch if yes
+		jr	z, .update_music				; Branch if yes
 		ld	hl, zMusicNumber				; Point hl to M68K input
 		ld	e, (hl)							; e = next song to play
 		inc	hl								; Advance pointer
@@ -597,12 +605,13 @@ zlocCheckFadeIn:
 		ld	a, (hl)							; a = next SFX to play
 		or	d								; Combine bits of a and d
 		or	e								; Is anything in the play queue?
-		jr	z, +							; Branch if not
+		jr	z, .update_music				; Branch if not
 		call	zFillSoundQueue				; Transfer M68K input
 		call	zCycleSoundQueue			; Cycle queue and play first entry
 		call	zCycleSoundQueue			; Cycle queue and play second entry
 		call	zCycleSoundQueue			; Cycle queue and play third entry
-+
+
+.update_music:
 		ld	a, (zSongBank)					; Get bank ID for music
 		bankswitch2							; Bank switch to it
 		xor	a								; a = 0
@@ -615,7 +624,7 @@ zlocCheckFadeIn:
 		call	nz, zUpdateDACTrack			; Branch if yes
 		ld	b, (zTracksEnd-zSongFM1)/zTrackSz	; Number of tracks
 		ld	ix, zSongFM1					; ix = FM1 track RAM
-		jr	+								; Play all tracks
+		jr	zTrackUpdLoop					; Play all tracks
 
 ; =============== S U B	R O U T	I N E =======================================
 ;
@@ -628,25 +637,26 @@ zUpdateSFXTracks:
 		ld	ix, zTracksSFXStart				; ix = start of SFX track RAM
 		ld	b, (zTracksSFXEnd-zTracksSFXStart)/zTrackSz	; Number of channels
 
-/		push	bc							; Save bc
+zTrackUpdLoop:
+		push	bc							; Save bc
 		bit	7, (ix+zTrackPlaybackControl)	; Is track playing?
 		call	nz, zUpdateFMorPSGTrack		; Call routine if yes
 		ld	de, zTrackSz					; Spacing between tracks
 		add	ix, de							; Advance to next track
 		pop	bc								; Restore bc
-		djnz	-							; Loop for all tracks
+		djnz	zTrackUpdLoop				; Loop for all tracks
 		
 		ld	a, (zTempoSpeedup)				; Get tempo speed-up value
 		or	a								; Is music sped up?
 		ret	z								; Return if not
 		ld	a, (zSpeedupTimeout)			; Get extra tempo timeout
 		or	a								; Has it expired?
-		jp	nz, +							; Branch if not
+		jp	nz, .no_dbl_update				; Branch if not
 		ld	a, (zTempoSpeedup)				; Get master tempo speed-up value
 		ld	(zSpeedupTimeout), a			; Reset extra tempo timeout to it
 		jp	zUpdateMusic					; Update music again
 ; ---------------------------------------------------------------------------
-+
+.no_dbl_update:
 		dec	a								; Decrement timeout...
 		ld	(zSpeedupTimeout), a			; ... then store new value
 		ret
@@ -661,7 +671,7 @@ zUpdateFMorPSGTrack:
 		bit	7, (ix+zTrackVoiceControl)		; Is this a PSG channel?
 		jp	nz, zUpdatePSGTrack				; Branch if yes
 		call	zTrackRunTimer				; Run note timer
-		jr	nz, +							; Branch if note hasn't expired yet
+		jr	nz, .note_going					; Branch if note hasn't expired yet
 		call	zGetNextNote				; Get next note for FM track
 		bit	4, (ix+zTrackPlaybackControl)	; Is track resting?
 		ret	nz								; Return if yes
@@ -671,20 +681,22 @@ zUpdateFMorPSGTrack:
 		call	zFMSendFreq					; Send frequancy to YM2612
 		jp	zFMNoteOn						; Note on on all operators
 ; ---------------------------------------------------------------------------
-+
+.note_going:
 		bit	4, (ix+zTrackPlaybackControl)	; Is track resting?
 		ret	nz								; Return if yes
-		call	zDoFMFlutter				; Do FM flutter for track
+		call	zDoFMVolEnv					; Do FM volume envelope effects for track
 		ld	a, (ix+zTrackNoteFillTimeout)	; Get note fill timeout
-		or	a								; Has timeout expired?
-		jr	z, +							; Branch if yes
+		or	a								; Is timeout either not running or expired?
+		jr	z, .keep_going					; Branch if yes
 		dec	(ix+zTrackNoteFillTimeout)		; Update note fill timeout
 		jp	z, zKeyOffIfActive				; Send key off if needed
-+
+
+.keep_going:
 		call	zDoPitchSlide				; Apply pitch slide and frequency displacement
 		bit	6, (ix+zTrackPlaybackControl)	; Is 'sustain frequency' bit set?
 		ret	nz								; Return if yes
 		call	zDoModulation				; Apply modulation then fall through
+		; Fall through to next function
 ; End of function zUpdateFMorPSGTrack
 
 
@@ -704,26 +716,26 @@ zFMSendFreq:
 		bit	2, (ix+zTrackPlaybackControl)	; Is SFX overriding this track?
 		ret	nz								; Return if yes
 		bit	0, (ix+zTrackPlaybackControl)	; Is track in special mode (FM3 only)?
-		jp	nz, +							; Branch if yes
+		jp	nz, .special_mode				; Branch if yes
 
--		ld	a, 0A4h							; Command to update frequency MSB
+.not_fm3:
+		ld	a, 0A4h							; Command to update frequency MSB
 		ld	c, h							; High byte of frequency
 		call	zWriteFMIorII				; Send it to YM2612
 		ld	a, 0A0h							; Command to update frequency LSB
 		ld	c, l							; Low byte of frequency
 		jp	zWriteFMIorII					; Send it to YM2612
 ; ---------------------------------------------------------------------------
-+
+.special_mode:
 		ld	a, (ix+zTrackVoiceControl)		; a = voice control byte
 		cp	2								; Is this FM3?
-		jr	nz, -							; Branch if not
+		jr	nz, .not_fm3					; Branch if not
 		call	zGetSpecialFM3DataPointer	; de = pointer to saved FM3 frequency shifts
 		ld	b, zSpecialFreqCommands_End-zSpecialFreqCommands	; Number of entries
 		ld	hl, zSpecialFreqCommands		; Lookup table
 
-		; DANGER! de is unset here, and could be pointing anywhere! Luckily,
-		; only reads are performed from it.
--		push	bc							; Save bc
+.loop:
+		push	bc							; Save bc
 		ld	a, (hl)							; a = register selector
 		inc	hl								; Advance pointer
 		push	hl							; Save hl
@@ -745,7 +757,7 @@ zFMSendFreq:
 		call	zWriteFMI					; Sent it to YM2612
 		pop	hl								; Restore hl
 		pop	bc								; Restore bc
-		djnz	-							; Loop for all operators
+		djnz	.loop						; Loop for all operators
 		ret
 ; End of function zFMSendFreq
 
@@ -801,11 +813,11 @@ zGetNextNote_cont:
 		or	a								; Is this a duration?
 		jp	p, zStoreDuration				; Branch if yes
 		sub	81h								; Make the note into a 0-based index
-		jp	p, +							; Branch if it is a note and not a rest
+		jp	p, .got_note					; Branch if it is a note and not a rest
 		call	zRestTrack					; Put track at rest
 		jr	zGetNoteDuration
 ; ---------------------------------------------------------------------------
-+
+.got_note:
 		add	a, (ix+zTrackKeyOffset)			; Add in key displacement
 		ld	hl, zPSGFrequencies				; PSG frequency lookup table
 		push	af							; Save af
@@ -819,14 +831,15 @@ zGetNextNote_cont:
 		ex	af, af'							; Exchange af with af'
 		xor	a								; Clear a (which will clear a')
 
--		ex	af, af'							; Exchange af with af'
+.loop:
+		ex	af, af'							; Exchange af with af'
 		sub	e								; Subtract 1 octave from the note
-		jr	c, +							; If this is less than zero, we are done
+		jr	c, .got_displacement			; If this is less than zero, we are done
 		ex	af, af'							; Exchange af with af'
 		add	a, d							; One octave up
-		jr	-								; Loop
+		jr	.loop							; Loop
 ; ---------------------------------------------------------------------------
-+
+.got_displacement:
 		add	a, e							; Add 1 octave back (so note index is positive)
 		ld	hl, zFMFrequencies				; FM first octave frequency lookup table
 		rst	PointerTableOffset				; hl = frequency of the note on the first octave
@@ -881,16 +894,18 @@ zAltFreqMode:
 		inc	de								; Advance pointer
 		ld	l, a							; l = last byte read from track
 		or	h								; Is hl nonzero?
-		jr	z, ++							; Branch if not
+		jr	z, .got_zero					; Branch if not
 		ld	a, (ix+zTrackKeyOffset)			; a = key displacement
 		ld	b, 0							; b = 0
 		or	a								; Is a negative?
-		jp	p, +							; Branch if not
+		jp	p, .did_sign_extend				; Branch if not
 		dec	b								; Set b to -1
-+
+
+.did_sign_extend:
 		ld	c, a							; bc = sign extension of key displacement
 		add	hl, bc							; hl += key displacement
-+
+
+.got_zero:
 		ld	(ix+zTrackFreqLow), l			; Store low byte of note frequency
 		ld	(ix+zTrackFreqHigh), h			; Store high byte of note frequency
 		bit	5, (ix+zTrackPlaybackControl)
@@ -922,7 +937,7 @@ zFinishTrackUpdate:
 		xor	a								; Clear a
 		ld	(ix+zTrackModulationSpeed), a	; Clear modulation speed
 		ld	(ix+zTrackModulationValLow), a	; Clear low byte of accumulated modulation
-		ld	(ix+zTrackVolFlutter), a		; Reset flutter
+		ld	(ix+zTrackVolEnv), a			; Reset volume envelope
 		ld	a, (ix+zTrackNoteFillMaster)	; Get master note fill
 		ld	(ix+zTrackNoteFillTimeout), a	; Set note fill timeout
 		ret
@@ -944,8 +959,9 @@ zComputeNoteDuration:
 		ret	z								; Return if it was 1
 		ld	c, a							; c = a
 
--		add	a, c							; a += c
-		djnz	-							; Loop
+.loop:
+		add	a, c							; a += c
+		djnz	.loop						; Loop
 		ret
 ; End of function zComputeNoteDuration
 
@@ -1018,7 +1034,7 @@ zKeyOnOff:
 ; End of function zKeyOnOff
 
 ; =============== S U B	R O U T	I N E =======================================
-; Performs flutter in FM channels.
+; Performs volume envelope effects in FM channels.
 ;
 ; Input:   ix    Pointer to track RAM
 ; Output:  a     Trashed
@@ -1027,39 +1043,41 @@ zKeyOnOff:
 ;          hl    Trashed
 ;
 ;sub_36D
-zDoFMFlutter:
-		ld	a, (ix+zTrackFMFlutter)			; Get FM flutter value
+zDoFMVolEnv:
+		ld	a, (ix+zTrackFMVolEnv)			; Get FM volume envelope
 		or	a								; Is it zero?
 		ret	z								; Return if yes
 		ret	m								; Return if it is actually the custom SSG-EG flag
 		dec	a								; Make a into an index
-		ld	c, zID_PSGTonePointers			; Value for PSG tone pointer table
-		rst	GetPointerTable					; hl = pointer to PSG flutter table
-		rst	PointerTableOffset				; hl = pointer to PSG flutter for track
-		call	zDoFlutter					; a = new flutter value
+		ld	c, zID_VolEnvPointers			; Value for volume envelope pointer table
+		rst	GetPointerTable					; hl = pointer to volume envelope table
+		rst	PointerTableOffset				; hl = pointer to volume envelope for track
+		call	zDoVolEnv					; a = new volume envelope
 		ld	h, (ix+zTrackTLPtrHigh)			; h = high byte ot TL data pointer
 		ld	l, (ix+zTrackTLPtrLow)			; l = low byte ot TL data pointer
 		ld	de, zFMInstrumentTLTable		; de = pointer to FM TL register table
 		ld	b, zFMInstrumentTLTable_End-zFMInstrumentTLTable	; Number of entries
-		ld	c, (ix+zTrackFMFlutterMask)		; c = flutter bitmask
+		ld	c, (ix+zTrackFMVolEnvMask)		; c = envelope bitmask
 
--		push	af							; Save af
+.loop:
+		push	af							; Save af
 		sra	c								; Divide c by 2
 		push	bc							; Save bc
-		jr	nc, +							; Branch if c bit shifted was zero
-		add	a, (hl)							; Add TL value to flutter value
+		jr	nc, .skip_reg					; Branch if c bit shifted was zero
+		add	a, (hl)							; Add TL value to volume envelope
 		and	7Fh								; Strip sign bit
-		ld	c, a							; c = TL + flutter
+		ld	c, a							; c = TL + volume envelope
 		ld	a, (de)							; a = YM2612 register
 		call	zWriteFMIorII				; Send TL data to YM2612
-+
+
+.skip_reg:
 		pop	bc								; Restore bc
 		inc	de								; Advance to next YM2612 register
 		inc	hl								; Advance to next TL value
 		pop	af								; Restore af
-		djnz	-							; Loop for all registers
+		djnz	.loop						; Loop for all registers
 		ret
-; End of function zDoFMFlutter
+; End of function zDoFMVolEnv
 
 ; =============== S U B	R O U T	I N E =======================================
 ; Initializes normal modulation.
@@ -1107,7 +1125,7 @@ zPrepareModulation:
 ;          iy    Pointer to modulation data in track RAM
 ;          bc    Unmodulated note frequency
 ;
-;    If modulation control is nonzero and not 80h (frequency flutter):
+;    If modulation control is nonzero and not 80h (modulation envelope effects):
 ;
 ;
 ;sub_3C9
@@ -1116,7 +1134,7 @@ zDoModulation:
 		or	a								; Is modulation active?
 		ret	z								; Return if not
 		cp	80h								; Is modulation control 80h?
-		jr	nz, zDoFrequencyFlutter			; Branch if not
+		jr	nz, zDoModEnvelope				; Branch if not
 		dec	(ix+zTrackModulationWait)		; Decrement modulation wait
 		ret	nz								; Return if nonzero
 		inc	(ix+zTrackModulationWait)		; Increase it back to 1 for next frame
@@ -1128,7 +1146,7 @@ zDoModulation:
 		push	de							; Save de
 		pop	iy								; iy = pointer to modulation data
 		dec	(ix+zTrackModulationSpeed)		; Decrement modulation speed
-		jr	nz, +							; Branch if nonzero
+		jr	nz, .mod_sustain				; Branch if nonzero
 		ld	a, (iy+1)						; Get original modulation speed
 		ld	(ix+zTrackModulationSpeed), a	; Reset modulation speed timeout
 		ld	a, (ix+zTrackModulationDelta)	; Get modulation delta per step
@@ -1140,7 +1158,8 @@ zDoModulation:
 		add	hl, bc							; hl += bc
 		ld	(ix+zTrackModulationValLow), l	; Store low byte of accumulated modulation
 		ld	(ix+zTrackModulationValHigh), h	; Store high byte of accumulated modulation
-+
+
+.mod_sustain:
 		pop	bc								; bc = note frequency
 		add	hl, bc							; hl = modulated note frequency
 		dec	(ix+zTrackModulationSteps)		; Reduce number of modulation steps
@@ -1153,86 +1172,80 @@ zDoModulation:
 		ret
 ; ---------------------------------------------------------------------------
 ;loc_41A
-zDoFrequencyFlutter:
+zDoModEnvelope:
 		dec	a								; Convert into pointer table index
 		ex	de, hl							; Exchange de and hl; de = note frequency
-		ld	c, zID_FreqFlutterPointers		; Value for frequency flutter pointer table
-		rst	GetPointerTable					; hl = pointer to frequency flutter pointer table
-		rst	PointerTableOffset				; hl = frequency flutter pointer for modulation control byte
-		jr	zDoFrequencyFlutter_cont
+		ld	c, zID_ModEnvPointers			; Value for modulation envelope pointer table
+		rst	GetPointerTable					; hl = pointer to modulation envelope pointer table
+		rst	PointerTableOffset				; hl = modulation envelope pointer for modulation control byte
+		jr	zDoModEnvelope_cont
 ; ---------------------------------------------------------------------------
 
-zFreqFlutterSetIndex:
-		ld	(ix+zTrackFreqFlutterIndex), a	; Set new frequency flutter index
+zModEnvSetIndex:
+		ld	(ix+zTrackModEnvIndex), a		; Set new modulation envelope index
 
 ;loc_425
-zDoFrequencyFlutter_cont:
+zDoModEnvelope_cont:
 		push	hl							; Save hl
-		ld	c, (ix+zTrackFreqFlutterIndex)	; c = frequency flutter index
+		ld	c, (ix+zTrackModEnvIndex)		; c = modulation envelope index
 		ld	b, 0							; b = 0
-		add	hl, bc							; Offset into frequency flutter
+		add	hl, bc							; Offset into modulation envelope table
 		; Fix based on similar code from Space Harrier II's sound driver.
-		; This fixes both "DANGER!" bugs below. This is better than the
-		; previous fix, which was based on Ristar's driver.
+		; This is better than the previous fix, which was based on Ristar's driver.
 		ld	c, l
 		ld	b, h
-		ld	a, (bc)							; a = new frequency flutter value
+		ld	a, (bc)							; a = new modulation envelope value
 		pop	hl								; Restore hl
-		bit	7, a							; Is frequency flutter negative?
-		jp	z, zlocPositiveFlutterMod			; Branch if not
+		bit	7, a							; Is modulation envelope negative?
+		jp	z, zlocPositiveModEnvMod		; Branch if not
 		cp	82h								; Is it 82h?
-		jr	z, zlocChangeFlutterIndex		; Branch if yes
+		jr	z, zlocChangeModEnvIndex		; Branch if yes
 		cp	80h								; Is it 80h?
-		jr	z, zlocResetFlutterMod			; Branch if yes
+		jr	z, zlocResetModEnvMod			; Branch if yes
 		cp	84h								; Is it 84h?
-		jr	z, zlocFlutterIncMultiplier		; Branch if yes
+		jr	z, zlocModEnvIncMultiplier		; Branch if yes
 		ld	h, 0FFh							; h = 0FFh
-		jr	nc, zlocApplyFlutterMod			; Branch if more than 84h
+		jr	nc, zlocApplyModEnvMod			; Branch if more than 84h
 		set	6, (ix+zTrackPlaybackControl)	; Set 'sustain frequency' bit
 		pop	hl								; Tamper with return location so as to not return to caller
 		ret
 ; ---------------------------------------------------------------------------
 ;loc_449
-zlocChangeFlutterIndex:
+zlocChangeModEnvIndex:
 		inc	bc								; Increment bc
-		; DANGER! Uses bc as a pointer, getting bytes from code region.
-		; This happens for several frequency flutters, so you should avoid them
-		; unless you enable the driver bug fixes.
 		ld	a, (bc)							; Use it as a pointer??? Getting bytes from code region?
-		jr	zFreqFlutterSetIndex			; Set position to nonsensical value
+		jr	zModEnvSetIndex					; Set position to nonsensical value
 ; ---------------------------------------------------------------------------
 ;loc_44D
-zlocResetFlutterMod:
+zlocResetModEnvMod:
 		xor	a								; a = 0
-		jr	zFreqFlutterSetIndex			; Reset position for frequency flutter
+		jr	zModEnvSetIndex					; Reset position for modulation envelope
 ; ---------------------------------------------------------------------------
 ;loc_450
-zlocFlutterIncMultiplier:
+zlocModEnvIncMultiplier:
 		inc	bc								; Increment bc
-		; DANGER! Uses bc as a pointer, getting bytes from code region.
-		; Luckily, this does not happen for any of the existing frequency
-		; flutters.
 		ld	a, (bc)							; Use it as a pointer??? Getting bytes from code region?
-		add	a, (ix+zTrackFreqFlutterSens)	; Add flutter sensibility to a...
-		ld	(ix+zTrackFreqFlutterSens), a	; ... then store new value
-		inc	(ix+zTrackFreqFlutterIndex)		; Advance flutter modulation...
-		inc	(ix+zTrackFreqFlutterIndex)		; ... twice.
-		jr	zDoFrequencyFlutter_cont
+		add	a, (ix+zTrackModEnvSens)		; Add envelope sensibility to a...
+		ld	(ix+zTrackModEnvSens), a		; ... then store new value
+		inc	(ix+zTrackModEnvIndex)			; Advance envelope modulation...
+		inc	(ix+zTrackModEnvIndex)			; ... twice.
+		jr	zDoModEnvelope_cont
 ; ---------------------------------------------------------------------------
 ;loc_460
-zlocPositiveFlutterMod:
+zlocPositiveModEnvMod:
 		ld	h, 0							; h = 0
 
 ;loc_462
-zlocApplyFlutterMod:
+zlocApplyModEnvMod:
 		ld	l, a							; hl = sign extension of modulation value
-		ld	b, (ix+zTrackFreqFlutterSens)	; Fetch flutter sensibility
+		ld	b, (ix+zTrackModEnvSens)		; Fetch envelope sensibility
 		inc	b								; Increment it (minimum 1)
 		ex	de, hl							; Swap hl and de; hl = note frequency
 
--		add	hl, de							; hl += de
-		djnz	-							; Make hl = note frequency + b * de
-		inc	(ix+zTrackFreqFlutterIndex)		; Advance frequency flutter
+.loop:
+		add	hl, de							; hl += de
+		djnz	.loop						; Make hl = note frequency + b * de
+		inc	(ix+zTrackModEnvIndex)			; Advance modulation envelope
 		ret
 ; End of function zDoModulation
 
@@ -1252,9 +1265,10 @@ zDoPitchSlide:
 		ld	b, 0							; b = 0
 		ld	a, (ix+zTrackFreqDisplacement)	; a = frequency displacement
 		or	a								; Is a negative?
-		jp	p, +							; Branch if not
+		jp	p, .did_sign_extend				; Branch if not
 		dec	b								; b = -1, faster and smaller
-+
+
+.did_sign_extend:
 		ld	c, a							; bc = sign extension of frequency displacement
 		add	hl, bc							; Add to frequency
 
@@ -1272,20 +1286,21 @@ zDoPitchSlide:
 		or	a								; Clear carry flag
 		ld	hl, 283h						; hl = lowest FM note - 1
 		sbc	hl, bc							; Is raw frequency lower than this?
-		jr	c, +							; Branch if not
+		jr	c, .no_underflow				; Branch if not
 		ld	hl, -57Bh						; hl = +12 semitones (freq) - 1 octave (block)
 		add	hl, de							; hl = de exchanging 1 octave (block) for 12 semitones (freq)
 		jr	zApplyFreq
 ; ---------------------------------------------------------------------------
-+
+.no_underflow:
 		or	a								; Clear carry flag
 		ld	hl, 508h						; hl = 1 octave above lowest FM note
 		sbc	hl, bc							; Is raw frequency above this?
-		jr	nc, +							; Branch if not
+		jr	nc, .no_overflow				; Branch if not
 		ld	hl, 57Ch						; hl = -12 semitones (freq) + 1 octave (block)
 		add	hl, de							; hl = de exchanging 1 octave (block) for 12 semitones (freq)
 		ex	de, hl							; de = new frequency
-+
+
+.no_overflow:
 		ex	de, hl							; hl = new frequency
 
 zApplyFreq:
@@ -1313,8 +1328,9 @@ zGetFMInstrumentOffset:
 		ret	z								; Return if so
 		ld	de, 25							; Size of each FM instrument
 
--		add	hl, de							; Advance pointer to next instrument
-		djnz	-							; Loop until instrument offset is found
+.loop:
+		add	hl, de							; Advance pointer to next instrument
+		djnz	.loop						; Loop until instrument offset is found
 		ret
 ; End of function zGetFMInstrumentPointer
 
@@ -1378,21 +1394,24 @@ zSendFMInstrument:
 		; Start with detune/multiplier operators
 		ld	b, zFMInstrumentRSARTable-zFMInstrumentOperatorTable	; Number of commands to issue
 
--		call	zSendFMInstrData			; Send FM instrument data
-		djnz	-							; Loop
+.loop1:
+		call	zSendFMInstrData			; Send FM instrument data
+		djnz	.loop1						; Loop
 
 		; Now for rate scaling/attack rate. The attack rate must be 1Fh if using
 		; SSG-EG, which is the reason for the split.
 		ld	b, zFMInstrumentAMD1RTable-zFMInstrumentRSARTable	; Number of commands to issue
 
--		call	zSendFMInstrDataRSAR		; Send FM instrument data
-		djnz	-							; Loop
+.loop2:
+		call	zSendFMInstrDataRSAR		; Send FM instrument data
+		djnz	.loop2						; Loop
 
 		; Finalize with all the other operators.
 		ld	b, zFMInstrumentOperatorTable_End-zFMInstrumentAMD1RTable	; Number of commands to issue
 
--		call	zSendFMInstrData			; Send FM instrument data
-		djnz	-							; Loop
+.loop3:
+		call	zSendFMInstrData			; Send FM instrument data
+		djnz	.loop3						; Loop
 		ld	(ix+zTrackTLPtrLow), l			; Save low byte of pointer to (not yet uploaded) TL data
 		ld	(ix+zTrackTLPtrHigh), h			; Save high byte of pointer to (not yet uploaded) TL data
 		jp	zSendTL							; Send TL data
@@ -1490,13 +1509,14 @@ zStopSFX:
 		ld	a, 1							; a = 1
 		ld	(zUpdatingSFX), a				; Set flag to update SFX
 
--		push	bc							; Save bc
+.loop:
+		push	bc							; Save bc
 		bit	7, (ix+zTrackPlaybackControl)	; Is track playing?
 		call	nz, zSilenceStopTrack		; Branch if yes
 		ld	de, zTrackSz					; Spacing between tracks
 		add	ix, de							; ix = pointer to next track
 		pop	bc								; Restore bc
-		djnz	-							; Loop for each track
+		djnz	.loop						; Loop for each track
 		jp	zClearNextSound
 
 ; =============== S U B	R O U T	I N E =======================================
@@ -1527,7 +1547,7 @@ zPlayMusic:
 		jp	nz, zPlayMusic_DoFade			; Branch if not
 		ld	a, (zFadeInTimeout)				; Fading timeout
 		or	a								; Is music being faded?
-		jp	z, +							; Branch if not
+		jp	z, .no_fade						; Branch if not
 		xor	a								; a = 0
 		ld	(zMusicNumber), a				; Clear M68K input queue...
 		ld	(zSFXNumber0), a				; ... including SFX slot 0...
@@ -1539,7 +1559,7 @@ zPlayMusic:
 		pop	af								; Restore af
 		ret
 ; ---------------------------------------------------------------------------
-+
+.no_fade:
 		ld	a, (zFadeToPrevFlag)			; Get fade-to-prev flag
 		cp	MusID_1UP-1						; Was it triggered by the 1-up song?
 		jp	z, zBGMLoad						; Branch if yes
@@ -1564,12 +1584,13 @@ zPlayMusic:
 		ld	de, zTrackSz					; Spacing between tracks
 		ld	b, (zTracksSaveEnd-zTracksSaveStart)/zTrackSz		; Number of tracks
 
--		ld	a, (hl)							; Get playback control byte for song
+.loop:
+		ld	a, (hl)							; Get playback control byte for song
 		and	7Fh								; Strip the 'playing' bit
 		set	2, (hl)							; Set bit 2 (SFX overriding)
 		ld	(hl), a							; But then overwrite the whole thing...
 		add	hl, de							; Advance to next track
-		djnz	-							; Loop for all tracks
+		djnz	.loop						; Loop for all tracks
 		
 		ld	a, MusID_1UP-1					; a = 1-up id-1
 		ld	(zFadeToPrevFlag), a			; Set fade-to-prev flag to it
@@ -1624,7 +1645,8 @@ zBGMLoad:
 		ld	b, (iy+2)						; b = number of FM + DAC channels
 		ld	a, (iy+4)						; a = tempo divider
 
--		push	bc							; Save bc (gets damaged by ldi instructions)
+.fm_dac_loop:
+		push	bc							; Save bc (gets damaged by ldi instructions)
 		ld	hl, (zTrackInitPos)				; Restore saved position for init bytes
 		ldi									; *de++ = *hl++	(copy initial playback control)
 		ldi									; *de++ = *hl++	(copy channel assignment bits)
@@ -1639,8 +1661,8 @@ zBGMLoad:
 		ld	(zSongPosition), hl				; Store current potition in BGM data
 		call	zInitFMDACTrack				; Init the remainder of the track RAM
 		pop	bc								; Restore bc
-		djnz	-							; Loop for all tracks (stored in b)
-		
+		djnz	.fm_dac_loop				; Loop for all tracks (stored in b)
+
 		ld	a, (iy+3)						; Get number of PSG tracks
 		or	a								; Do we have any PSG channels?
 		jp	z, zClearNextSound				; Branch if not
@@ -1650,7 +1672,8 @@ zBGMLoad:
 		ld	de, zSongPSG1					; de = pointer to RAM for song PSG tracks
 		ld	a, (iy+4)						; a = tempo divider
 
--		push	bc							; Save bc (gets damaged by ldi instructions)
+.psg_loop:
+		push	bc							; Save bc (gets damaged by ldi instructions)
 		ld	hl, (zTrackInitPos)				; Restore saved position for init bytes
 		ldi									; *de++ = *hl++
 		ldi									; *de++ = *hl++
@@ -1663,7 +1686,7 @@ zBGMLoad:
 		ld	(zSongPosition), hl				; Store current potition in BGM data
 		call	zZeroFillTrackRAM			; Init the remainder of the track RAM
 		pop	bc								; Restore bc
-		djnz	-							; Loop for all tracks (stored in b)
+		djnz	.psg_loop					; Loop for all tracks (stored in b)
 
 ; =============== S U B	R O U T	I N E =======================================
 ; Clears next sound to play.
@@ -1807,18 +1830,15 @@ zSFXTrackInitLoop:
 ;sub_78F
 zGetSFXChannelPointers:
 		bit	7, c							; Is this a PSG track?
-		jr	nz, +							; Branch if yes
+		jr	nz, .is_psg						; Branch if yes
 		ld	a, c							; a = c
 		bit	2, a							; Is this FM4, FM5 or FM6?
-		jr	z, ++							; Branch if not
+		jr	z, .get_ptrs					; Branch if not
 		dec	a								; Remove gap between FM3 and FM4+
-		jr	++
+		jr	.get_ptrs
 ; ---------------------------------------------------------------------------
-+
-		ld	a, 1Fh							; a = 1Fh (redundant, as this is the first instruction of the function)
+.is_psg:
 		call	zSilencePSGChannel			; Silence channel at ix
-		ld	a, 0FFh							; Command to silence PSG3/Noise channel (zSilencePSGChannel should do it...)
-		ld	(zPSG), a						; Silence it (zSilencePSGChannel should do it...)
 		ld	a, c							; a = channel identifier
 			; The next 5 shifts are so that we can convert it to a table index
 		srl	a
@@ -1827,7 +1847,8 @@ zGetSFXChannelPointers:
 		srl	a
 		srl	a
 		add	a, 2							; Compensate for subtration below
-+
+
+.get_ptrs:
 		sub	2								; Start table at FM3
 		ld	(zSFXSaveIndex), a				; Save index of overridden channel
 		push	af							; Save af
@@ -1867,9 +1888,10 @@ zZeroFillTrackRAM:
 
 		ld	b, zTrackSz-zTrackDurationTimeout-1		; Loop counter
 
--		inc	hl								; Advance to next byte
+.loop:
+		inc	hl								; Advance to next byte
 		ld	(hl), 0							; Put 0 into this byte
-		djnz	-							; Loop until end of track
+		djnz	.loop						; Loop until end of track
 
 		inc	hl								; Make hl point to next track
 		ex	de, hl							; Exchange the contents of de and hl
@@ -1906,50 +1928,55 @@ zPauseUnpause:
 		ld	a, (hl)							; a = pause flag
 		or	a								; Is sound driver paused?
 		ret	z								; Return if not
-		jp	m, +							; Branch if pause flag is negative (unpause)
+		jp	m, .unpause						; Branch if pause flag is negative (unpause)
 		pop	de								; Pop return value from the stack, so that a 'ret' will go back to zVInt
 		dec	a								; Decrease a
 		ret	nz								; Return if nonzero
 		ld	(hl), 2							; Set pause flag to 2 (i.e., stay paused but don't pause again)
 		jp	zPauseAudio						; Pause all but DAC
 ; ---------------------------------------------------------------------------
-+
+.unpause:
 		xor	a								; a = 0
 		ld	(hl), a							; Clear pause flag
 		ld	a, (zFadeOutTimeout)			; Get fade timeout
 		or	a								; Is it zero?
 		jp	nz, zMusicFade					; Stop all music if not
 		ld	ix, zSongFM1					; Start with FM1 track
-		ld	b, (zSongPSG1-zSongFM1)/zTrackSz	; Number of tracks
+		ld	b, (zSongPSG1-zSongFM1)/zTrackSz	; Number of FM tracks
 
--		ld	a, (zHaltFlag)					; Get halt flag
+.fm_loop:
+		ld	a, (zHaltFlag)					; Get halt flag
 		or	a								; Is song halted?
-		jr	nz, +							; Branch if yes
+		jr	nz, .set_pan					; Branch if yes
 		bit	7, (ix+zTrackPlaybackControl)	; Is track playing?
-		jr	z, ++							; Branch if not
-+
+		jr	z, .skip_fm_track				; Branch if not
+
+.set_pan:
 		ld	c, (ix+zTrackAMSFMSPan)			; Get track AMS/FMS/panning
 		ld	a, 0B4h							; Command to select AMS/FMS/panning register
 		call	zWriteFMIorII				; Write data to YM2612
-+
+
+.skip_fm_track:
 		ld	de, zTrackSz					; Spacing between tracks
 		add	ix, de							; Advance to next track
-		djnz	-							; Loop for all tracks
+		djnz	.fm_loop					; Loop for all tracks
 
 		ld	ix, zTracksSFXStart				; Start at the start of SFX track data
 		ld	b, (zTracksSFXEnd-zTracksSFXStart)/zTrackSz		; Number of tracks
 
--		bit	7, (ix+zTrackPlaybackControl)	; Is track playing?
-		jr	z, +							; Branch if not
+.psg_loop:
+		bit	7, (ix+zTrackPlaybackControl)	; Is track playing?
+		jr	z, .skip_psg_track				; Branch if not
 		bit	7, (ix+zTrackVoiceControl)		; Is this a PSG track?
-		jr	nz, +							; Branch if yes
+		jr	nz, .skip_psg_track				; Branch if yes
 		ld	c, (ix+zTrackAMSFMSPan)			; Get track AMS/FMS/panning
 		ld	a, 0B4h							; Command to select AMS/FMS/panning register
 		call	zWriteFMIorII				; Write data to YM2612
-+
+
+.skip_psg_track:
 		ld	de, zTrackSz					; Spacing between tracks
 		add	ix, de							; Go to next track
-		djnz	-							; Loop for all tracks
+		djnz	.psg_loop					; Loop for all tracks
 		ret
 ; End of function zPauseUnpause
 
@@ -1990,11 +2017,11 @@ zDoMusicFadeOut:
 		res	7, (hl)							; Clear sign bit
 		ld	a, (zFadeDelayTimeout)			; Get fade delay timeout
 		dec	a								; Decrement it
-		jr	z, +							; Branch if it zero now
+		jr	z, .timer_expired				; Branch if it zero now
 		ld	(zFadeDelayTimeout), a			; Store it back
 		ret
 ; ---------------------------------------------------------------------------
-+
+.timer_expired:
 		ld	a, (zFadeDelay)					; Get fade delay
 		ld	(zFadeDelayTimeout), a			; Restore counter to initial value
 		ld	a, (zFadeOutTimeout)			; a = fade timeout
@@ -2006,23 +2033,25 @@ zDoMusicFadeOut:
 		ld	ix, zTracksStart				; ix = pointer to track RAM
 		ld	b, (zSongPSG1-zTracksStart)/zTrackSz	; Number of FM+DAC tracks
 
--		inc	(ix+zTrackVolume)				; Decrease volume
-		jp	p, +							; If still positive, branch
+.loop:
+		inc	(ix+zTrackVolume)				; Decrease volume
+		jp	p, .chk_change_volume			; If still positive, branch
 		dec	(ix+zTrackVolume)				; Increase it back to minimum volume (127)
-		jr	++
+		jr	.next_track
 ; ---------------------------------------------------------------------------
-+
+.chk_change_volume:
 		bit	7, (ix+zTrackPlaybackControl)	; Is track still playing?
-		jr	z, +							; Branch if not
+		jr	z, .next_track					; Branch if not
 		bit	2, (ix+zTrackPlaybackControl)	; Is SFX overriding track?
-		jr	nz, +							; Branch if yes
+		jr	nz, .next_track					; Branch if yes
 		push	bc							; Save bc
 		call	zSendTL						; Send new volume
 		pop	bc								; Restore bc
-+
+
+.next_track:
 		ld	de, zTrackSz					; Spacing between tracks
 		add	ix, de							; Advance to next track
-		djnz	-							; Loop for all tracks
+		djnz	.loop						; Loop for all tracks
 		ret
 ; End of function zDoMusicFadeOut
 
@@ -2047,14 +2076,15 @@ zDoMusicFadeIn:
 		ld	ix, zSongFM1					; ix = start of FM1 RAM
 		ld	de, zTrackSz					; Spacing between tracks
 
--		ld	a, (ix+zTrackVolume)			; Get track volume
+.fm_loop:
+		ld	a, (ix+zTrackVolume)			; Get track volume
 		dec	a								; Increase it
 		ld	(ix+zTrackVolume), a			; Then store it back
 		push	bc							; Save bc
 		call	zSendTL						; Send new volume
 		pop	bc								; Restore bc
 		add	ix, de							; Advance to next track
-		djnz	-							; Loop for all tracks
+		djnz	.fm_loop					; Loop for all tracks
 		
 		ld	a, (zFadeInTimeout)				; Get fading timeout
 		dec	a								; Decrement it
@@ -2064,9 +2094,10 @@ zDoMusicFadeIn:
 		ld	ix, zSongPSG1					; ix = start of PSG RAM
 		ld	de, zTrackSz					; Spacing between tracks
 
--		res	2, (ix+zTrackPlaybackControl)	; Clear 'SFX is overriding' bit
+.psg_loop:
+		res	2, (ix+zTrackPlaybackControl)	; Clear 'SFX is overriding' bit
 		add	ix, de							; Advance to next track
-		djnz	-							; Loop for all tracks
+		djnz	.psg_loop					; Loop for all tracks
 		
 		ld	ix, zSongDAC					; ix = start of DAC RAM
 		res	2, (ix+zTrackPlaybackControl)	; Clear 'SFX is overriding' bit
@@ -2091,13 +2122,14 @@ zMusicFade:
 		ld	ix, zFMDACInitBytes				; Initialization data for channels
 		ld	b, (zSongPSG1-zSongFM1)/zTrackSz	; Number of channels
 
--		push	bc							; Save bc for loop
+.loop:
+		push	bc							; Save bc for loop
 		call	zFMSilenceChannel			; Silence track's channel
 		call	zFMClearSSGEGOps			; Clears the SSG-EG operators for this channel
 		inc	ix								; Go to next channel byte
 		inc	ix								; But skip the 80h
 		pop	bc								; Restore bc for loop counter
-		djnz	-							; Loop while b > 0
+		djnz	.loop						; Loop while b > 0
 
 		xor	a								; a = 0
 		ld	(zFadeOutTimeout), a			; Set fade timeout to zero... again
@@ -2141,30 +2173,33 @@ zPauseAudio:
 		ld	a, 0B4h							; Command to select AMS/FMS/panning register (FM1)
 		ld	c, 0							; AMS=FMS=panning=0
 
--		push	af							; Save af
+.loop1:
+		push	af							; Save af
 		call	zWriteFMI					; Write reg/data pair to YM2612
 		pop	af								; Restore af
 		inc	a								; Advance to next channel
-		djnz	-							; Loop for all channels
+		djnz	.loop1						; Loop for all channels
 
 		ld	b, (zSongPSG1-zSongFM4)/zTrackSz	; FM4 and FM5, and FM6 for driver >= 5
 		ld	a, 0B4h							; Command to select AMS/FMS/panning register
 
--		push	af							; Save af
+.loop2:
+		push	af							; Save af
 		call	zWriteFMII					; Write reg/data pair to YM2612
 		pop	af								; Restore af
 		inc	a								; Advance to next channel
-		djnz	-							; Loop for all channels
+		djnz	.loop2						; Loop for all channels
 
 		ld	c, 0							; Note off for all operators
 		ld	b, (zSongPSG1-zSongFM1)/zTrackSz+1	; FM channels + gap between FM3 and FM4
 		ld	a, 28h							; Command to send note on/off
 
--		push	af							; Save af
+.loop3:
+		push	af							; Save af
 		call	zWriteFMI					; Write reg/data pair to YM2612
 		inc	c								; Next channel
 		pop	af								; Restore af
-		djnz	-							; Loop for all channels
+		djnz	.loop3						; Loop for all channels
 
 		pop	af								; Restore af
 		pop	bc								; restore bc and fall through
@@ -2179,9 +2214,10 @@ zPSGSilenceAll:
 		ld	b, (zTracksEnd-zSongPSG1)/zTrackSz+1	; Loop 4 times: 3 PSG channels + noise channel
 		ld	a, 9Fh							; Command to silence PSG1
 
--		ld	(zPSG), a						; Write command
+.loop:
+		ld	(zPSG), a						; Write command
 		add	a, 20h							; Next channel
-		djnz	-							; Loop for all PSG channels
+		djnz	.loop						; Loop for all PSG channels
 		pop	bc								; Restore bc
 		jp	zClearNextSound
 ; End of function zPSGSilenceAll
@@ -2203,9 +2239,10 @@ TempoWait:
 		ld	de, zTrackSz					; Spacing between tracks
 		ld	b, (zTracksEnd-zTracksStart)/zTrackSz	; Number of tracks
 
--		inc	(hl)							; Delay notes another frame
+.loop:
+		inc	(hl)							; Delay notes another frame
 		add	hl, de							; Advance to next track
-		djnz	-							; Loop for all channels
+		djnz	.loop						; Loop for all channels
 		ret
 ; End of function TempoWait
 
@@ -2276,11 +2313,12 @@ zSetMaxRelRate:
 zFMOperatorWriteLoop:
 		ld	b, 4							; Loop 4 times
 
--		push	af							; Save af
+.loop:
+		push	af							; Save af
 		call	zWriteFMIorII				; Write to part I or II, as appropriate
 		pop	af								; Restore af
 		add	a, 4							; a += 4
-		djnz	-							; Loop
+		djnz	.loop						; Loop
 		ret
 ; End of function zFMOperatorWriteLoop
 ; ---------------------------------------------------------------------------
@@ -2289,7 +2327,7 @@ zPlaySegaSound:
 		call	zMusicFade					; Fade music before playing the sound
 		ld	a, 1							; a = 1
 		ld	(PlaySegaPCMFlag), a			; Set flag to play SEGA sound
-		pop	hl								; Restore hl
+		pop	hl								; Don't return to caller of zCycleSoundQueue
 		ret
 
 ; =============== S U B	R O U T	I N E =======================================
@@ -2318,11 +2356,12 @@ zFadeInToPrevious:
 		ld	ix, zSongFM1					; ix = pointer to FM1 track RAM
 		ld	b, (zTracksEnd-zSongFM1)/zTrackSz	; Number of FM+PSG tracks
 
--		ld	a, (ix+zTrackPlaybackControl)	; a = track playback control
+.loop:
+		ld	a, (ix+zTrackPlaybackControl)	; a = track playback control
 		or	84h								; Set 'track is playing' and 'track is resting' flags
 		ld	(ix+zTrackPlaybackControl), a	; Set new value
 		bit	7, (ix+zTrackVoiceControl)		; Is this a PSG track?
-		jp	nz, +							; Branch if yes
+		jp	nz, .skip_psg					; Branch if yes
 		res	2, (ix+zTrackPlaybackControl)	; Clear 'SFX is overriding track' flag
 		ld	a, (ix+zTrackVolume)			; Get track volume
 		add	a, 40h							; Lower volume by 40h
@@ -2333,10 +2372,11 @@ zFadeInToPrevious:
 		call	zGetFMInstrumentPointer		; hl = pointer to instrument data
 		call	zSendFMInstrument			; Send instrument
 		pop	bc								; Restore bc
-+
+
+.skip_psg:
 		ld	de, zTrackSz					; Spacing between tracks
 		add	ix, de							; ix = pointer to next track
-		djnz	-							; Loop for all tracks
+		djnz	.loop						; Loop for all tracks
 
 		ld	a, 40h							; a = 40h
 		ld	(zFadeInTimeout), a				; Start fade
@@ -2400,10 +2440,11 @@ zUpdateDACTrack_cont:
 		cp	FirstCoordFlag					; Is it a coordination flag?
 		jp	nc, zHandleDACCoordFlag			; Branch if yes
 		or	a								; Is it a note?
-		jp	m, +							; Branch if yes
+		jp	m, .got_sample					; Branch if yes
 		dec	de								; We got a duration, so go back to it
 		ld	a, (ix+zTrackSavedDAC)			; Reuse previous DAC sample
-+
+
+.got_sample:
 		ld	(ix+zTrackSavedDAC), a			; Store new DAC sample
 		cp	NoteRest						; Is it a rest?
 		jp	z, zUpdateDACTrack_GetDuration	; Branch if yes
@@ -2417,9 +2458,10 @@ zUpdateDACTrack_cont:
 		ex	af, af'							; Restore af
 		ld	ix, zSongDAC					; ix = pointer to DAC track data
 		bit	2, (ix+zTrackPlaybackControl)	; Is SFX overriding DAC channel?
-		jp	nz, +							; Branch if yes
+		jp	nz, .dont_play					; Branch if yes
 		ld	(zDACIndex), a					; Queue DAC sample
-+
+
+.dont_play:
 		pop	de								; Restore de
 		ld	hl, zSongFM6					; Get pointer to FM6 track
 		res	2, (hl)							; Clear track as being overridden (?)
@@ -2484,7 +2526,7 @@ zCoordFlagSwitchTable:
 		dw cfStopTrack						; 0F2h
 		dw cfSetPSGNoise					; 0F3h
 		dw cfSetModulation					; 0F4h
-		dw cfSetPSGTone						; 0F5h
+		dw cfSetPSGVolEnv					; 0F5h
 		dw cfJumpTo							; 0F6h
 		dw cfRepeatAtPos					; 0F7h
 		dw cfJumpToGosub					; 0F8h
@@ -2503,7 +2545,7 @@ zExtraCoordFlagSwitchTable:
 		dw cfCopyData						; 0FFh 03h
 		dw cfSetTempoDivider				; 0FFh 04h
 		dw cfSetSSGEG						; 0FFh 05h
-		dw cfFMFlutter						; 0FFh 06h
+		dw cfFMVolEnv						; 0FFh 06h
 		dw cfResetSpindashRev				; 0FFh 07h
 		dw cfChanSetTempoDivider			; 0FFh 08h
 		dw cfChanFMCommand					; 0FFh 09h
@@ -2581,9 +2623,10 @@ cfSpindashRev:
 		add	a, (ix+zTrackKeyOffset)			; Add in current track key offset
 		ld	(ix+zTrackKeyOffset), a			; Store result as new track key offset
 		cp	10h								; Is the current transposition 10h?
-		jp	z, +							; Branch if yes
+		jp	z, .skip_rev					; Branch if yes
 		inc	(hl)							; Otherwise, increase escalating transposition
-+
+
+.skip_rev:
 		dec	de								; Put parameter byte back
 		ret
 ; End of function cfSpindashRev
@@ -2645,7 +2688,7 @@ cfSilenceStopTrack:
 ;loc_C85
 cfSetVolume:
 		bit	7, (ix+zTrackVoiceControl)		; Is this a PSG channel?
-		jr	z, +							; Branch if not
+		jr	z, .not_psg						; Branch if not
 		; The following code gets bits 3, 4, 5 and 6 from the parameter byte,
 		; puts them in positions 0 to 3 and inverts them, discarding all other
 		; bits in the parameter byte.
@@ -2657,7 +2700,7 @@ cfSetVolume:
 		and	0Fh								; Clear out high nibble
 		jp	zStoreTrackVolume
 ; ---------------------------------------------------------------------------
-+
+.not_psg:
 		xor	7Fh								; Invert parameter byte (except irrelevant sign bit)
 		and	7Fh								; Strip sign bit
 		ld	(ix+zTrackVolume), a			; Set as new track volume
@@ -2686,14 +2729,15 @@ cfChangeVolume:
 		bit	7, (ix+zTrackVoiceControl)		; Is this a PSG track?
 		ret	nz								; Return if yes
 		add	a, (ix+zTrackVolume)			; Add in track's current volume
-		jp	p, ++							; Branch if result is still positive
-		jp	pe, +							; Branch if addition overflowed into more than 127 positive
+		jp	p, .set_vol						; Branch if result is still positive
+		jp	pe, .underflow					; Branch if addition overflowed into more than 127 positive
 		xor	a								; Set maximum volume
-		jp	++
+		jp	.set_vol
 ; ---------------------------------------------------------------------------
-+
+.underflow:
 		ld	a, 7Fh							; Set minimum volume
-+
+
+.set_vol:
 		ld	(ix+zTrackVolume), a			; Store new volume
 
 ; =============== S U B	R O U T	I N E =======================================
@@ -2707,18 +2751,20 @@ zSendTL:
 		ld	h, (ix+zTrackTLPtrHigh)			; h = high byte of pointer to instrument's TL data
 		ld	b, zFMInstrumentTLTable_End-zFMInstrumentTLTable	; Number of entries
 
--		ld	a, (hl)							; a = register data
+.loop:
+		ld	a, (hl)							; a = register data
 		or	a								; Is it positive?
-		jp	p, +							; Branch if yes
+		jp	p, .skip_track_vol				; Branch if yes
 		add	a, (ix+zTrackVolume)			; Add track's volume to it
-+
+
+.skip_track_vol:
 		and	7Fh								; Strip sign bit
 		ld	c, a							; c = new volume for operator
 		ld	a, (de)							; a = register write command
 		call	zWriteFMIorII				; Send it to YM2612
 		inc	de								; Advance pointer
 		inc	hl								; Advance pointer
-		djnz	-							; Loop
+		djnz	.loop						; Loop
 
 		pop	de								; Restore de
 		ret
@@ -2776,11 +2822,11 @@ cfConditionalJump:
 		add	hl, bc							; hl = pointer in RAM to current loop conuter
 		ld	a, (hl)							; a = value of current loop counter
 		dec	a								; Decrement loop counter (note: value is not saved!)
-		jp	z, +							; Branch if result is zero
+		jp	z, .do_jump						; Branch if result is zero
 		inc	de								; Skip another byte
 		ret
 ; ---------------------------------------------------------------------------
-+
+.do_jump:
 		xor	a								; a = 0
 		ld	(hl), a							; Clear loop counter
 		jp	cfJumpTo
@@ -2796,7 +2842,7 @@ cfChangePSGVolume:
 		bit	7, (ix+zTrackVoiceControl)		; Is this a PSG channel?
 		ret	z								; Return if not
 		res	4, (ix+zTrackPlaybackControl)	; Clear 'track is resting' flag
-		dec	(ix+zTrackVolFlutter)			; Decrement flutter index
+		dec	(ix+zTrackVolEnv)				; Decrement envelope index
 		add	a, (ix+zTrackVolume)			; Add track's current volume
 		cp	0Fh								; Is it 0Fh or more?
 		jp	c, zStoreTrackVolume			; Branch if not
@@ -2887,14 +2933,15 @@ zSetVoiceUploadAlter:
 		and	7Fh								; Strip sign bit
 		ld	b, a							; b = voice index
 		call	zGetFMInstrumentOffset		; hl = pointer to voice data
-		jr	+
+		jr	zSetVoiceDoUpload
 ; ---------------------------------------------------------------------------
 ;loc_D5A
 zSetVoiceUpload:
 		push	de							; Save de
 		ld	b, a							; b = instrument index
 		call	zGetFMInstrumentPointer		; hl = pointer to instrument data
-+
+
+zSetVoiceDoUpload:
 		call	zSendFMInstrument			; Upload instrument data to YM2612
 		pop	de								; Restore de
 		ret
@@ -2976,21 +3023,23 @@ cfStopTrack:
 		jr	z, zStopCleanExit				; Exit if not
 		ld	a, 2							; a = 2 (FM3)
 		cp	(ix+zTrackVoiceControl)			; Is this track for FM3?
-		jr	nz, ++							; Branch if not
+		jr	nz, .not_fm3					; Branch if not
 		ld	a, 4Fh							; FM3 settings: special mode, enable and load A/B
 		bit	0, (ix+zTrackPlaybackControl)	; Is FM3 in special mode?
-		jr	nz, +							; Branch if yes
+		jr	nz, .do_fme_settings			; Branch if yes
 		and	0Fh								; FM3 settings: normal mode, enable and load A/B
-+
+
+.do_fme_settings:
 		call	zWriteFM3Settings			; Set the above FM3 settings
-+
+
+.not_fm3:
 		ld	a, (ix+zTrackVoiceIndex)		; Get FM instrument
 		or	a								; Is it positive?
-		jp	p, +							; Branch if yes
+		jp	p, .switch_to_music				; Branch if yes
 		call	zSetVoiceUploadAlter		; Upload the voice from another song's voice bank
-		jr	++
+		jr	.send_ssg_eg
 ; ---------------------------------------------------------------------------
-+
+.switch_to_music:
 		ld	b, a							; b = FM instrument
 		push	hl							; Save hl
 		bankswitchToMusic					; Bank switch to song bank
@@ -3004,7 +3053,8 @@ cfStopTrack:
 		jp	p, zStopCleanExit				; Exit if not
 		ld	e, (ix+zTrackSSGEGPointerLow)	; e = low byte of pointer to SSG-EG data
 		ld	d, (ix+zTrackSSGEGPointerHigh)	; d = high byte of pointer to SSG-EG data
-+
+
+.send_ssg_eg:
 		call	zSendSSGEGData				; Upload custom SSG-EG data
 
 ;loc_E22
@@ -3020,9 +3070,10 @@ zStopPSGTrack:
 		jr	z, zStopCleanExit				; Exit if not
 		ld	a, (ix+zTrackPSGNoise)			; Get track's PSG noise setting
 		or	a								; Is it an actual noise?
-		jp	p, +							; Branch if not
+		jp	p, .skip_command				; Branch if not
 		ld	(zPSG), a						; Send it to PSG
-+
+
+.skip_command:
 		jr	zStopCleanExit
 
 ; =============== S U B	R O U T	I N E =======================================
@@ -3041,10 +3092,11 @@ cfSetPSGNoise:
 		set	0, (ix+zTrackPlaybackControl)	; Mark PSG track as being noise
 		or	a								; Test noise value
 		ld	a, 0DFh							; Command to silence PSG3
-		jr	nz, +							; If nonzero, branch
+		jr	nz, .skip_noise_silence			; If nonzero, branch
 		res	0, (ix+zTrackPlaybackControl)	; Otherwise, mark track as not being a noise channel
 		ld	a, 0FFh							; Command to silence the noise channel
-+
+
+.skip_noise_silence:
 		bit	2, (ix+zTrackPlaybackControl)	; Is SFX overriding this track?
 		ret	nz								; Return if yes
 		ld	(zPSG), a						; Execute it
@@ -3058,7 +3110,7 @@ cfSetPSGNoise:
 ; Has one parameter byte, the new PSG tone to use.
 ;
 ;loc_E58
-cfSetPSGTone:
+cfSetPSGVolEnv:
 		bit	7, (ix+zTrackVoiceControl)		; Is this a PSG track?
 		ret	z								; Return if not
 
@@ -3087,11 +3139,11 @@ cfJumpTo:
 ; Has a single parameter byte: if 1 enables pitch slide, disabling it if not.
 cfPitchSlide:
 		cp	1								; Is parameter equal to 1?
-		jr	nz, +							; Branch if not
+		jr	nz, .disable_slide				; Branch if not
 		set	5, (ix+zTrackPlaybackControl)	; Enable pitch slide
 		ret
 ; ---------------------------------------------------------------------------
-+
+.disable_slide:
 		res	1, (ix+zTrackPlaybackControl)	; Clear 'don't attack' flag
 		res	5, (ix+zTrackPlaybackControl)	; Stop pitch slide
 		xor	a								; a = 0
@@ -3115,10 +3167,11 @@ cfRepeatAtPos:
 		add	hl, bc							; hl = pointer in RAM to current loop conuter
 		ld	a, (hl)							; a = value of current loop counter
 		or	a								; Is loop counter zero?
-		jr	nz, +							; Branch if not
+		jr	nz, .run_counter				; Branch if not
 		ld	a, (de)							; Get repeat counter
 		ld	(hl), a							; Reset loop counter to it
-+
+
+.run_counter:
 		inc	de								; Advance track pointer
 		dec	(hl)							; Decrement loop counter
 		jp	nz, cfJumpTo					; Loop if it is nonzero
@@ -3206,14 +3259,14 @@ cfAddKey:
 cfLoopContinuousSFX:
 		ld	a, (zContinousSFXFlag)			; Get 'continuous sound effect' flag
 		cp	80h								; Is it equal to 80h?
-		jp	z, +							; Branch if yes
+		jp	z, .run_counter					; Branch if yes
 		xor	a								; a = 0
 		ld	(zContinousSFX), a				; Clear last continuous SFX played
 		ld	(zContinousSFXFlag), a			; Clear continous sound effect flag
 		inc	de								; Skip a byte
 		ret
 ; ---------------------------------------------------------------------------
-+
+.run_counter:
 		ld	a, (zContSFXLoopCnt)			; Get number loops to perform
 		dec	a								; Decrement it...
 		ld	(zContSFXLoopCnt), a			; ... and store it back
@@ -3232,11 +3285,11 @@ cfLoopContinuousSFX:
 ;cfToggleAlternateSMPS
 cfToggleAltFreqMode:
 		cp	1								; Is parameter equal to 1?
-		jr	nz, +							; Branch if not
+		jr	nz, .stop_altfreq_mode			; Branch if not
 		set	3, (ix+zTrackPlaybackControl)	; Start alternate frequency mode for track
 		ret
 ; ---------------------------------------------------------------------------
-+
+.stop_altfreq_mode:
 		res	3, (ix+zTrackPlaybackControl)	; Stop alternate frequency mode for track
 		ret
 
@@ -3259,13 +3312,8 @@ cfFM3SpecialMode:
 		call	zGetSpecialFM3DataPointer	; de = pointer to saved FM3 frequency shifts
 		ld	b, 4							; Loop counter: 4 parameter bytes
 
-		; DANGER! The following code will trash the Z80 code due to failed
-		; initialization of de. At the start of the function, hl was a pointer
-		; to the coord. flag switch table entry that had the address of this
-		; function; after 'ex	de, hl', now de is this pointer.
-		; After the code below, the targets of the last few coord. flag handlers
-		; will be overwritten by the nonsensical numbers at the lookup table.
--		push	bc							; Save bc
+.loop:
+		push	bc							; Save bc
 		ld	a, (hl)							; Get parameter byte
 		inc	hl								; Advance pointer
 		push	hl							; Save hl
@@ -3278,7 +3326,7 @@ cfFM3SpecialMode:
 		ldi									; *de++ = *hl++
 		pop	hl								; Restore hl
 		pop	bc								; Restore bc
-		djnz	-							; Loop for all parameters
+		djnz	.loop						; Loop for all parameters
 
 		ex	de, hl							; Exchange back de and hl
 		dec	de								; Put back last byte
@@ -3341,6 +3389,9 @@ cfSetTempo:
 ;
 ; Has one parameter byte, the ID of what is to be played.
 ;
+; DO NOT USE THIS TO PLAY THE SEGA PCM! It tampers with the stack pointer, and
+; will wreak havok with the track update.
+;
 ;loc_F3A:
 cfPlaySoundByIndex:
 		push	ix							; Save track pointer
@@ -3358,31 +3409,33 @@ cfPlaySoundByIndex:
 cfHaltSound:
 		ld	(zHaltFlag), a					; Set new mute flag
 		or	a								; Is it set now?
-		jr	z, +							; Branch if not
+		jr	z, .resume						; Branch if not
 		push	ix							; Save ix
 		push	de							; Save de
 		ld	ix, zTracksStart				; Start of song RAM
 		ld	b, (zTracksEnd-zTracksStart)/zTrackSz	; Number of tracks
 		ld	de, zTrackSz					; Spacing between tracks
 
--		res	7, (ix+zTrackPlaybackControl)	; Clear 'track is playing' bit
+.loop1:
+		res	7, (ix+zTrackPlaybackControl)	; Clear 'track is playing' bit
 		call	zKeyOff						; Stop current note
 		add	ix, de							; Advance to next track
-		djnz	-							; Loop for all tracks
+		djnz	.loop1						; Loop for all tracks
 		pop	de								; Restore de
 		pop	ix								; Restore ix
 		jp	zPSGSilenceAll
 ; ---------------------------------------------------------------------------
-+
+.resume:
 		push	ix							; Save ix
 		push	de							; Save de
 		ld	ix, zTracksStart				; Start of song RAM
 		ld	b, (zTracksEnd-zTracksStart)/zTrackSz	; Number of tracks
 		ld	de, zTrackSz					; Spacing between tracks
 
--		set	7, (ix+zTrackPlaybackControl)	;Set 'track is playing' bit
+.loop2:
+		set	7, (ix+zTrackPlaybackControl)	; Set 'track is playing' bit
 		add	ix, de							; Advance to next track
-		djnz	-							; Loop for all tracks
+		djnz	.loop2						; Loop for all tracks
 		pop	de								; Restore de
 		pop	ix								; Restore ix
 		ret
@@ -3423,12 +3476,13 @@ cfSetTempoDivider:
 		ld	b, (zTracksEnd-zTracksStart)/zTrackSz	; Number of tracks
 		ld	hl, zTracksStart+zTrackTempoDivider	; Want to change tempo dividers
 
--		push	bc							; Save bc
+.loop:
+		push	bc							; Save bc
 		ld	bc, zTrackSz					; Spacing between tracks
 		ld	(hl), a							; Set tempo divider for track
 		add	hl, bc							; Advance to next track
 		pop	bc								; Restore bc
-		djnz	-
+		djnz	.loop
 		ret
 
 ; =============== S U B	R O U T	I N E =======================================
@@ -3447,9 +3501,6 @@ cfSetSSGEG:
 ;
 ;sub_FA4
 zSendSSGEGData:
-		; DANGER! The following code ignores the fact that SSG-EG mode must be
-		; used with maximum (1Fh) attack rate or output is officially undefined.
-		; This has the potential effect of weird sound, even in real hardware.
 		; This fix is even better than what is done in Ristar's sound driver:
 		; we preserve rate scaling, whereas that driver sets it to 0.
 		ld	l, (ix+zTrackTLPtrLow)			; l = low byte of pointer to TL data
@@ -3460,7 +3511,8 @@ zSendSSGEGData:
 		ld	hl, zFMInstrumentSSGEGTable		; hl = pointer to registers for SSG-EG data
 		ld	b, zFMInstrumentSSGEGTable_End-zFMInstrumentSSGEGTable	; Number of entries
 
--		ld	a, (de)							; Get data to sent to SSG-EG register
+.loop:
+		ld	a, (de)							; Get data to sent to SSG-EG register
 		inc	de								; Advance pointer
 		ld	c, a							; c = data to send
 		ld	a, (hl)							; a = register to send to
@@ -3475,26 +3527,26 @@ zSendSSGEGData:
 		sub	40h								; Convert into command to set RS/AR
 		inc	hl								; Advance pointer
 		call	zWriteFMIorII				; Send data to correct channel
-		djnz	-							; Loop for all registers
+		djnz	.loop						; Loop for all registers
 		pop	hl								; Remove from stack (see line marked (**) above)
 		dec	de								; Rewind data pointer a bit
 		ret
 ; End of function zSendSSGEGData
 
 ; =============== S U B	R O U T	I N E =======================================
-; Starts or controls FM flutter, according to the parameters.
+; Starts or controls FM volume envelope effects, according to the parameters.
 ;
-; Has two parameter bytes: the first is a (1-based) index into the PSG flutter
-; table indicating how the flutter should go, while the second is a bitmask
+; Has two parameter bytes: the first is a (1-based) index into the PSG envelope
+; table indicating how the envelope should go, while the second is a bitmask
 ; indicating which operators should be affected (in the form %00004231) for
 ; the current channel.
 ;
 ;loc_FB5
-cfFMFlutter:
-		ld	(ix+zTrackFMFlutter), a			; Store flutter index
+cfFMVolEnv:
+		ld	(ix+zTrackFMVolEnv), a			; Store envelope index
 		inc	de								; Advance track pointer
-		ld	a, (de)							; Get flutter mask
-		ld	(ix+zTrackFMFlutterMask), a		; Store flutter bitmask
+		ld	a, (de)							; Get envelope mask
+		ld	(ix+zTrackFMVolEnvMask), a		; Store envelope bitmask
 		ret
 
 ; =============== S U B	R O U T	I N E =======================================
@@ -3539,20 +3591,21 @@ cfChanFMCommand:
 ;loc_FC4
 zUpdatePSGTrack:
 		call	zTrackRunTimer				; Run note timer
-		jr	nz, +							; Branch if note hasn't expired yet
+		jr	nz, .note_going					; Branch if note hasn't expired yet
 		call	zGetNextNote				; Get next note for PSG track
 		bit	4, (ix+zTrackPlaybackControl)	; Is track resting?
 		ret	nz								; Return if yes
 		call	zPrepareModulation			; Initialize modulation
-		jr	++
+		jr	.skip_fill
 ; ---------------------------------------------------------------------------
-+
+.note_going:
 		ld	a, (ix+zTrackNoteFillTimeout)	; Get note fill
 		or	a								; Has timeout expired?
-		jr	z, +							; Branch if yes
+		jr	z, .skip_fill					; Branch if yes
 		dec	(ix+zTrackNoteFillTimeout)		; Update note fill
 		jp	z, zRestTrack					; Put PSG track at rest if needed
-+
+
+.skip_fill:
 		call	zDoPitchSlide				; Apply pitch slide and frequency displacement
 		call	zDoModulation				; Do modulation
 		bit	2, (ix+zTrackPlaybackControl)	; Is SFX overriding this track?
@@ -3574,100 +3627,95 @@ zUpdatePSGTrack:
 		ld	a, (ix+zTrackVoiceIndex)		; Get PSG tone
 		or	a								; Test if it is zero
 		ld	c, 0							; c = 0
-		jr	z, +							; Branch if no PSG tone
+		jr	z, .no_volenv					; Branch if no PSG tone
 		dec	a								; Make it into a 0-based index
-		ld	c, zID_PSGTonePointers			; Value for PSG tone pointer table
-		rst	GetPointerTable					; hl = pointer to PSG flutter table
-		rst	PointerTableOffset				; hl = pointer to PSG flutter for track
-		call	zDoFlutter					; Get new flutter value
-		ld	c, a							; c = new flutter value
-+
+		ld	c, zID_VolEnvPointers			; Value for volume envelope pointer table
+		rst	GetPointerTable					; hl = pointer to volume envelope table
+		rst	PointerTableOffset				; hl = pointer to volume envelope for track
+		call	zDoVolEnv					; Get new volume envelope
+		ld	c, a							; c = new volume envelope
+
+.no_volenv:
 		bit	4, (ix+zTrackPlaybackControl)	; Is track resting?
 		ret	nz								; Return if yes
 		ld	a, (ix+zTrackVolume)			; Get track volume
-		add	a, c							; Add flutter to it
+		add	a, c							; Add volume envelope to it
 		bit	4, a							; Is bit 4 set?
-		jr	z, +							; Branch if not
+		jr	z, .no_underflow				; Branch if not
 		ld	a, 0Fh							; Set silence on PSG track
-+
+
+.no_underflow:
 		or	(ix+zTrackVoiceControl)			; Mask in the PSG channel bits
 		add	a, 10h							; Flag to latch volume
 		bit	0, (ix+zTrackPlaybackControl)	; Is this a noise channel?
-		jr	nz, +							; Branch if yes
+		jr	nz, .set_noise					; Branch if yes
 		ld	(zPSG), a						; Set PSG volume
 		ret
 ; ---------------------------------------------------------------------------
-+
+.set_noise:
 		add	a, 20h							; Change to noise channel
 		ld	(zPSG), a						; Set noise channel volume
 		ret
 ; ---------------------------------------------------------------------------
 ;loc_1037
-zDoFlutterSetValue:
-		ld	(ix+zTrackVolFlutter), a		; Set new value for PSG flutter index and fall through
+zDoVolEnvSetValue:
+		ld	(ix+zTrackVolEnv), a			; Set new value for PSG envelope index and fall through
 
 ; =============== S U B	R O U T	I N E =======================================
-; Get next PSG flutter value.
+; Get next PSG volume envelope value.
 ;
 ; Input:   ix    Pointer to track RAM
-;          hl    Pointer to current PSG flutter
-; Output:  a     New flutter value
+;          hl    Pointer to current PSG volume envelope
+; Output:  a     New volume envelope value
 ;          bc    Trashed
 ;
 ;sub_103A
-zDoFlutter:
+zDoVolEnv:
 		push	hl							; Save hl
-		ld	c, (ix+zTrackVolFlutter)		; Get current PSG flutter index
+		ld	c, (ix+zTrackVolEnv)			; Get current PSG envelope index
 		ld	b, 0							; b = 0
-		add	hl, bc							; Offset into PSG flutter
+		add	hl, bc							; Offset into PSG envelope table
 		; Fix based on similar code from Space Harrier II's sound driver.
-		; This fixes the "DANGER!" bug below. This is better than the
-		; previous fix, which was based on Ristar's driver.
+		; This is better than the previous fix, which was based on Ristar's driver.
 		ld	c, l
 		ld	b, h
-		ld	a, (bc)							; a = PSG flutter value
+		ld	a, (bc)							; a = PSG volume envelope
 		pop	hl								; Restore hl
 		bit	7, a							; Is it a terminator?
-		jr	z, zDoFlutterAdvance			; Branch if not
+		jr	z, zDoVolEnvAdvance				; Branch if not
 		cp	83h								; Is it a command to put PSG channel to rest?
-		jr	z, zDoFlutterFullRest			; Branch if yes
+		jr	z, zDoVolEnvFullRest			; Branch if yes
 		cp	81h								; Is it a command to set rest flag on PSG channel?
-		jr	z, zDoFlutterRest				; Branch if yes
-		cp	80h								; Is it a command to reset flutter?
-		jr	z, zDoFlutterReset				; Branch if yes
+		jr	z, zDoVolEnvRest				; Branch if yes
+		cp	80h								; Is it a command to reset envelope?
+		jr	z, zDoVolEnvReset				; Branch if yes
 
-		inc	bc								; Increment flutter index
-		; DANGER! Will read data from code segment and use it as if it were valid!
-		; In order to get here, the flutter value would have to be:
-		; (1) negative;
-		; (2) not 80h, 81h or 83h.
-		; As it stands, none of the entries in the flutter tables will allow
-		; this code to execute.
+		inc	bc								; Increment envelope index
 		ld	a, (bc)							; Get value from wherever the hell bc is pointing to
-		jr	zDoFlutterSetValue				; Use this as new flutter index
+		jr	zDoVolEnvSetValue				; Use this as new envelope index
 ; ---------------------------------------------------------------------------
 ;loc_1057
-zDoFlutterFullRest:
+zDoVolEnvFullRest:
 		set	4, (ix+zTrackPlaybackControl)	; Set 'track is resting' bit
 		pop	hl								; Pop return value from stack (causes a 'ret' to return to caller of zUpdatePSGTrack)
 		jp	zRestTrack						; Put track at rest
 ; ---------------------------------------------------------------------------
 ;loc_105F
-zDoFlutterReset:
+zDoVolEnvReset:
 		xor	a								; a = 0
-		jr	zDoFlutterSetValue
+		jr	zDoVolEnvSetValue
 ; ---------------------------------------------------------------------------
 ;loc_1062
-zDoFlutterRest:
+zDoVolEnvRest:
 		pop	hl								; Pop return value from stack (causes a 'ret' to return to caller of zUpdatePSGTrack)
 		set	4, (ix+zTrackPlaybackControl)	; Set 'track is resting' bit
 		ret									; Do NOT silence PSG channel
 ; ---------------------------------------------------------------------------
 ;loc_1068
-zDoFlutterAdvance:
-		inc	(ix+zTrackVolFlutter)			; Advance flutter
+zDoVolEnvAdvance:
+		inc	(ix+zTrackVolEnv)				; Advance envelope
 		ret
-; End of function zDoFlutter
+; End of function zDoVolEnv
 
 
 ; =============== S U B	R O U T	I N E =======================================
@@ -3829,11 +3877,12 @@ zPlaySEGAPCM:
 		ld	(zYM2612_A0), a					; Send to YM2612
 		nop									; Delay
 
--		ld	a, (hl)							; a = next byte of SEGA PCM
+.loop:
+		ld	a, (hl)							; a = next byte of SEGA PCM
 		ld	(zYM2612_D0), a					; Send to DAC
 		ld	a, (zMusicNumber)				; Check next song number
 		cp	SndID_StopSega					; Is it the command to stop playing SEGA PCM?
-		jr	z, +							; Break the loop if yes
+		jr	z, .done						; Break the loop if yes
 		nop
 		nop
 
@@ -3844,11 +3893,11 @@ zPlaySEGAPCM:
 		dec	de								; Mark one byte as being done
 		ld	a, d							; a = d
 		or	e								; Is length zero?
-		jr	nz, -							; Loop if not
+		jr	nz, .loop						; Loop if not
 
-+		jp	zPlayDigitalAudio				; Go back to normal DAC code
+.done:
+		jp	zPlayDigitalAudio				; Go back to normal DAC code
 ; ---------------------------------------------------------------------------
-			; db    0
 
 	if $ > 1300h
 		fatal "Your Z80 code won't fit before its tables. It's \{$-1300h}h bytes past the start of music data \{1300h}h"
@@ -3863,142 +3912,142 @@ Z80_Snd_Driver2:
 ; ===========================================================================
 
 z80_SoundDriverPointers:
-		dw	z80_MusicPointers
-		dw	zmake68kPtr(z80_UniVoiceBank)
+		dw	z80_MusicPointers				; This would be the priority array in other drivers
+		dw	zmake68kPtr(z80_UniVoiceBank)	; In other drivers, this is a pointer to special SFX table instead
 		dw	z80_MusicPointers
 		dw  z80_SFXPointers
-		dw  z80_FreqFlutterPointers
-		dw  z80_PSGTonePointers
-		dw  33h
+		dw  z80_ModEnvPointers
+		dw  z80_VolEnvPointers
+		dw  33h								; This is the song limit; it is never used in any driver
 ; ---------------------------------------------------------------------------
 ; ===========================================================================
-; Frequency Flutter Pointers
+; Modulation Envelope Pointers
 ; ===========================================================================
 
-z80_FreqFlutterPointers:
-		dw	FreqFlutter0
-		dw	FreqFlutter1
-		dw	FreqFlutter2
-		dw	FreqFlutter3
-		dw	FreqFlutter4
-		dw	FreqFlutter5
-		dw	FreqFlutter6
-		dw	FreqFlutter7
+z80_ModEnvPointers:
+		dw	ModEnv_00
+		dw	ModEnv_01
+		dw	ModEnv_02
+		dw	ModEnv_03
+		dw	ModEnv_04
+		dw	ModEnv_05
+		dw	ModEnv_06
+		dw	ModEnv_07
 
-FreqFlutter1:   db    0
-FreqFlutter0:   db    1,   2,   1,   0,0FFh,0FEh,0FDh,0FCh,0FDh,0FEh,0FFh, 83h
-FreqFlutter2:   db    0,   0,   0,   0, 13h, 26h, 39h, 4Ch, 5Fh, 72h, 7Fh, 72h, 83h
-FreqFlutter3:   db    1,   2,   3,   2,   1,   0,0FFh,0FEh,0FDh,0FEh,0FFh,   0, 82h,   0
-FreqFlutter4:   db    0,   0,   1,   3,   1,   0,0FFh,0FDh,0FFh,   0, 82h,   2
-FreqFlutter5:   db    0,   0,   0,   0,   0, 0Ah, 14h, 1Eh, 14h, 0Ah,   0,0F6h,0ECh,0E2h,0ECh,0F6h
-                db  82h,   4
-FreqFlutter6:   db    0,   0,   0,   0, 16h, 2Ch, 42h, 2Ch, 16h,   0,0EAh,0D4h,0BEh,0D4h,0EAh, 82h
-                db    3
-FreqFlutter7:   db    1,   2,   3,   4,   3,   2,   1,   0,0FFh,0FEh,0FDh,0FCh,0FDh,0FEh,0FFh,   0
-                db  82h,   1
+ModEnv_01:	db    0
+ModEnv_00:	db    1,   2,   1,   0,0FFh,0FEh,0FDh,0FCh,0FDh,0FEh,0FFh, 83h
+ModEnv_02:	db    0,   0,   0,   0, 13h, 26h, 39h, 4Ch, 5Fh, 72h, 7Fh, 72h, 83h
+ModEnv_03:	db    1,   2,   3,   2,   1,   0,0FFh,0FEh,0FDh,0FEh,0FFh,   0, 82h,   0
+ModEnv_04:	db    0,   0,   1,   3,   1,   0,0FFh,0FDh,0FFh,   0, 82h,   2
+ModEnv_05:	db    0,   0,   0,   0,   0, 0Ah, 14h, 1Eh, 14h, 0Ah,   0,0F6h,0ECh,0E2h,0ECh,0F6h
+        	db  82h,   4
+ModEnv_06:	db    0,   0,   0,   0, 16h, 2Ch, 42h, 2Ch, 16h,   0,0EAh,0D4h,0BEh,0D4h,0EAh, 82h
+        	db    3
+ModEnv_07:	db    1,   2,   3,   4,   3,   2,   1,   0,0FFh,0FEh,0FDh,0FCh,0FDh,0FEh,0FFh,   0
+        	db  82h,   1
 
 ; ---------------------------------------------------------------------------
 ; ===========================================================================
-; PSG Tone Pointers
+; Volume Envelope Pointers
 ; ===========================================================================
 
-z80_PSGTonePointers:
-		dw		PSGTone_00,PSGTone_01,PSGTone_02,PSGTone_03,PSGTone_04,PSGTone_05
-		dw		PSGTone_06,PSGTone_07,PSGTone_08,PSGTone_09,PSGTone_0A,PSGTone_0B
-		dw		PSGTone_0C,PSGTone_0D,PSGTone_0E,PSGTone_0F,PSGTone_10,PSGTone_11
-		dw		PSGTone_12,PSGTone_13,PSGTone_14,PSGTone_15,PSGTone_16,PSGTone_17
-		dw		PSGTone_18,PSGTone_19,PSGTone_1A,PSGTone_1B,PSGTone_1C,PSGTone_1D
-		dw		PSGTone_1E,PSGTone_1F,PSGTone_20,PSGTone_21,PSGTone_22,PSGTone_23
-		dw		PSGTone_24,PSGTone_25,PSGTone_26,PSGTone_27,PSGTone_28,PSGTone_29
-		dw		PSGTone_2A,PSGTone_2B,PSGTone_2C,PSGTone_2D,PSGTone_2E,PSGTone_2F
-		dw		PSGTone_30,PSGTone_31,PSGTone_32,PSGTone_33
+z80_VolEnvPointers:
+		dw		VolEnv_00,VolEnv_01,VolEnv_02,VolEnv_03,VolEnv_04,VolEnv_05
+		dw		VolEnv_06,VolEnv_07,VolEnv_08,VolEnv_09,VolEnv_0A,VolEnv_0B
+		dw		VolEnv_0C,VolEnv_0D,VolEnv_0E,VolEnv_0F,VolEnv_10,VolEnv_11
+		dw		VolEnv_12,VolEnv_13,VolEnv_14,VolEnv_15,VolEnv_16,VolEnv_17
+		dw		VolEnv_18,VolEnv_19,VolEnv_1A,VolEnv_1B,VolEnv_1C,VolEnv_1D
+		dw		VolEnv_1E,VolEnv_1F,VolEnv_20,VolEnv_21,VolEnv_22,VolEnv_23
+		dw		VolEnv_24,VolEnv_25,VolEnv_26,VolEnv_27,VolEnv_28,VolEnv_29
+		dw		VolEnv_2A,VolEnv_2B,VolEnv_2C,VolEnv_2D,VolEnv_2E,VolEnv_2F
+		dw		VolEnv_30,VolEnv_31,VolEnv_32,VolEnv_33
 
-PSGTone_00:		db    2, 83h
-PSGTone_01:
-PSGTone_0E:
-PSGTone_28:		db    0,   2,   4,   6,   8, 10h, 83h
-PSGTone_02:		db    2,   1,   0,   0,   1,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2
-                db    2,   3,   3,   3,   4,   4,   4,   5, 81h
-PSGTone_03:		db    0,   0,   2,   3,   4,   4,   5,   5,   5,   6,   6, 81h
-PSGTone_04:		db    3,   0,   1,   1,   1,   2,   3,   4,   4,   5, 81h
-PSGTone_05:		db    0,   0,   1,   1,   2,   3,   4,   5,   5,   6,   8,   7,   7,   6, 81h
-PSGTone_06:		db    1, 0Ch,   3, 0Fh,   2,   7,   3, 0Fh, 80h
-PSGTone_07:		db    0,   0,   0,   2,   3,   3,   4,   5,   6,   7,   8,   9, 0Ah, 0Bh, 0Eh, 0Fh
-                db  83h
-PSGTone_08:		db    3,   2,   1,   1,   0,   0,   1,   2,   3,   4, 81h
-PSGTone_09:		db    1,   0,   0,   0,   0,   1,   1,   1,   2,   2,   2,   3,   3,   3,   3,   4
-                db    4,   4,   5,   5, 81h
-PSGTone_0A:		db  10h, 20h, 30h, 40h, 30h, 20h, 10h,   0,0F0h, 80h
-PSGTone_0B:		db    0,   0,   1,   1,   3,   3,   4,   5, 83h
-PSGTone_0C:		db    0, 81h
-PSGTone_0D:		db    2, 83h
-PSGTone_0F:		db    9,   9,   9,   8,   8,   8,   7,   7,   7,   6,   6,   6,   5,   5,   5,   4
-                db    4,   4,   3,   3,   3,   2,   2,   2,   1,   1,   1,   0,   0,   0, 81h
-PSGTone_10:		db    1,   1,   1,   0,   0,   0, 81h
-PSGTone_11:		db    3,   0,   1,   1,   1,   2,   3,   4,   4,   5, 81h
-PSGTone_12:		db    0,   0,   1,   1,   2,   3,   4,   5,   5,   6,   8,   7,   7,   6, 81h
-PSGTone_13:		db  0Ah,   5,   0,   4,   8, 83h
-PSGTone_14:		db    0,   0,   0,   2,   3,   3,   4,   5,   6,   7,   8,   9, 0Ah, 0Bh, 0Eh, 0Fh
-                db  83h
-PSGTone_15:		db    3,   2,   1,   1,   0,   0,   1,   2,   3,   4, 81h
-PSGTone_16:		db    1,   0,   0,   0,   0,   1,   1,   1,   2,   2,   2,   3,   3,   3,   3,   4
-                db    4,   4,   5,   5, 81h
-PSGTone_17:		db  10h, 20h, 30h, 40h, 30h, 20h, 10h,   0, 80h
-PSGTone_18:		db    0,   0,   1,   1,   3,   3,   4,   5, 83h
-PSGTone_19:		db    0,   2,   4,   6,   8, 16h, 83h
-PSGTone_1A:		db    0,   0,   1,   1,   3,   3,   4,   5, 83h
-PSGTone_1B:		db    4,   4,   4,   4,   3,   3,   3,   3,   2,   2,   2,   2,   1,   1,   1,   1
-                db  83h
-PSGTone_1C:		db    0,   0,   0,   0,   1,   1,   1,   1,   2,   2,   2,   2,   3,   3,   3,   3
-                db    4,   4,   4,   4,   5,   5,   5,   5,   6,   6,   6,   6,   7,   7,   7,   7
-                db    8,   8,   8,   8,   9,   9,   9,   9, 0Ah, 0Ah, 0Ah, 0Ah, 81h
-PSGTone_1D:		db    0, 0Ah, 83h
-PSGTone_1E:		db    0,   2,   4, 81h
-PSGTone_1F:		db  30h, 20h, 10h,   0,   0,   0,   0,   0,   8, 10h, 20h, 30h, 81h
-PSGTone_20:		db    0,   4,   4,   4,   4,   4,   4,   4,   4,   4,   4,   6,   6,   6,   8,   8
-                db  0Ah, 83h
-PSGTone_21:		db    0,   2,   3,   4,   6,   7, 81h
-PSGTone_22:		db    2,   1,   0,   0,   0,   2,   4,   7, 81h
-PSGTone_23:		db  0Fh,   1,   5, 83h
-PSGTone_24:		db    8,   6,   2,   3,   4,   5,   6,   7,   8,   9, 0Ah, 0Bh, 0Ch, 0Dh, 0Eh, 0Fh
-                db  10h, 83h
-PSGTone_25:		db    0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   1,   1,   1,   1,   1,   1
-                db    1,   1,   1,   1,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   3,   3
-                db    3,   3,   3,   3,   3,   3,   3,   3,   4,   4,   4,   4,   4,   4,   4,   4
-                db    4,   4,   5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   6,   6,   6,   6
-                db    6,   6,   6,   6,   6,   6,   7,   7,   7,   7,   7,   7,   7,   7,   7,   7
-                db    8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   9,   9,   9,   9,   9,   9
-                db    9,   9, 83h
-PSGTone_26:		db    0,   2,   2,   2,   3,   3,   3,   4,   4,   4,   5,   5, 83h
-PSGTone_27:     db	  0,   0,   0,   1,   1,   1,   2,   2,   2,   3,   3,   3,   4,   4,   4,   5
-                db	  5,   5,   6,   6,   6,   7, 81h
-PSGTone_29:     db	  0,   0,   1,   1,   2,   2,   3,   3,   4,   4,   5,   5,   6,   6,   7,   7, 81h
-PSGTone_2A:     db	  0,   0,   2,   3,   4,   4,   5,   5,   5,   6, 81h
-PSGTone_2C:     db	  3,   3,   3,   2,   2,   2,   2,   1,   1,   1,   0,   0,   0,   0, 81h
-PSGTone_2B:     db	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   1,   1
-                db	  1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   2,   2,   2,   2
-                db	  2,   2,   2,   2,   3,   3,   3,   3,   3,   3,   3,   3,   4, 81h
-PSGTone_2D:     db	  0,   0,   0,   0,   0,   0,   1,   1,   1,   1,   1,   2,   2,   2,   2,   2
-                db	  3,   3,   3,   4,   4,   4,   5,   5,   5,   6,   7, 81h
-PSGTone_2E:     db	  0,   0,   0,   0,   0,   1,   1,   1,   1,   1,   2,   2,   2,   2,   2,   2
-                db	  3,   3,   3,   3,   3,   4,   4,   4,   4,   4,   5,   5,   5,   5,   5,   6
-                db	  6,   6,   6,   6,   7,   7,   7, 81h
-PSGTone_2F:     db	  0,   1,   2,   3,   4,   5,   6,   7,   8,   9, 0Ah, 0Bh, 0Ch, 0Dh, 0Eh, 0Fh, 83h
-PSGTone_30:     db	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   1,   1,   1,   1,   1,   1
-                db	  1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1
-                db	  1,   1,   1,   1,   1,   1,   1,   1,   2,   2,   2,   2,   2,   2,   2,   2
-                db	  2,   2,   3,   3,   3,   3,   3,   3,   3,   3,   3,   3,   4, 81h
-PSGTone_31:     db	  4,   4,   4,   3,   3,   3,   2,   2,   2,   1,   1,   1,   1,   1,   1,   1
-                db	  2,   2,   2,   2,   2,   3,   3,   3,   3,   3,   4, 81h
-PSGTone_32:     db	  4,   4,   3,   3,   2,   2,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1
-                db	  1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   2,   2,   2,   2,   2,   2
-                db	  2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   3,   3
-                db	  3,   3,   3,   3,   3,   3,   3,   3,   3,   3,   3,   3,   3,   3,   3,   3
-                db	  3,   3,   4,   4,   4,   4,   4,   4,   4,   4,   4,   4,   4,   4,   4,   4
-                db	  4,   4,   4,   4,   4,   4,   5,   5,   5,   5,   5,   5,   5,   5,   5,   5
-                db	  5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   6,   6,   6,   6,   6,   6
-                db	  6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   7, 81h
-PSGTone_33:     db	0Eh, 0Dh, 0Ch, 0Bh, 0Ah,   9,   8,   7,   6,   5,   4,   3,   2,   1,   0, 81h
+VolEnv_00:	db    2, 83h
+VolEnv_01:
+VolEnv_0E:
+VolEnv_28:	db    0,   2,   4,   6,   8, 10h, 83h
+VolEnv_02:	db    2,   1,   0,   0,   1,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2
+          	db    2,   3,   3,   3,   4,   4,   4,   5, 81h
+VolEnv_03:	db    0,   0,   2,   3,   4,   4,   5,   5,   5,   6,   6, 81h
+VolEnv_04:	db    3,   0,   1,   1,   1,   2,   3,   4,   4,   5, 81h
+VolEnv_05:	db    0,   0,   1,   1,   2,   3,   4,   5,   5,   6,   8,   7,   7,   6, 81h
+VolEnv_06:	db    1, 0Ch,   3, 0Fh,   2,   7,   3, 0Fh, 80h
+VolEnv_07:	db    0,   0,   0,   2,   3,   3,   4,   5,   6,   7,   8,   9, 0Ah, 0Bh, 0Eh, 0Fh
+          	db  83h
+VolEnv_08:	db    3,   2,   1,   1,   0,   0,   1,   2,   3,   4, 81h
+VolEnv_09:	db    1,   0,   0,   0,   0,   1,   1,   1,   2,   2,   2,   3,   3,   3,   3,   4
+          	db    4,   4,   5,   5, 81h
+VolEnv_0A:	db  10h, 20h, 30h, 40h, 30h, 20h, 10h,   0,0F0h, 80h
+VolEnv_0B:	db    0,   0,   1,   1,   3,   3,   4,   5, 83h
+VolEnv_0C:	db    0, 81h
+VolEnv_0D:	db    2, 83h
+VolEnv_0F:	db    9,   9,   9,   8,   8,   8,   7,   7,   7,   6,   6,   6,   5,   5,   5,   4
+          	db    4,   4,   3,   3,   3,   2,   2,   2,   1,   1,   1,   0,   0,   0, 81h
+VolEnv_10:	db    1,   1,   1,   0,   0,   0, 81h
+VolEnv_11:	db    3,   0,   1,   1,   1,   2,   3,   4,   4,   5, 81h
+VolEnv_12:	db    0,   0,   1,   1,   2,   3,   4,   5,   5,   6,   8,   7,   7,   6, 81h
+VolEnv_13:	db  0Ah,   5,   0,   4,   8, 83h
+VolEnv_14:	db    0,   0,   0,   2,   3,   3,   4,   5,   6,   7,   8,   9, 0Ah, 0Bh, 0Eh, 0Fh
+          	db  83h
+VolEnv_15:	db    3,   2,   1,   1,   0,   0,   1,   2,   3,   4, 81h
+VolEnv_16:	db    1,   0,   0,   0,   0,   1,   1,   1,   2,   2,   2,   3,   3,   3,   3,   4
+          	db    4,   4,   5,   5, 81h
+VolEnv_17:	db  10h, 20h, 30h, 40h, 30h, 20h, 10h,   0, 80h
+VolEnv_18:	db    0,   0,   1,   1,   3,   3,   4,   5, 83h
+VolEnv_19:	db    0,   2,   4,   6,   8, 16h, 83h
+VolEnv_1A:	db    0,   0,   1,   1,   3,   3,   4,   5, 83h
+VolEnv_1B:	db    4,   4,   4,   4,   3,   3,   3,   3,   2,   2,   2,   2,   1,   1,   1,   1
+          	db  83h
+VolEnv_1C:	db    0,   0,   0,   0,   1,   1,   1,   1,   2,   2,   2,   2,   3,   3,   3,   3
+          	db    4,   4,   4,   4,   5,   5,   5,   5,   6,   6,   6,   6,   7,   7,   7,   7
+          	db    8,   8,   8,   8,   9,   9,   9,   9, 0Ah, 0Ah, 0Ah, 0Ah, 81h
+VolEnv_1D:	db    0, 0Ah, 83h
+VolEnv_1E:	db    0,   2,   4, 81h
+VolEnv_1F:	db  30h, 20h, 10h,   0,   0,   0,   0,   0,   8, 10h, 20h, 30h, 81h
+VolEnv_20:	db    0,   4,   4,   4,   4,   4,   4,   4,   4,   4,   4,   6,   6,   6,   8,   8
+          	db  0Ah, 83h
+VolEnv_21:	db    0,   2,   3,   4,   6,   7, 81h
+VolEnv_22:	db    2,   1,   0,   0,   0,   2,   4,   7, 81h
+VolEnv_23:	db  0Fh,   1,   5, 83h
+VolEnv_24:	db    8,   6,   2,   3,   4,   5,   6,   7,   8,   9, 0Ah, 0Bh, 0Ch, 0Dh, 0Eh, 0Fh
+          	db  10h, 83h
+VolEnv_25:	db    0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   1,   1,   1,   1,   1,   1
+          	db    1,   1,   1,   1,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   3,   3
+          	db    3,   3,   3,   3,   3,   3,   3,   3,   4,   4,   4,   4,   4,   4,   4,   4
+          	db    4,   4,   5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   6,   6,   6,   6
+          	db    6,   6,   6,   6,   6,   6,   7,   7,   7,   7,   7,   7,   7,   7,   7,   7
+          	db    8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   9,   9,   9,   9,   9,   9
+          	db    9,   9, 83h
+VolEnv_26:	db    0,   2,   2,   2,   3,   3,   3,   4,   4,   4,   5,   5, 83h
+VolEnv_27:	db	  0,   0,   0,   1,   1,   1,   2,   2,   2,   3,   3,   3,   4,   4,   4,   5
+          	db	  5,   5,   6,   6,   6,   7, 81h
+VolEnv_29:	db	  0,   0,   1,   1,   2,   2,   3,   3,   4,   4,   5,   5,   6,   6,   7,   7, 81h
+VolEnv_2A:	db	  0,   0,   2,   3,   4,   4,   5,   5,   5,   6, 81h
+VolEnv_2C:	db	  3,   3,   3,   2,   2,   2,   2,   1,   1,   1,   0,   0,   0,   0, 81h
+VolEnv_2B:	db	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   1,   1
+          	db	  1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   2,   2,   2,   2
+          	db	  2,   2,   2,   2,   3,   3,   3,   3,   3,   3,   3,   3,   4, 81h
+VolEnv_2D:	db	  0,   0,   0,   0,   0,   0,   1,   1,   1,   1,   1,   2,   2,   2,   2,   2
+          	db	  3,   3,   3,   4,   4,   4,   5,   5,   5,   6,   7, 81h
+VolEnv_2E:	db	  0,   0,   0,   0,   0,   1,   1,   1,   1,   1,   2,   2,   2,   2,   2,   2
+          	db	  3,   3,   3,   3,   3,   4,   4,   4,   4,   4,   5,   5,   5,   5,   5,   6
+          	db	  6,   6,   6,   6,   7,   7,   7, 81h
+VolEnv_2F:	db	  0,   1,   2,   3,   4,   5,   6,   7,   8,   9, 0Ah, 0Bh, 0Ch, 0Dh, 0Eh, 0Fh, 83h
+VolEnv_30:	db	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   1,   1,   1,   1,   1,   1
+          	db	  1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1
+          	db	  1,   1,   1,   1,   1,   1,   1,   1,   2,   2,   2,   2,   2,   2,   2,   2
+          	db	  2,   2,   3,   3,   3,   3,   3,   3,   3,   3,   3,   3,   4, 81h
+VolEnv_31:	db	  4,   4,   4,   3,   3,   3,   2,   2,   2,   1,   1,   1,   1,   1,   1,   1
+          	db	  2,   2,   2,   2,   2,   3,   3,   3,   3,   3,   4, 81h
+VolEnv_32:	db	  4,   4,   3,   3,   2,   2,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1
+          	db	  1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   2,   2,   2,   2,   2,   2
+          	db	  2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   3,   3
+          	db	  3,   3,   3,   3,   3,   3,   3,   3,   3,   3,   3,   3,   3,   3,   3,   3
+          	db	  3,   3,   4,   4,   4,   4,   4,   4,   4,   4,   4,   4,   4,   4,   4,   4
+          	db	  4,   4,   4,   4,   4,   4,   5,   5,   5,   5,   5,   5,   5,   5,   5,   5
+          	db	  5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   6,   6,   6,   6,   6,   6
+          	db	  6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   7, 81h
+VolEnv_33:	db	0Eh, 0Dh, 0Ch, 0Bh, 0Ah,   9,   8,   7,   6,   5,   4,   3,   2,   1,   0, 81h
 
 ; ---------------------------------------------------------------------------
 ; ===========================================================================
@@ -4744,24 +4793,4 @@ Snd_2PMenu:			include	"Sound/Music/Competition Menu.asm"
 Snd_Drown:			include	"Sound/Music/Countdown.asm"
 
 	finishBank
-
-	shared Snd_FBZ1,Snd_FBZ2,Snd_MHZ1,Snd_MHZ2,Snd_SOZ1,Snd_SOZ2,Snd_LRZ1
-	shared Snd_LRZ2,Snd_SSZ,Snd_DEZ1,Snd_DEZ2,Snd_Minib_SK,Snd_Boss,Snd_DDZ
-	shared Snd_PachBonus,Snd_SpecialS,Snd_SlotBonus,Snd_Knux,Snd_Title,Snd_1UP
-	shared Snd_Emerald,Snd_AIZ1,Snd_AIZ2,Snd_HCZ1,Snd_HCZ2,Snd_MGZ1,Snd_MGZ2
-	shared Snd_CNZ2,Snd_CNZ1,Snd_ICZ2,Snd_ICZ1,Snd_LBZ2,Snd_LBZ1,Snd_SKCredits
-	shared Snd_GameOver,Snd_Continue,Snd_Results,Snd_Invic,Snd_Menu,Snd_FinalBoss
-	shared Snd_PresSega,Snd_GumBonus,Snd_ALZ,Snd_BPZ,Snd_DPZ,Snd_CGZ,Snd_EMZ
-	shared Snd_S3Credits,Snd_2PMenu,Snd_Drown
-	shared                            Sound_33,Sound_34,Sound_35,Sound_36,Sound_37,Sound_38,Sound_39,Sound_3A,Sound_3B,Sound_3C,Sound_3D,Sound_3E,Sound_3F
-	shared Sound_40,Sound_41,Sound_42,Sound_43,Sound_44,Sound_45,Sound_46,Sound_47,Sound_48,Sound_49,Sound_4A,Sound_4B,Sound_4C,Sound_4D,Sound_4E,Sound_4F
-	shared Sound_50,Sound_51,Sound_52,Sound_53,Sound_54,Sound_55,Sound_56,Sound_57,Sound_58,Sound_59,Sound_5A,Sound_5B,Sound_5C,Sound_5D,Sound_5E,Sound_5F
-	shared Sound_60,Sound_61,Sound_62,Sound_63,Sound_64,Sound_65,Sound_66,Sound_67,Sound_68,Sound_69,Sound_6A,Sound_6B,Sound_6C,Sound_6D,Sound_6E,Sound_6F
-	shared Sound_70,Sound_71,Sound_72,Sound_73,Sound_74,Sound_75,Sound_76,Sound_77,Sound_78,Sound_79,Sound_7A,Sound_7B,Sound_7C,Sound_7D,Sound_7E,Sound_7F
-	shared Sound_80,Sound_81,Sound_82,Sound_83,Sound_84,Sound_85,Sound_86,Sound_87,Sound_88,Sound_89,Sound_8A,Sound_8B,Sound_8C,Sound_8D,Sound_8E,Sound_8F
-	shared Sound_90,Sound_91,Sound_92,Sound_93,Sound_94,Sound_95,Sound_96,Sound_97,Sound_98,Sound_99,Sound_9A,Sound_9B,Sound_9C,Sound_9D,Sound_9E,Sound_9F
-	shared Sound_A0,Sound_A1,Sound_A2,Sound_A3,Sound_A4,Sound_A5,Sound_A6,Sound_A7,Sound_A8,Sound_A9,Sound_AA,Sound_AB,Sound_AC,Sound_AD,Sound_AE,Sound_AF
-	shared Sound_B0,Sound_B1,Sound_B2,Sound_B3,Sound_B4,Sound_B5,Sound_B6,Sound_B7,Sound_B8,Sound_B9,Sound_BA,Sound_BB,Sound_BC,Sound_BD,Sound_BE,Sound_BF
-	shared Sound_C0,Sound_C1,Sound_C2,Sound_C3,Sound_C4,Sound_C5,Sound_C6,Sound_C7,Sound_C8,Sound_C9,Sound_CA,Sound_CB,Sound_CC,Sound_CD,Sound_CE,Sound_CF
-	shared Sound_D0,Sound_D1,Sound_D2,Sound_D3,Sound_D4,Sound_D5,Sound_D6,Sound_D7,Sound_D8,Sound_D9,Sound_DA,Sound_DB
 

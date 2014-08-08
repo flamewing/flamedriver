@@ -27,7 +27,7 @@ nMaxPSG2			EQU nB6
 	endif
 
 ; ---------------------------------------------------------------------------------------------
-; PSG flutter equates
+; PSG volume envelope equates
 	if SonicDriverVer==1
 		enum fTone_01=$01,fTone_02,fTone_03,fTone_04,fTone_05,fTone_06
 		enum fTone_07=fTone_06+1,fTone_08,fTone_09
@@ -44,7 +44,7 @@ nMaxPSG2			EQU nB6
 		enum sTone_1F=sTone_1E+1,sTone_20,sTone_21,sTone_22,sTone_23,sTone_24
 		enum sTone_25=sTone_24+1,sTone_26,sTone_27
 		; For conversions:
-		if SonicDriverVer==5
+		if SonicDriverVer>=5
 			enum fTone_01=$28,fTone_02,fTone_03,fTone_04,fTone_05,fTone_06
 			enum fTone_07=fTone_06+1,fTone_08,fTone_09,fTone_0A,fTone_0B,fTone_0C
 			enum fTone_0D=fTone_0C+1
@@ -365,7 +365,7 @@ smpsFade macro val
 
 ; E5xx - Set channel tempo divider to xx
 smpsChanTempoDiv macro val
-	if SonicDriverVer==5
+	if SonicDriverVer>=5
 		; New flag unique to Flamewing's modified S&K driver
 		dc.b	$FF,$08,val
 	elseif SonicDriverVer==3
@@ -385,7 +385,7 @@ smpsNoAttack	EQU $E7
 
 ; E8xx - Set note fill to xx
 smpsNoteFill macro val
-	if (SonicDriverVer==5)&&(SourceDriver<3)
+	if (SonicDriverVer>=5)&&(SourceDriver<3)
 		; Unique to Flamewing's modified driver
 		dc.b	$FF,$0A,val
 	else
@@ -566,11 +566,11 @@ smpsStopFM macro
 smpsSpindashRev macro
 	dc.b	$E9
 	endm
-	
+
 smpsPlayDACSample macro sample
 	dc.b	$EA,sample
 	endm
-	
+
 smpsConditionalJump macro index,loc
 	dc.b	$EB
 	dc.b	index
@@ -629,18 +629,30 @@ smpsSSGEG macro op1,op2,op3,op4
 	dc.b	$FF,$05,op1,op3,op2,op4
 	endm
 
-smpsFMFlutter macro tone,mask
+smpsFMVolEnv macro tone,mask
 	dc.b	$FF,$06,tone,mask
+	endm
+
+smpsFMFlutter macro tone,mask
+	smpsFMVolEnv	tone,mask
 	endm
 
 smpsResetSpindashRev macro val
 	dc.b	$FF,$07
 	endm
 
-	; Flag ported from Ristar.
-	if SonicDriverVer==5
+	; Flags ported from other drivers.
+	if SonicDriverVer>=5
 smpsChanFMCommand macro reg,val
 	dc.b	$FF,$09,reg,val
+	endm
+
+smpsPitchSlide macro enable
+	dc.b	$FF,$0B,enable
+	endm
+
+smpsSetLFO macro enable,amsfms
+	dc.b	$FF,$0C,enable,amsfms
 	endm
 	endif
 
