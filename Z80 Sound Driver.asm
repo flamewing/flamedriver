@@ -1948,6 +1948,10 @@ zPauseUnpause:
 		jp	nz, zMusicFade					; Stop all music if not
 		ld	ix, zSongFM1					; Start with FM1 track
 		ld	b, (zSongPSG1-zSongFM1)/zTrackSz	; Number of FM tracks
+		ld	a, (zDACEnable)					; Get DAC enable
+		or	a								; Is it supposed to be on?
+		jr	z, .fm_loop						; Branch if not
+		ld	ix, zSongDAC					; Start with DAC instead
 
 .fm_loop:
 		ld	a, (zHaltFlag)					; Get halt flag
@@ -1982,6 +1986,7 @@ zPauseUnpause:
 		ld	de, zTrackSz					; Spacing between tracks
 		add	ix, de							; Go to next track
 		djnz	.psg_loop					; Loop for all tracks
+
 		ret
 ; End of function zPauseUnpause
 
@@ -2177,7 +2182,6 @@ zFMClearSSGEGOps:
 ; Pauses all audio.
 ;loc_98D
 zPauseAudio:
-		call	zPSGSilenceAll				; Redundant, as function falls-through to it anyway
 		push	bc							; Save bc
 		push	af							; Save af
 		ld	b, (zSongFM4-zSongFM1)/zTrackSz	; FM1/FM2/FM3
@@ -2191,7 +2195,7 @@ zPauseAudio:
 		inc	a								; Advance to next channel
 		djnz	.loop1						; Loop for all channels
 
-		ld	b, (zSongPSG1-zSongFM4)/zTrackSz	; FM4 and FM5, and FM6 for driver >= 5
+		ld	b, (zSongPSG1-zSongFM4)/zTrackSz	; FM4/FM5/FM6
 		ld	a, 0B4h							; Command to select AMS/FMS/panning register
 
 .loop2:
@@ -2478,7 +2482,7 @@ zUpdateDACTrack_cont:
 .dont_play:
 		pop	de								; Restore de
 		ld	hl, zSongFM6					; Get pointer to FM6 track
-		res	2, (hl)							; Clear track as being overridden (?)
+		res	2, (hl)							; Clear track as being overridden
 
 zUpdateDACTrack_GetDuration:
 		ld	a, (de)							; Get note duration
