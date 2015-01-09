@@ -568,7 +568,7 @@ smpsSpindashRev macro
 	endm
 
 smpsPlayDACSample macro sample
-	dc.b	$EA,sample
+	dc.b	$EA,(sample&$7F)
 	endm
 
 smpsConditionalJump macro index,loc
