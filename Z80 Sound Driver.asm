@@ -1549,7 +1549,7 @@ zPlayMusic:
 		ld	a, (hl)							; Get playback control byte for song
 		and	7Fh								; Strip the 'playing' bit
 		set	2, a							; Set bit 2 (SFX overriding)
-		ld	(hl), a							; But then overwrite the whole thing...
+		ld	(hl), a							; And save it all
 		add	hl, de							; Advance to next track
 		djnz	.loop						; Loop for all tracks
 
