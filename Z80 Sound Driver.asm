@@ -3976,22 +3976,57 @@ DAC_Banks:
 ; MUSIC BANKS
 ; ===========================================================================
 z80_MusicBanks:
-		db  zmake68kBank(Snd_AIZ1),zmake68kBank(Snd_AIZ2),zmake68kBank(Snd_HCZ1),zmake68kBank(Snd_HCZ2)
-		db  zmake68kBank(Snd_MGZ1),zmake68kBank(Snd_MGZ2),zmake68kBank(Snd_CNZ1),zmake68kBank(Snd_CNZ2)
-		db  zmake68kBank(Snd_FBZ1),zmake68kBank(Snd_FBZ2),zmake68kBank(Snd_ICZ1),zmake68kBank(Snd_ICZ2)
-		db  zmake68kBank(Snd_LBZ1),zmake68kBank(Snd_LBZ2),zmake68kBank(Snd_MHZ1),zmake68kBank(Snd_MHZ2)
-
-		db  zmake68kBank(Snd_SOZ1),zmake68kBank(Snd_SOZ2),zmake68kBank(Snd_LRZ1),zmake68kBank(Snd_LRZ2)
-		db  zmake68kBank(Snd_SSZ),zmake68kBank(Snd_DEZ1),zmake68kBank(Snd_DEZ2),zmake68kBank(Snd_Minib_SK)
-		db  zmake68kBank(Snd_Boss),zmake68kBank(Snd_DDZ),zmake68kBank(Snd_PachBonus),zmake68kBank(Snd_SpecialS)
-		db  zmake68kBank(Snd_SlotBonus),zmake68kBank(Snd_GumBonus),zmake68kBank(Snd_Knux),zmake68kBank(Snd_ALZ)
-
-		db  zmake68kBank(Snd_BPZ),zmake68kBank(Snd_DPZ),zmake68kBank(Snd_CGZ),zmake68kBank(Snd_EMZ)
-		db  zmake68kBank(Snd_Title),zmake68kBank(Snd_S3Credits),zmake68kBank(Snd_GameOver),zmake68kBank(Snd_Continue)
-		db  zmake68kBank(Snd_Results),zmake68kBank(Snd_1UP),zmake68kBank(Snd_Emerald),zmake68kBank(Snd_Invic)
-		db  zmake68kBank(Snd_2PMenu),zmake68kBank(Snd_Minib_SK),zmake68kBank(Snd_Menu),zmake68kBank(Snd_FinalBoss)
-
-		db  zmake68kBank(Snd_Drown),zmake68kBank(Snd_PresSega),zmake68kBank(Snd_SKCredits)
+	db zmake68kBank(Mus_AIZ1)
+	db zmake68kBank(Mus_AIZ2)
+	db zmake68kBank(Mus_HCZ1)
+	db zmake68kBank(Mus_HCZ2)
+	db zmake68kBank(Mus_MGZ1)
+	db zmake68kBank(Mus_MGZ2)
+	db zmake68kBank(Mus_CNZ1)
+	db zmake68kBank(Mus_CNZ2)
+	db zmake68kBank(Mus_FBZ1)
+	db zmake68kBank(Mus_FBZ2)
+	db zmake68kBank(Mus_ICZ1)
+	db zmake68kBank(Mus_ICZ2)
+	db zmake68kBank(Mus_LBZ1)
+	db zmake68kBank(Mus_LBZ2)
+	db zmake68kBank(Mus_MHZ1)
+	db zmake68kBank(Mus_MHZ2)
+	db zmake68kBank(Mus_SOZ1)
+	db zmake68kBank(Mus_SOZ2)
+	db zmake68kBank(Mus_LRZ1)
+	db zmake68kBank(Mus_LRZ2)
+	db zmake68kBank(Mus_SSZ)
+	db zmake68kBank(Mus_DEZ1)
+	db zmake68kBank(Mus_DEZ2)
+	db zmake68kBank(Mus_Minib_SK)
+	db zmake68kBank(Mus_Boss)
+	db zmake68kBank(Mus_DDZ)
+	db zmake68kBank(Mus_PachBonus)
+	db zmake68kBank(Mus_SpecialS)
+	db zmake68kBank(Mus_SlotBonus)
+	db zmake68kBank(Mus_GumBonus)
+	db zmake68kBank(Mus_Knux)
+	db zmake68kBank(Mus_ALZ)
+	db zmake68kBank(Mus_BPZ)
+	db zmake68kBank(Mus_DPZ)
+	db zmake68kBank(Mus_CGZ)
+	db zmake68kBank(Mus_EMZ)
+	db zmake68kBank(Mus_Title)
+	db zmake68kBank(Mus_S3Credits)
+	db zmake68kBank(Mus_GameOver)
+	db zmake68kBank(Mus_Continue)
+	db zmake68kBank(Mus_Results)
+	db zmake68kBank(Mus_1UP)
+	db zmake68kBank(Mus_Emerald)
+	db zmake68kBank(Mus_Invic)
+	db zmake68kBank(Mus_2PMenu)
+	db zmake68kBank(Mus_Minib_SK)
+	db zmake68kBank(Mus_Menu)
+	db zmake68kBank(Mus_FinalBoss)
+	db zmake68kBank(Mus_Drown)
+	db zmake68kBank(Mus_PresSega)
+	db zmake68kBank(Mus_SKCredits)
 ; ---------------------------------------------------------------------------
 
 	if $ > 1300h
@@ -4150,82 +4185,238 @@ VolEnv_33:	db	0Eh, 0Dh, 0Ch, 0Bh, 0Ah,   9,   8,   7,   6,   5,   4,   3,   2,  
 ; ===========================================================================
 
 z80_MusicPointers:
-		dw	zmake68kPtr(Snd_AIZ1),zmake68kPtr(Snd_AIZ2),zmake68kPtr(Snd_HCZ1),zmake68kPtr(Snd_HCZ2)
-		dw	zmake68kPtr(Snd_MGZ1),zmake68kPtr(Snd_MGZ2),zmake68kPtr(Snd_CNZ1),zmake68kPtr(Snd_CNZ2)
-		dw	zmake68kPtr(Snd_FBZ1),zmake68kPtr(Snd_FBZ2),zmake68kPtr(Snd_ICZ1),zmake68kPtr(Snd_ICZ2)
-		dw	zmake68kPtr(Snd_LBZ1),zmake68kPtr(Snd_LBZ2),zmake68kPtr(Snd_MHZ1),zmake68kPtr(Snd_MHZ2)
-
-		dw	zmake68kPtr(Snd_SOZ1),zmake68kPtr(Snd_SOZ2),zmake68kPtr(Snd_LRZ1),zmake68kPtr(Snd_LRZ2)
-		dw	zmake68kPtr(Snd_SSZ),zmake68kPtr(Snd_DEZ1),zmake68kPtr(Snd_DEZ2),zmake68kPtr(Snd_Minib_SK)
-		dw	zmake68kPtr(Snd_Boss),zmake68kPtr(Snd_DDZ),zmake68kPtr(Snd_PachBonus),zmake68kPtr(Snd_SpecialS)
-		dw	zmake68kPtr(Snd_SlotBonus),zmake68kPtr(Snd_GumBonus),zmake68kPtr(Snd_Knux),zmake68kPtr(Snd_ALZ)
-
-		dw	zmake68kPtr(Snd_BPZ),zmake68kPtr(Snd_DPZ),zmake68kPtr(Snd_CGZ),zmake68kPtr(Snd_EMZ)
-		dw	zmake68kPtr(Snd_Title),zmake68kPtr(Snd_S3Credits),zmake68kPtr(Snd_GameOver),zmake68kPtr(Snd_Continue)
-		dw	zmake68kPtr(Snd_Results),zmake68kPtr(Snd_1UP),zmake68kPtr(Snd_Emerald),zmake68kPtr(Snd_Invic)
-		dw	zmake68kPtr(Snd_2PMenu),zmake68kPtr(Snd_Minib_SK),zmake68kPtr(Snd_Menu),zmake68kPtr(Snd_FinalBoss)
-
-		dw	zmake68kPtr(Snd_Drown),zmake68kPtr(Snd_PresSega),zmake68kPtr(Snd_SKCredits)
+MusPtr_AIZ1:		dw zmake68kPtr(Mus_AIZ1)
+MusPtr_AIZ2:		dw zmake68kPtr(Mus_AIZ2)
+MusPtr_HCZ1:		dw zmake68kPtr(Mus_HCZ1)
+MusPtr_HCZ2:		dw zmake68kPtr(Mus_HCZ2)
+MusPtr_MGZ1:		dw zmake68kPtr(Mus_MGZ1)
+MusPtr_MGZ2:		dw zmake68kPtr(Mus_MGZ2)
+MusPtr_CNZ1:		dw zmake68kPtr(Mus_CNZ1)
+MusPtr_CNZ2:		dw zmake68kPtr(Mus_CNZ2)
+MusPtr_FBZ1:		dw zmake68kPtr(Mus_FBZ1)
+MusPtr_FBZ2:		dw zmake68kPtr(Mus_FBZ2)
+MusPtr_ICZ1:		dw zmake68kPtr(Mus_ICZ1)
+MusPtr_ICZ2:		dw zmake68kPtr(Mus_ICZ2)
+MusPtr_LBZ1:		dw zmake68kPtr(Mus_LBZ1)
+MusPtr_LBZ2:		dw zmake68kPtr(Mus_LBZ2)
+MusPtr_MHZ1:		dw zmake68kPtr(Mus_MHZ1)
+MusPtr_MHZ2:		dw zmake68kPtr(Mus_MHZ2)
+MusPtr_SOZ1:		dw zmake68kPtr(Mus_SOZ1)
+MusPtr_SOZ2:		dw zmake68kPtr(Mus_SOZ2)
+MusPtr_LRZ1:		dw zmake68kPtr(Mus_LRZ1)
+MusPtr_LRZ2:		dw zmake68kPtr(Mus_LRZ2)
+MusPtr_SSZ:			dw zmake68kPtr(Mus_SSZ)
+MusPtr_DEZ1:		dw zmake68kPtr(Mus_DEZ1)
+MusPtr_DEZ2:		dw zmake68kPtr(Mus_DEZ2)
+MusPtr_Minib_SK:	dw zmake68kPtr(Mus_Minib_SK)
+MusPtr_Boss:		dw zmake68kPtr(Mus_Boss)
+MusPtr_DDZ:			dw zmake68kPtr(Mus_DDZ)
+MusPtr_PachBonus:	dw zmake68kPtr(Mus_PachBonus)
+MusPtr_SpecialS:	dw zmake68kPtr(Mus_SpecialS)
+MusPtr_SlotBonus:	dw zmake68kPtr(Mus_SlotBonus)
+MusPtr_GumBonus:	dw zmake68kPtr(Mus_GumBonus)
+MusPtr_Knux:		dw zmake68kPtr(Mus_Knux)
+MusPtr_ALZ:			dw zmake68kPtr(Mus_ALZ)
+MusPtr_BPZ:			dw zmake68kPtr(Mus_BPZ)
+MusPtr_DPZ:			dw zmake68kPtr(Mus_DPZ)
+MusPtr_CGZ:			dw zmake68kPtr(Mus_CGZ)
+MusPtr_EMZ:			dw zmake68kPtr(Mus_EMZ)
+MusPtr_Title:		dw zmake68kPtr(Mus_Title)
+MusPtr_S3Credits:	dw zmake68kPtr(Mus_S3Credits)
+MusPtr_GameOver:	dw zmake68kPtr(Mus_GameOver)
+MusPtr_Continue:	dw zmake68kPtr(Mus_Continue)
+MusPtr_Results:		dw zmake68kPtr(Mus_Results)
+MusPtr_1UP:			dw zmake68kPtr(Mus_1UP)
+MusPtr_Emerald:		dw zmake68kPtr(Mus_Emerald)
+MusPtr_Invic:		dw zmake68kPtr(Mus_Invic)
+MusPtr_2PMenu:		dw zmake68kPtr(Mus_2PMenu)
+MusPtr_Minib_SK:	dw zmake68kPtr(Mus_Minib_SK)
+MusPtr_Menu:		dw zmake68kPtr(Mus_Menu)
+MusPtr_FinalBoss:	dw zmake68kPtr(Mus_FinalBoss)
+MusPtr_Drown:		dw zmake68kPtr(Mus_Drown)
+MusPtr_PresSega:	dw zmake68kPtr(Mus_PresSega)
+MusPtr_SKCredits:	dw zmake68kPtr(Mus_SKCredits)
+zMusIDPtr__End
 ; ---------------------------------------------------------------------------
 ; ===========================================================================
 ; SFX Pointers
 ; ===========================================================================
 
 z80_SFXPointers:
-		dw	zmake68kPtr(Sound_33),zmake68kPtr(Sound_34),zmake68kPtr(Sound_35),zmake68kPtr(Sound_36)
-		dw	zmake68kPtr(Sound_37),zmake68kPtr(Sound_38),zmake68kPtr(Sound_39),zmake68kPtr(Sound_3A)
-		dw	zmake68kPtr(Sound_3B),zmake68kPtr(Sound_3C),zmake68kPtr(Sound_3D),zmake68kPtr(Sound_3E)
-		dw	zmake68kPtr(Sound_3F)
-
-		dw	zmake68kPtr(Sound_40),zmake68kPtr(Sound_41),zmake68kPtr(Sound_42),zmake68kPtr(Sound_43)
-		dw	zmake68kPtr(Sound_44),zmake68kPtr(Sound_45),zmake68kPtr(Sound_46),zmake68kPtr(Sound_47)
-		dw	zmake68kPtr(Sound_48),zmake68kPtr(Sound_49),zmake68kPtr(Sound_4A),zmake68kPtr(Sound_4B)
-		dw	zmake68kPtr(Sound_4C),zmake68kPtr(Sound_4D),zmake68kPtr(Sound_4E),zmake68kPtr(Sound_4F)
-
-		dw	zmake68kPtr(Sound_50),zmake68kPtr(Sound_51),zmake68kPtr(Sound_52),zmake68kPtr(Sound_53)
-		dw	zmake68kPtr(Sound_54),zmake68kPtr(Sound_55),zmake68kPtr(Sound_56),zmake68kPtr(Sound_57)
-		dw	zmake68kPtr(Sound_58),zmake68kPtr(Sound_59),zmake68kPtr(Sound_5A),zmake68kPtr(Sound_5B)
-		dw	zmake68kPtr(Sound_5C),zmake68kPtr(Sound_5D),zmake68kPtr(Sound_5E),zmake68kPtr(Sound_5F)
-
-		dw	zmake68kPtr(Sound_60),zmake68kPtr(Sound_61),zmake68kPtr(Sound_62),zmake68kPtr(Sound_63)
-		dw	zmake68kPtr(Sound_64),zmake68kPtr(Sound_65),zmake68kPtr(Sound_66),zmake68kPtr(Sound_67)
-		dw	zmake68kPtr(Sound_68),zmake68kPtr(Sound_69),zmake68kPtr(Sound_6A),zmake68kPtr(Sound_6B)
-		dw	zmake68kPtr(Sound_6C),zmake68kPtr(Sound_6D),zmake68kPtr(Sound_6E),zmake68kPtr(Sound_6F)
-
-		dw	zmake68kPtr(Sound_70),zmake68kPtr(Sound_71),zmake68kPtr(Sound_72),zmake68kPtr(Sound_73)
-		dw	zmake68kPtr(Sound_74),zmake68kPtr(Sound_75),zmake68kPtr(Sound_76),zmake68kPtr(Sound_77)
-		dw	zmake68kPtr(Sound_78),zmake68kPtr(Sound_79),zmake68kPtr(Sound_7A),zmake68kPtr(Sound_7B)
-		dw	zmake68kPtr(Sound_7C),zmake68kPtr(Sound_7D),zmake68kPtr(Sound_7E),zmake68kPtr(Sound_7F)
-
-		dw	zmake68kPtr(Sound_80),zmake68kPtr(Sound_81),zmake68kPtr(Sound_82),zmake68kPtr(Sound_83)
-		dw	zmake68kPtr(Sound_84),zmake68kPtr(Sound_85),zmake68kPtr(Sound_86),zmake68kPtr(Sound_87)
-		dw	zmake68kPtr(Sound_88),zmake68kPtr(Sound_89),zmake68kPtr(Sound_8A),zmake68kPtr(Sound_8B)
-		dw	zmake68kPtr(Sound_8C),zmake68kPtr(Sound_8D),zmake68kPtr(Sound_8E),zmake68kPtr(Sound_8F)
-
-		dw	zmake68kPtr(Sound_90),zmake68kPtr(Sound_91),zmake68kPtr(Sound_92),zmake68kPtr(Sound_93)
-		dw	zmake68kPtr(Sound_94),zmake68kPtr(Sound_95),zmake68kPtr(Sound_96),zmake68kPtr(Sound_97)
-		dw	zmake68kPtr(Sound_98),zmake68kPtr(Sound_99),zmake68kPtr(Sound_9A),zmake68kPtr(Sound_9B)
-		dw	zmake68kPtr(Sound_9C),zmake68kPtr(Sound_9D),zmake68kPtr(Sound_9E),zmake68kPtr(Sound_9F)
-
-		dw	zmake68kPtr(Sound_A0),zmake68kPtr(Sound_A1),zmake68kPtr(Sound_A2),zmake68kPtr(Sound_A3)
-		dw	zmake68kPtr(Sound_A4),zmake68kPtr(Sound_A5),zmake68kPtr(Sound_A6),zmake68kPtr(Sound_A7)
-		dw	zmake68kPtr(Sound_A8),zmake68kPtr(Sound_A9),zmake68kPtr(Sound_AA),zmake68kPtr(Sound_AB)
-		dw	zmake68kPtr(Sound_AC),zmake68kPtr(Sound_AD),zmake68kPtr(Sound_AE),zmake68kPtr(Sound_AF)
-
-		dw	zmake68kPtr(Sound_B0),zmake68kPtr(Sound_B1),zmake68kPtr(Sound_B2),zmake68kPtr(Sound_B3)
-		dw	zmake68kPtr(Sound_B4),zmake68kPtr(Sound_B5),zmake68kPtr(Sound_B6),zmake68kPtr(Sound_B7)
-		dw	zmake68kPtr(Sound_B8),zmake68kPtr(Sound_B9),zmake68kPtr(Sound_BA),zmake68kPtr(Sound_BB)
-		dw	zmake68kPtr(Sound_BC),zmake68kPtr(Sound_BD),zmake68kPtr(Sound_BE),zmake68kPtr(Sound_BF)
-
-		dw	zmake68kPtr(Sound_C0),zmake68kPtr(Sound_C1),zmake68kPtr(Sound_C2),zmake68kPtr(Sound_C3)
-		dw	zmake68kPtr(Sound_C4),zmake68kPtr(Sound_C5),zmake68kPtr(Sound_C6),zmake68kPtr(Sound_C7)
-		dw	zmake68kPtr(Sound_C8),zmake68kPtr(Sound_C9),zmake68kPtr(Sound_CA),zmake68kPtr(Sound_CB)
-		dw	zmake68kPtr(Sound_CC),zmake68kPtr(Sound_CD),zmake68kPtr(Sound_CE),zmake68kPtr(Sound_CF)
-
-		dw	zmake68kPtr(Sound_D0),zmake68kPtr(Sound_D1),zmake68kPtr(Sound_D2),zmake68kPtr(Sound_D3)
-		dw	zmake68kPtr(Sound_D4),zmake68kPtr(Sound_D5),zmake68kPtr(Sound_D6),zmake68kPtr(Sound_D7)
-		dw	zmake68kPtr(Sound_D8),zmake68kPtr(Sound_D9),zmake68kPtr(Sound_DA),zmake68kPtr(Sound_DB)
-		dw	zmake68kPtr(Sound_DB),zmake68kPtr(Sound_DB),zmake68kPtr(Sound_DB),zmake68kPtr(Sound_DB)
+Sound_33_Ptr:	dw zmake68kPtr(Sound_33)
+Sound_34_Ptr:	dw zmake68kPtr(Sound_34)
+Sound_35_Ptr:	dw zmake68kPtr(Sound_35)
+Sound_36_Ptr:	dw zmake68kPtr(Sound_36)
+Sound_37_Ptr:	dw zmake68kPtr(Sound_37)
+Sound_38_Ptr:	dw zmake68kPtr(Sound_38)
+Sound_39_Ptr:	dw zmake68kPtr(Sound_39)
+Sound_3A_Ptr:	dw zmake68kPtr(Sound_3A)
+Sound_3B_Ptr:	dw zmake68kPtr(Sound_3B)
+Sound_3C_Ptr:	dw zmake68kPtr(Sound_3C)
+Sound_3D_Ptr:	dw zmake68kPtr(Sound_3D)
+Sound_3E_Ptr:	dw zmake68kPtr(Sound_3E)
+Sound_3F_Ptr:	dw zmake68kPtr(Sound_3F)
+Sound_40_Ptr:	dw zmake68kPtr(Sound_40)
+Sound_41_Ptr:	dw zmake68kPtr(Sound_41)
+Sound_42_Ptr:	dw zmake68kPtr(Sound_42)
+Sound_43_Ptr:	dw zmake68kPtr(Sound_43)
+Sound_44_Ptr:	dw zmake68kPtr(Sound_44)
+Sound_45_Ptr:	dw zmake68kPtr(Sound_45)
+Sound_46_Ptr:	dw zmake68kPtr(Sound_46)
+Sound_47_Ptr:	dw zmake68kPtr(Sound_47)
+Sound_48_Ptr:	dw zmake68kPtr(Sound_48)
+Sound_49_Ptr:	dw zmake68kPtr(Sound_49)
+Sound_4A_Ptr:	dw zmake68kPtr(Sound_4A)
+Sound_4B_Ptr:	dw zmake68kPtr(Sound_4B)
+Sound_4C_Ptr:	dw zmake68kPtr(Sound_4C)
+Sound_4D_Ptr:	dw zmake68kPtr(Sound_4D)
+Sound_4E_Ptr:	dw zmake68kPtr(Sound_4E)
+Sound_4F_Ptr:	dw zmake68kPtr(Sound_4F)
+Sound_50_Ptr:	dw zmake68kPtr(Sound_50)
+Sound_51_Ptr:	dw zmake68kPtr(Sound_51)
+Sound_52_Ptr:	dw zmake68kPtr(Sound_52)
+Sound_53_Ptr:	dw zmake68kPtr(Sound_53)
+Sound_54_Ptr:	dw zmake68kPtr(Sound_54)
+Sound_55_Ptr:	dw zmake68kPtr(Sound_55)
+Sound_56_Ptr:	dw zmake68kPtr(Sound_56)
+Sound_57_Ptr:	dw zmake68kPtr(Sound_57)
+Sound_58_Ptr:	dw zmake68kPtr(Sound_58)
+Sound_59_Ptr:	dw zmake68kPtr(Sound_59)
+Sound_5A_Ptr:	dw zmake68kPtr(Sound_5A)
+Sound_5B_Ptr:	dw zmake68kPtr(Sound_5B)
+Sound_5C_Ptr:	dw zmake68kPtr(Sound_5C)
+Sound_5D_Ptr:	dw zmake68kPtr(Sound_5D)
+Sound_5E_Ptr:	dw zmake68kPtr(Sound_5E)
+Sound_5F_Ptr:	dw zmake68kPtr(Sound_5F)
+Sound_60_Ptr:	dw zmake68kPtr(Sound_60)
+Sound_61_Ptr:	dw zmake68kPtr(Sound_61)
+Sound_62_Ptr:	dw zmake68kPtr(Sound_62)
+Sound_63_Ptr:	dw zmake68kPtr(Sound_63)
+Sound_64_Ptr:	dw zmake68kPtr(Sound_64)
+Sound_65_Ptr:	dw zmake68kPtr(Sound_65)
+Sound_66_Ptr:	dw zmake68kPtr(Sound_66)
+Sound_67_Ptr:	dw zmake68kPtr(Sound_67)
+Sound_68_Ptr:	dw zmake68kPtr(Sound_68)
+Sound_69_Ptr:	dw zmake68kPtr(Sound_69)
+Sound_6A_Ptr:	dw zmake68kPtr(Sound_6A)
+Sound_6B_Ptr:	dw zmake68kPtr(Sound_6B)
+Sound_6C_Ptr:	dw zmake68kPtr(Sound_6C)
+Sound_6D_Ptr:	dw zmake68kPtr(Sound_6D)
+Sound_6E_Ptr:	dw zmake68kPtr(Sound_6E)
+Sound_6F_Ptr:	dw zmake68kPtr(Sound_6F)
+Sound_70_Ptr:	dw zmake68kPtr(Sound_70)
+Sound_71_Ptr:	dw zmake68kPtr(Sound_71)
+Sound_72_Ptr:	dw zmake68kPtr(Sound_72)
+Sound_73_Ptr:	dw zmake68kPtr(Sound_73)
+Sound_74_Ptr:	dw zmake68kPtr(Sound_74)
+Sound_75_Ptr:	dw zmake68kPtr(Sound_75)
+Sound_76_Ptr:	dw zmake68kPtr(Sound_76)
+Sound_77_Ptr:	dw zmake68kPtr(Sound_77)
+Sound_78_Ptr:	dw zmake68kPtr(Sound_78)
+Sound_79_Ptr:	dw zmake68kPtr(Sound_79)
+Sound_7A_Ptr:	dw zmake68kPtr(Sound_7A)
+Sound_7B_Ptr:	dw zmake68kPtr(Sound_7B)
+Sound_7C_Ptr:	dw zmake68kPtr(Sound_7C)
+Sound_7D_Ptr:	dw zmake68kPtr(Sound_7D)
+Sound_7E_Ptr:	dw zmake68kPtr(Sound_7E)
+Sound_7F_Ptr:	dw zmake68kPtr(Sound_7F)
+Sound_80_Ptr:	dw zmake68kPtr(Sound_80)
+Sound_81_Ptr:	dw zmake68kPtr(Sound_81)
+Sound_82_Ptr:	dw zmake68kPtr(Sound_82)
+Sound_83_Ptr:	dw zmake68kPtr(Sound_83)
+Sound_84_Ptr:	dw zmake68kPtr(Sound_84)
+Sound_85_Ptr:	dw zmake68kPtr(Sound_85)
+Sound_86_Ptr:	dw zmake68kPtr(Sound_86)
+Sound_87_Ptr:	dw zmake68kPtr(Sound_87)
+Sound_88_Ptr:	dw zmake68kPtr(Sound_88)
+Sound_89_Ptr:	dw zmake68kPtr(Sound_89)
+Sound_8A_Ptr:	dw zmake68kPtr(Sound_8A)
+Sound_8B_Ptr:	dw zmake68kPtr(Sound_8B)
+Sound_8C_Ptr:	dw zmake68kPtr(Sound_8C)
+Sound_8D_Ptr:	dw zmake68kPtr(Sound_8D)
+Sound_8E_Ptr:	dw zmake68kPtr(Sound_8E)
+Sound_8F_Ptr:	dw zmake68kPtr(Sound_8F)
+Sound_90_Ptr:	dw zmake68kPtr(Sound_90)
+Sound_91_Ptr:	dw zmake68kPtr(Sound_91)
+Sound_92_Ptr:	dw zmake68kPtr(Sound_92)
+Sound_93_Ptr:	dw zmake68kPtr(Sound_93)
+Sound_94_Ptr:	dw zmake68kPtr(Sound_94)
+Sound_95_Ptr:	dw zmake68kPtr(Sound_95)
+Sound_96_Ptr:	dw zmake68kPtr(Sound_96)
+Sound_97_Ptr:	dw zmake68kPtr(Sound_97)
+Sound_98_Ptr:	dw zmake68kPtr(Sound_98)
+Sound_99_Ptr:	dw zmake68kPtr(Sound_99)
+Sound_9A_Ptr:	dw zmake68kPtr(Sound_9A)
+Sound_9B_Ptr:	dw zmake68kPtr(Sound_9B)
+Sound_9C_Ptr:	dw zmake68kPtr(Sound_9C)
+Sound_9D_Ptr:	dw zmake68kPtr(Sound_9D)
+Sound_9E_Ptr:	dw zmake68kPtr(Sound_9E)
+Sound_9F_Ptr:	dw zmake68kPtr(Sound_9F)
+Sound_A0_Ptr:	dw zmake68kPtr(Sound_A0)
+Sound_A1_Ptr:	dw zmake68kPtr(Sound_A1)
+Sound_A2_Ptr:	dw zmake68kPtr(Sound_A2)
+Sound_A3_Ptr:	dw zmake68kPtr(Sound_A3)
+Sound_A4_Ptr:	dw zmake68kPtr(Sound_A4)
+Sound_A5_Ptr:	dw zmake68kPtr(Sound_A5)
+Sound_A6_Ptr:	dw zmake68kPtr(Sound_A6)
+Sound_A7_Ptr:	dw zmake68kPtr(Sound_A7)
+Sound_A8_Ptr:	dw zmake68kPtr(Sound_A8)
+Sound_A9_Ptr:	dw zmake68kPtr(Sound_A9)
+Sound_AA_Ptr:	dw zmake68kPtr(Sound_AA)
+Sound_AB_Ptr:	dw zmake68kPtr(Sound_AB)
+Sound_AC_Ptr:	dw zmake68kPtr(Sound_AC)
+Sound_AD_Ptr:	dw zmake68kPtr(Sound_AD)
+Sound_AE_Ptr:	dw zmake68kPtr(Sound_AE)
+Sound_AF_Ptr:	dw zmake68kPtr(Sound_AF)
+Sound_B0_Ptr:	dw zmake68kPtr(Sound_B0)
+Sound_B1_Ptr:	dw zmake68kPtr(Sound_B1)
+Sound_B2_Ptr:	dw zmake68kPtr(Sound_B2)
+Sound_B3_Ptr:	dw zmake68kPtr(Sound_B3)
+Sound_B4_Ptr:	dw zmake68kPtr(Sound_B4)
+Sound_B5_Ptr:	dw zmake68kPtr(Sound_B5)
+Sound_B6_Ptr:	dw zmake68kPtr(Sound_B6)
+Sound_B7_Ptr:	dw zmake68kPtr(Sound_B7)
+Sound_B8_Ptr:	dw zmake68kPtr(Sound_B8)
+Sound_B9_Ptr:	dw zmake68kPtr(Sound_B9)
+Sound_BA_Ptr:	dw zmake68kPtr(Sound_BA)
+Sound_BB_Ptr:	dw zmake68kPtr(Sound_BB)
+Sound_BC_Ptr:	dw zmake68kPtr(Sound_BC)
+Sound_BD_Ptr:	dw zmake68kPtr(Sound_BD)
+Sound_BE_Ptr:	dw zmake68kPtr(Sound_BE)
+Sound_BF_Ptr:	dw zmake68kPtr(Sound_BF)
+Sound_C0_Ptr:	dw zmake68kPtr(Sound_C0)
+Sound_C1_Ptr:	dw zmake68kPtr(Sound_C1)
+Sound_C2_Ptr:	dw zmake68kPtr(Sound_C2)
+Sound_C3_Ptr:	dw zmake68kPtr(Sound_C3)
+Sound_C4_Ptr:	dw zmake68kPtr(Sound_C4)
+Sound_C5_Ptr:	dw zmake68kPtr(Sound_C5)
+Sound_C6_Ptr:	dw zmake68kPtr(Sound_C6)
+Sound_C7_Ptr:	dw zmake68kPtr(Sound_C7)
+Sound_C8_Ptr:	dw zmake68kPtr(Sound_C8)
+Sound_C9_Ptr:	dw zmake68kPtr(Sound_C9)
+Sound_CA_Ptr:	dw zmake68kPtr(Sound_CA)
+Sound_CB_Ptr:	dw zmake68kPtr(Sound_CB)
+Sound_CC_Ptr:	dw zmake68kPtr(Sound_CC)
+Sound_CD_Ptr:	dw zmake68kPtr(Sound_CD)
+Sound_CE_Ptr:	dw zmake68kPtr(Sound_CE)
+Sound_CF_Ptr:	dw zmake68kPtr(Sound_CF)
+Sound_D0_Ptr:	dw zmake68kPtr(Sound_D0)
+Sound_D1_Ptr:	dw zmake68kPtr(Sound_D1)
+Sound_D2_Ptr:	dw zmake68kPtr(Sound_D2)
+Sound_D3_Ptr:	dw zmake68kPtr(Sound_D3)
+Sound_D4_Ptr:	dw zmake68kPtr(Sound_D4)
+Sound_D5_Ptr:	dw zmake68kPtr(Sound_D5)
+Sound_D6_Ptr:	dw zmake68kPtr(Sound_D6)
+Sound_D7_Ptr:	dw zmake68kPtr(Sound_D7)
+Sound_D8_Ptr:	dw zmake68kPtr(Sound_D8)
+Sound_D9_Ptr:	dw zmake68kPtr(Sound_D9)
+Sound_DA_Ptr:	dw zmake68kPtr(Sound_DA)
+Sound_DB_Ptr:	dw zmake68kPtr(Sound_DB)
+	dw zmake68kPtr(Sound_DB)
+	dw zmake68kPtr(Sound_DB)
+	dw zmake68kPtr(Sound_DB)
+	dw zmake68kPtr(Sound_DB)
+Sound_End_Ptr
 ; ---------------------------------------------------------------------------
 	if $ > z80_stack_top
 		fatal "Your Z80 tables won't fit before the z80 stack. It's \{$-z80_stack_top}h bytes past the start of the bottom of the stack, at \{z80_stack_top}h"
@@ -4500,7 +4691,30 @@ DAC_D9_Setup:			DAC_Setup $20,DAC_D8_D9_Data
 ; Playlist
 ; ===========================================================================
 LevelMusic_Playlist:
-		binclude "Sound/Music/Music playlist.bin"
+	dc.b $01,$02
+	dc.b $03,$04
+	dc.b $05,$06
+	dc.b $07,$08
+	dc.b $09,$0A
+	dc.b $0B,$0C
+	dc.b $0D,$0E
+	dc.b $0F,$10
+	dc.b $11,$12
+	dc.b $13,$14
+	dc.b $15,$15
+	dc.b $16,$17
+	dc.b $1A,$1A
+	dc.b $1C,$15
+	dc.b $20,$20
+	dc.b $21,$21
+	dc.b $22,$22
+	dc.b $23,$23
+	dc.b $24,$24
+	dc.b $1E,$1E
+	dc.b $1B,$1B
+	dc.b $1D,$1D
+	dc.b $19,$14
+	dc.b $17,$14
 ; ---------------------------------------------------------------------------
 ; ===========================================================================
 ; DAC Banks
@@ -4807,82 +5021,82 @@ Sound_DB:	include "Sound/SFX/DB.asm"
 ; ===========================================================================
 ; Music Bank 1
 ; ---------------------------------------------------------------------------
-Snd_Bank1_Start:	startBank
+Mus_Bank1_Start:	startBank
 z80_UniVoiceBank:	include "Sound/UniBank.asm"
-Snd_FBZ1:			include	"Sound/Music/FBZ1.asm"
-Snd_FBZ2:			include	"Sound/Music/FBZ2.asm"
-Snd_MHZ1:			include	"Sound/Music/MHZ1.asm"
-Snd_MHZ2:			include	"Sound/Music/MHZ2.asm"
-Snd_SOZ1:			include	"Sound/Music/SOZ1.asm"
-Snd_SOZ2:			include	"Sound/Music/SOZ2.asm"
-Snd_LRZ1:			include	"Sound/Music/LRZ1.asm"
-Snd_LRZ2:			include	"Sound/Music/LRZ2.asm"
-Snd_SSZ:			include	"Sound/Music/SSZ.asm"
-Snd_DEZ1:			include	"Sound/Music/DEZ1.asm"
-Snd_DEZ2:			include	"Sound/Music/DEZ2.asm"
-Snd_Minib_SK:		include	"Sound/Music/Miniboss.asm"
-Snd_Boss:			include	"Sound/Music/Zone Boss.asm"
-Snd_DDZ:			include	"Sound/Music/DDZ.asm"
-Snd_PachBonus:		include	"Sound/Music/Pachinko.asm"
-Snd_SpecialS:		include	"Sound/Music/Special Stage.asm"
-Snd_SlotBonus:		include	"Sound/Music/Slots.asm"
-Snd_Knux:			include	"Sound/Music/Knuckles.asm"
+Mus_FBZ1:			include	"Sound/Music/FBZ1.asm"
+Mus_FBZ2:			include	"Sound/Music/FBZ2.asm"
+Mus_MHZ1:			include	"Sound/Music/MHZ1.asm"
+Mus_MHZ2:			include	"Sound/Music/MHZ2.asm"
+Mus_SOZ1:			include	"Sound/Music/SOZ1.asm"
+Mus_SOZ2:			include	"Sound/Music/SOZ2.asm"
+Mus_LRZ1:			include	"Sound/Music/LRZ1.asm"
+Mus_LRZ2:			include	"Sound/Music/LRZ2.asm"
+Mus_SSZ:			include	"Sound/Music/SSZ.asm"
+Mus_DEZ1:			include	"Sound/Music/DEZ1.asm"
+Mus_DEZ2:			include	"Sound/Music/DEZ2.asm"
+Mus_Minib_SK:		include	"Sound/Music/Miniboss.asm"
+Mus_Boss:			include	"Sound/Music/Zone Boss.asm"
+Mus_DDZ:			include	"Sound/Music/DDZ.asm"
+Mus_PachBonus:		include	"Sound/Music/Pachinko.asm"
+Mus_SpecialS:		include	"Sound/Music/Special Stage.asm"
+Mus_SlotBonus:		include	"Sound/Music/Slots.asm"
+Mus_Knux:			include	"Sound/Music/Knuckles.asm"
 
 	finishBank
 
 ; ---------------------------------------------------------------------------
 ; Music Bank 2
 ; ---------------------------------------------------------------------------
-Snd_Bank2_Start:	startBank
+Mus_Bank2_Start:	startBank
 					include "Sound/UniBank.asm"
-Snd_Title:			include	"Sound/Music/Title.asm"
-Snd_1UP:			include	"Sound/Music/1UP.asm"
-Snd_Emerald:		include	"Sound/Music/Chaos Emerald.asm"
-Snd_AIZ1:			include	"Sound/Music/AIZ1.asm"
-Snd_AIZ2:			include	"Sound/Music/AIZ2.asm"
-Snd_HCZ1:			include	"Sound/Music/HCZ1.asm"
-Snd_HCZ2:			include	"Sound/Music/HCZ2.asm"
-Snd_MGZ1:			include	"Sound/Music/MGZ1.asm"
-Snd_MGZ2:			include	"Sound/Music/MGZ2.asm"
-Snd_CNZ2:			include	"Sound/Music/CNZ2.asm"
-Snd_CNZ1:			include	"Sound/Music/CNZ1.asm"
+Mus_Title:			include	"Sound/Music/Title.asm"
+Mus_1UP:			include	"Sound/Music/1UP.asm"
+Mus_Emerald:		include	"Sound/Music/Chaos Emerald.asm"
+Mus_AIZ1:			include	"Sound/Music/AIZ1.asm"
+Mus_AIZ2:			include	"Sound/Music/AIZ2.asm"
+Mus_HCZ1:			include	"Sound/Music/HCZ1.asm"
+Mus_HCZ2:			include	"Sound/Music/HCZ2.asm"
+Mus_MGZ1:			include	"Sound/Music/MGZ1.asm"
+Mus_MGZ2:			include	"Sound/Music/MGZ2.asm"
+Mus_CNZ2:			include	"Sound/Music/CNZ2.asm"
+Mus_CNZ1:			include	"Sound/Music/CNZ1.asm"
 
 	finishBank
 
 ; ---------------------------------------------------------------------------
 ; Music Bank 3
 ; ---------------------------------------------------------------------------
-Snd_Bank3_Start:	startBank
+Mus_Bank3_Start:	startBank
 					include "Sound/UniBank.asm"
-Snd_ICZ2:			include	"Sound/Music/ICZ2.asm"
-Snd_ICZ1:			include	"Sound/Music/ICZ1.asm"
-Snd_LBZ2:			include	"Sound/Music/LBZ2.asm"
-Snd_LBZ1:			include	"Sound/Music/LBZ1.asm"
-Snd_SKCredits:		include	"Sound/Music/Credits.asm"
-Snd_GameOver:		include	"Sound/Music/Game Over.asm"
-Snd_Continue:		include	"Sound/Music/Continue.asm"
-Snd_Results:		include	"Sound/Music/Level Outro.asm"
-Snd_Invic:			include	"Sound/Music/Invincible.asm"
-Snd_Menu:			include	"Sound/Music/Menu.asm"
-Snd_FinalBoss:		include	"Sound/Music/Final Boss.asm"
-Snd_PresSega:		include	"Sound/Music/Game Complete.asm"
+Mus_ICZ2:			include	"Sound/Music/ICZ2.asm"
+Mus_ICZ1:			include	"Sound/Music/ICZ1.asm"
+Mus_LBZ2:			include	"Sound/Music/LBZ2.asm"
+Mus_LBZ1:			include	"Sound/Music/LBZ1.asm"
+Mus_SKCredits:		include	"Sound/Music/Credits.asm"
+Mus_GameOver:		include	"Sound/Music/Game Over.asm"
+Mus_Continue:		include	"Sound/Music/Continue.asm"
+Mus_Results:		include	"Sound/Music/Level Outro.asm"
+Mus_Invic:			include	"Sound/Music/Invincible.asm"
+Mus_Menu:			include	"Sound/Music/Menu.asm"
+Mus_FinalBoss:		include	"Sound/Music/Final Boss.asm"
+Mus_PresSega:		include	"Sound/Music/Game Complete.asm"
 
 	finishBank
 
 ; ---------------------------------------------------------------------------
 ; Music Bank 4
 ; ---------------------------------------------------------------------------
-Snd_Bank4_Start:	startBank
+Mus_Bank4_Start:	startBank
 					include "Sound/UniBank.asm"
-Snd_GumBonus:		include	"Sound/Music/Gum Ball Machine.asm"
-Snd_ALZ:			include	"Sound/Music/Azure Lake.asm"
-Snd_BPZ:			include	"Sound/Music/Balloon Park.asm"
-Snd_DPZ:			include	"Sound/Music/Desert Palace.asm"
-Snd_CGZ:			include	"Sound/Music/Chrome Gadget.asm"
-Snd_EMZ:			include	"Sound/Music/Endless Mine.asm"
-Snd_S3Credits:		include	"Sound/Music/Sonic 3 Credits.asm"
-Snd_2PMenu:			include	"Sound/Music/Competition Menu.asm"	
-Snd_Drown:			include	"Sound/Music/Countdown.asm"
+Mus_GumBonus:		include	"Sound/Music/Gum Ball Machine.asm"
+Mus_ALZ:			include	"Sound/Music/Azure Lake.asm"
+Mus_BPZ:			include	"Sound/Music/Balloon Park.asm"
+Mus_DPZ:			include	"Sound/Music/Desert Palace.asm"
+Mus_CGZ:			include	"Sound/Music/Chrome Gadget.asm"
+Mus_EMZ:			include	"Sound/Music/Endless Mine.asm"
+Mus_S3Credits:		include	"Sound/Music/Sonic 3 Credits.asm"
+Mus_2PMenu:			include	"Sound/Music/Competition Menu.asm"	
+Mus_Drown:			include	"Sound/Music/Countdown.asm"
 
 	finishBank
 
