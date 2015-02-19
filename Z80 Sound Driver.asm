@@ -65,7 +65,7 @@ zTrack STRUCT DOTS
 	FreqHigh:			ds.b 1	; S&K: 0Eh		; For FM/PSG channels
 	VoiceSongID:		ds.b 1	; S&K: 0Fh		; For using voices from a different song
 	FreqDisplacement:	ds.b 1	; S&K: 10h
-						;ds.b 6	; S&K: 11h-17h	; Unused
+						;ds.b 6	; S&K: 11h-16h	; Unused
 	VolEnv:				ds.b 1	; S&K: 17h		; Used for dynamic volume adjustments
 	; ---------------------------------
 	; Alternate names for same offsets:
@@ -121,7 +121,6 @@ zDACEnable:			ds.b 1
 zDACEnableSave:		ds.b 1
 zSpecFM3Freqs:		ds.b 8
 zSpecFM3FreqsSFX:	ds.b 8
-; Note: zQueueVariables must be at an even spot.
 zQueueVariables:
 zPalFlag:			ds.b 1
 zPalDblUpdCounter:	ds.b 1
@@ -204,6 +203,9 @@ zSaveSongPSG1:	zTrack
 zSaveSongPSG2:	zTrack
 zSaveSongPSG3:	zTrack
 zTracksSaveEnd:
+	if (zQueueVariables&1)<>0
+		fatal "zQueueVariables must be at an even address!"
+	endif
 	if * > $2000	; Don't declare more space than the RAM can contain!
 		fatal "The RAM variable declarations are too large by $\{$} bytes."
 	endif
