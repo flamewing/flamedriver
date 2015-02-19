@@ -3147,18 +3147,17 @@ cfJumpTo:
 ; =============== S U B	R O U T	I N E =======================================
 ; Starts or stops pitch sliding. Ported from Battletoads driver.
 ;
-; Has a single parameter byte: if 1 enables pitch slide, disabling it if not.
+; Has a single parameter byte: if nonzero enables pitch slide, disables otherwise.
 cfPitchSlide:
-		cp	1								; Is parameter equal to 1?
-		jr	nz, .disable_slide				; Branch if not
+		or	a								; Is parameter nonzero?
+		jr	z, .disable_slide				; Branch if not
 		set	5, (ix+zTrack.PlaybackControl)	; Enable pitch slide
 		ret
 ; ---------------------------------------------------------------------------
 .disable_slide:
 		res	1, (ix+zTrack.PlaybackControl)	; Clear 'don't attack' flag
 		res	5, (ix+zTrack.PlaybackControl)	; Stop pitch slide
-		xor	a								; a = 0
-		ld	(ix+zTrack.FreqDisplacement), a	; Clear frequency displacement
+		ld	(ix+zTrack.FreqDisplacement), a	; Clear frequency displacement (we already know a is zero)
 		ret
 
 ; =============== S U B	R O U T	I N E =======================================
