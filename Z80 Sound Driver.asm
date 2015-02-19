@@ -64,7 +64,7 @@ zTrack STRUCT DOTS
 	; ---------------------------------
 	FreqHigh:			ds.b 1	; S&K: 0Eh		; For FM/PSG channels
 	VoiceSongID:		ds.b 1	; S&K: 0Fh		; For using voices from a different song
-	FreqDisplacement:	ds.b 1	; S&K: 10h
+	FreqDisplacement:	ds.b 1	; S&K: 10h/11h	; In S&K, some places used 11h instead of 10h
 						;ds.b 6	; S&K: 11h-16h	; Unused
 	VolEnv:				ds.b 1	; S&K: 17h		; Used for dynamic volume adjustments
 	; ---------------------------------
@@ -97,7 +97,7 @@ zTrack STRUCT DOTS
 	; ---------------------------------
 	ModulationDelta:	ds.b 1	; S&K: 26h
 	ModulationSteps:	ds.b 1	; S&K: 27h
-	LoopCounters:		ds.b 2	; S&K: 28h		; May end up overwriting following data
+	LoopCounters:		ds.b 2	; S&K: 28h		; Might overflow into the following data
 	VoicesLow:			ds.b 1	; S&K: 2Ah		; Low byte of pointer to track's voices, used only if zUpdatingSFX is set
 	VoicesHigh:			ds.b 1	; S&K: 2Bh		; High byte of pointer to track's voices, used only if zUpdatingSFX is set
 	Stack_top:			ds.b 4	; S&K: 2Ch-2Fh	; Track stack; can be used by LoopCounters
@@ -204,7 +204,7 @@ zSaveSongPSG2:	zTrack
 zSaveSongPSG3:	zTrack
 zTracksSaveEnd:
 	if (zQueueVariables&1)<>0
-		fatal "zQueueVariables must be at an even address!"
+		fatal "zQueueVariables must be at an even address as it is used as a longword by the 68k!"
 	endif
 	if * > $2000	; Don't declare more space than the RAM can contain!
 		fatal "The RAM variable declarations are too large by $\{$} bytes."
