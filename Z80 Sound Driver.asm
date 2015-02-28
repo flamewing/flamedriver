@@ -944,7 +944,7 @@ zFMNoteOn:
 		or	(ix+zTrack.FreqHigh)			; Is the note frequency zero?
 		ret	z								; Return if yes
 		ld	a, (ix+zTrack.PlaybackControl)	; Get playback control byte for track
-		and	14h								; Is either bit 4 ("track at rest") or 2 ("SFX overriding this track") set?
+		and	16h								; Is either bit 4 ("track at rest") or 2 ("SFX overriding this track") or bit 1 ("do not attack next note") set?
 		ret	nz								; Return if yes
 		ld	a, (ix+zTrack.VoiceControl)		; Get voice control byte from track
 		or	0F0h							; We want only the FM channel assignment bits
