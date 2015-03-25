@@ -3772,14 +3772,14 @@ zPlayDigitalAudio:
 .enabletrack:
 		res	2, (hl)							; Mark track as no longer being overridden
 
-loc_1092:
+.dac_idle_loop:
 		ei									; Enable interrupts
 		ld	a, (PlaySegaPCMFlag)			; a = play SEGA PCM flag
 		or	a								; Is SEGA sound being played?
 		jp	nz, zPlaySEGAPCM				; Branch if yes
 		ld	a, (zDACIndex)					; a = DAC index/flag
 		or	a								; Is DAC channel being used?
-		jr	z, loc_1092						; Loop if not
+		jr	z, .dac_idle_loop				; Loop if not
 		ld	a, 2Bh							; DAC enable/disable register
 		ld	c, 80h							; Value to enable DAC
 		di									; Disable interrupts
@@ -3794,8 +3794,8 @@ loc_1092:
 		rst	PointerTableOffset				; hl = pointer to DAC data
 		ld	c, 80h							; c is an accumulator below; this initializes it to 80h
 		ld	a, (hl)							; a = DAC rate
-		ld	(loc_10CA+1), a					; Store into following instruction (self-modifying code)
-		ld	(loc_10E7+1), a					; Store into following instruction (self-modifying code)
+		ld	(.sample1_rate+1), a			; Store into following instruction (self-modifying code)
+		ld	(.sample2_rate+1), a			; Store into following instruction (self-modifying code)
 		inc	hl								; hl = pointer to low byte of DAC sample's length
 		ld	e, (hl)							; e = low byte of DAC sample's length
 		inc	hl								; hl = pointer to high byte of DAC sample's length
@@ -3807,8 +3807,9 @@ loc_1092:
 		ld	l, a							; l = low byte of DAC sample's in-bank location
 		; hl is now pointer to DAC data, while de is the DAC sample's length
 
-loc_10CA:
-		ld	b,0Ah							; self-modified code; b is set to DAC rate
+.dac_playback_loop:
+.sample1_rate:
+		ld	b, 0Ah							; self-modified code; b is set to DAC rate
 		ei									; Enable interrupts
 		djnz	$							; Loop in this instruction, decrementing b each iteration, until b = 0
 
@@ -3822,14 +3823,16 @@ loc_10CA:
 		rlca
 		rlca
 		and	0Fh								; Get only low nibble (which was the high nibble originally)
-		ld	(loc_10E0+2), a					; Store into following instruction (self-modifying code)
+		ld	(.sample1_index+2), a			; Store into following instruction (self-modifying code)
 		ld	a, c							; a = c
-loc_10E0:
+
+.sample1_index:
 		add	a, (iy+0)						; Self-modified code: the index offset is not zero, but what was set above
 		ld	(zYM2612_D0), a					; Send byte to DAC
-		ld	c,a								; Set c to the new value of a
-loc_10E7:
-		ld	b,0Ah							; self-modified code; b is set to DAC rate
+		ld	c, a							; Set c to the new value of a
+
+.sample2_rate:
+		ld	b, 0Ah							; self-modified code; b is set to DAC rate
 		ei									; Enable interrupts
 		djnz	$							; Loop in this instruction, decrementing b each iteration, until b = 0
 
@@ -3838,9 +3841,10 @@ loc_10E7:
 		ld	(zYM2612_A0), a					; Send to YM2612
 		ld	a, (hl)							; a = next byte of DAC sample
 		and	0Fh								; Want only the low nibble
-		ld	(loc_10F9+2), a					; Store into following instruction (self-modifying code)
+		ld	(.sample2_index+2), a			; Store into following instruction (self-modifying code)
 		ld	a, c							; a = c
-loc_10F9:
+
+.sample2_index:
 		add	a, (iy+0)						; Self-modified code: the index offset is not zero, but what was set above
 		ld	(zYM2612_D0), a					; Send byte to DAC
 		ei									; Enable interrupts
