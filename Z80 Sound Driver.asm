@@ -452,6 +452,7 @@ zInitAudioDriver:
 		ld	(zPalDblUpdCounter), a			; (that is, do not double-update for 5 frames)
 		ei									; Enable interrupts
 		jp	zPlayDigitalAudio				; Start digital audio loop
+; ---------------------------------------------------------------------------
 
 ; =============== S U B	R O U T	I N E =======================================
 ;
@@ -2657,7 +2658,8 @@ cfFadeInToPrevious:
 ;
 ;loc_C7F
 cfSilenceStopTrack:
-		call	zFMSilenceChannel
+		bit	7, (ix+zTrack.VoiceControl)		; Is this a PSG track?
+		call	z, zFMSilenceChannel		; If so, don't mess with the YM2612
 		jp	cfStopTrack
 ; End of function cfSilenceStopTrack
 
