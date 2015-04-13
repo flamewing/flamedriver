@@ -6,26 +6,26 @@
 ; ===========================================================================
 ; Disassembled by MarkeyJester
 ; Routines, pointers and stuff by Linncaki
-; Throroungly commented and improved (including optional bugfixes) by Flamewing
+; Thoroughly commented and improved (including optional bugfixes) by Flamewing
 ; ===========================================================================
 ; Constants
 ; ===========================================================================
 
 ; Used by SMPS2ASM include file.
-SonicDriverVer			=  5
+SonicDriverVer			= 5
 ; Set the following to non-zero to use all S2 DAC samples, or to zero otherwise.
 ; The S1 samples are a subset of this.
-use_s2_samples			=  1
+use_s2_samples			= 1
 ; Set the following to non-zero to use all S3D DAC samples, or to zero
 ; otherwise. Most of the S3D samples are also present in S3/S&K, but
 ; there are two samples specific to S3D.
-use_s3d_samples			=  1
+use_s3d_samples			= 1
 ; Set the following to non-zero to use all S3 DAC samples,
 ; or to zero otherwise.
-use_s3_samples			=  1
+use_s3_samples			= 1
 ; Set the following to non-zero to use all S&K DAC samples,
 ; or to zero otherwise.
-use_sk_samples			=  1
+use_sk_samples			= 1
 ; ---------------------------------------------------------------------------
 zTrack STRUCT DOTS
 	; Playback control bits:
@@ -182,23 +182,24 @@ zTracksEnd:
 ; This is RAM for backup of songs (when 1-up jingle is playing)
 ; and for SFX channels. Note these two overlap.
 ; Max number of SFX channels: 4 FM + 3 PSG
-zTracksSaveStart:
 zTracksSFXStart:
-zSaveSongDAC:
 zSFX_FM3:		zTrack
-zSaveSongFM1:
 zSFX_FM4:		zTrack
-zSaveSongFM2:
 zSFX_FM5:		zTrack
-zSaveSongFM3:
 zSFX_FM6:		zTrack
-zSaveSongFM4:
 zSFX_PSG1:		zTrack
-zSaveSongFM5:
 zSFX_PSG2:		zTrack
-zSaveSongFM6:
 zSFX_PSG3:		zTrack
 zTracksSFXEnd:
+	phase zTracksSFXStart
+zTracksSaveStart:
+zSaveSongDAC:	zTrack
+zSaveSongFM1:	zTrack
+zSaveSongFM2:	zTrack
+zSaveSongFM3:	zTrack
+zSaveSongFM4:	zTrack
+zSaveSongFM5:	zTrack
+zSaveSongFM6:	zTrack
 zSaveSongPSG1:	zTrack
 zSaveSongPSG2:	zTrack
 zSaveSongPSG3:	zTrack
@@ -430,7 +431,7 @@ zVInt:	rsttarget
 ; ---------------------------------------------------------------------------
 ;loc_85
 zInitAudioDriver:
-		ld	sp, z80_stack			    ; set the stack pointer to 0x2000 (end of z80 RAM)
+		ld	sp, z80_stack					; set the stack pointer to 0x2000 (end of z80 RAM)
 			; The following instruction block keeps the z80 in a tight loop.
 		ld	c, 0							; c = 0
 
@@ -727,11 +728,11 @@ zSpecialFreqCommands_End
 ; =============== S U B	R O U T	I N E =======================================
 ;
 zGetSpecialFM3DataPointer:
-		ld	de,zSpecFM3Freqs				; de = pointer to saved FM3 frequency shifts
+		ld	de, zSpecFM3Freqs				; de = pointer to saved FM3 frequency shifts
 		ld	a, (zUpdatingSFX)				; Get flag
 		or	a								; Is this a SFX track?
 		ret	z								; Return if not
-		ld	de,zSpecFM3FreqsSFX				; de = pointer to saved FM3 frequency shifts
+		ld	de, zSpecFM3FreqsSFX			; de = pointer to saved FM3 frequency shifts
 		ret
 ; End of function zGetSpecialFM3DataPointer
 
@@ -884,7 +885,7 @@ zFinishTrackUpdate:
 		ld	a, (ix+zTrack.SavedDuration)	; Get current saved duration
 		ld	(ix+zTrack.DurationTimeout), a	; Set it as duration timeout
 		bit	1, (ix+zTrack.PlaybackControl)	; Is 'do not attack next note' flag set?
-		ret	nz								; Branch of yes
+		ret	nz								; Branch if yes
 		xor	a								; Clear a
 		ld	(ix+zTrack.ModulationSpeed), a	; Clear modulation speed
 		ld	(ix+zTrack.ModulationValLow), a	; Clear low byte of accumulated modulation
@@ -1283,44 +1284,44 @@ zGetFMInstrumentOffset:
 zFMInstrumentRegTable:
 		db 0B0h								; Feedback/Algorithm
 zFMInstrumentOperatorTable:
-		db  30h								; Detune/multiple operator 1
-		db  38h								; Detune/multiple operator 3
-		db  34h								; Detune/multiple operator 2
-		db  3Ch								; Detune/multiple operator 4
+		db 30h								; Detune/multiple operator 1
+		db 38h								; Detune/multiple operator 3
+		db 34h								; Detune/multiple operator 2
+		db 3Ch								; Detune/multiple operator 4
 zFMInstrumentRSARTable:
-		db  50h								; Rate scalling/attack rate operator 1
-		db  58h								; Rate scalling/attack rate operator 3
-		db  54h								; Rate scalling/attack rate operator 2
-		db  5Ch								; Rate scalling/attack rate operator 4
+		db 50h								; Rate scalling/attack rate operator 1
+		db 58h								; Rate scalling/attack rate operator 3
+		db 54h								; Rate scalling/attack rate operator 2
+		db 5Ch								; Rate scalling/attack rate operator 4
 zFMInstrumentAMD1RTable:
-		db  60h								; Amplitude modulation/first decay rate operator 1
-		db  68h								; Amplitude modulation/first decay rate operator 3
-		db  64h								; Amplitude modulation/first decay rate operator 2
-		db  6Ch								; Amplitude modulation/first decay rate operator 4
+		db 60h								; Amplitude modulation/first decay rate operator 1
+		db 68h								; Amplitude modulation/first decay rate operator 3
+		db 64h								; Amplitude modulation/first decay rate operator 2
+		db 6Ch								; Amplitude modulation/first decay rate operator 4
 zFMInstrumentD2RTable:
-		db  70h								; Secondary decay rate operator 1
-		db  78h								; Secondary decay rate operator 3
-		db  74h								; Secondary decay rate operator 2
-		db  7Ch								; Secondary decay rate operator 4
+		db 70h								; Secondary decay rate operator 1
+		db 78h								; Secondary decay rate operator 3
+		db 74h								; Secondary decay rate operator 2
+		db 7Ch								; Secondary decay rate operator 4
 zFMInstrumentD1LRRTable:
-		db  80h								; Secondary amplitude/release rate operator 1
-		db  88h								; Secondary amplitude/release rate operator 3
-		db  84h								; Secondary amplitude/release rate operator 2
-		db  8Ch								; Secondary amplitude/release rate operator 4
+		db 80h								; Secondary amplitude/release rate operator 1
+		db 88h								; Secondary amplitude/release rate operator 3
+		db 84h								; Secondary amplitude/release rate operator 2
+		db 8Ch								; Secondary amplitude/release rate operator 4
 zFMInstrumentOperatorTable_End
 ;loc_4B1
 zFMInstrumentTLTable:
-		db  40h								; Total level operator 1
-		db  48h								; Total level operator 3
-		db  44h								; Total level operator 2
-		db  4Ch								; Total level operator 4
+		db 40h								; Total level operator 1
+		db 48h								; Total level operator 3
+		db 44h								; Total level operator 2
+		db 4Ch								; Total level operator 4
 zFMInstrumentTLTable_End
 ;loc_4B5
 zFMInstrumentSSGEGTable:
-		db  90h								; SSG-EG operator 1
-		db  98h								; SSG-EG operator 3
-		db  94h								; SSG-EG operator 2
-		db  9Ch								; SSG-EG operator 4
+		db 90h								; SSG-EG operator 1
+		db 98h								; SSG-EG operator 3
+		db 94h								; SSG-EG operator 2
+		db 9Ch								; SSG-EG operator 4
 zFMInstrumentSSGEGTable_End
 
 ; =============== S U B	R O U T	I N E =======================================
@@ -1608,7 +1609,7 @@ zBGMLoad:
 		djnz	.fm_dac_loop				; Loop for all tracks (stored in b)
 
 		ld	a, (iy+2)						; a = number of FM + DAC channels
-		cp	7								; Does it equal 7?  (6 FM channels)
+		cp	7								; Does it equal 7? (6 FM channels)
 		jr	nz, .got_dac					; If not, skip this next part
 		xor	a								; Clear 'a'
 		jr	.set_dac						; jump to zloc_87E
@@ -1692,13 +1693,21 @@ zClearNextSound:
 ; The first is for DAC; then 0, 1, 2 then 4, 5, 6 for the FM channels (the missing 3
 ; is the gap between part I and part II for YM2612 port writes).
 zFMDACInitBytes:
-		db   80h,   6, 80h,   0, 80h,   1, 80h,   2, 80h,   4, 80h,   5, 80h,   6
+		db 80h, 6
+		db 80h, 0
+		db 80h, 1
+		db 80h, 2
+		db 80h, 4
+		db 80h, 5
+		db 80h, 6
 ;loc_6A3
 ; Default values for PSG tracks
 ; The first byte in every pair (always 80h) is default value for playback control bits.
 ; The second byte in every pair is the default values for PSG tracks.
 zPSGInitBytes:
-		db   80h, 80h, 80h, 0A0h, 80h, 0C0h
+		db 80h,  80h
+		db 80h, 0A0h
+		db 80h, 0C0h
 ; ---------------------------------------------------------------------------
 ;loc_6A9
 zPlaySound_CheckRing:
@@ -1883,24 +1892,24 @@ zZeroFillTrackRAM:
 ; ---------------------------------------------------------------------------
 ;zloc_7DF
 zSFXChannelData:
-		dw  zSFX_FM3						; FM3
-		dw  zSFX_FM4						; FM4
-		dw  zSFX_FM5						; FM5
-		dw  zSFX_FM6						; FM6 or DAC
-		dw  zSFX_PSG1						; PSG1
-		dw  zSFX_PSG2						; PSG2
-		dw  zSFX_PSG3						; PSG3
-		dw  zSFX_PSG3						; PSG3/Noise
+		dw zSFX_FM3						; FM3
+		dw zSFX_FM4						; FM4
+		dw zSFX_FM5						; FM5
+		dw zSFX_FM6						; FM6 or DAC
+		dw zSFX_PSG1					; PSG1
+		dw zSFX_PSG2					; PSG2
+		dw zSFX_PSG3					; PSG3
+		dw zSFX_PSG3					; PSG3/Noise
 ;zloc_7EF
 zSFXOverriddenChannel:
-		dw  zSongFM3						; FM3
-		dw  zSongFM4						; FM4
-		dw  zSongFM5						; FM5
-		dw  zSongFM6						; FM6
-		dw  zSongPSG1						; PSG1
-		dw  zSongPSG2						; PSG2
-		dw  zSongPSG3						; PSG3
-		dw  zSongPSG3						; PSG3/Noise
+		dw zSongFM3						; FM3
+		dw zSongFM4						; FM4
+		dw zSongFM5						; FM5
+		dw zSongFM6						; FM6
+		dw zSongPSG1					; PSG1
+		dw zSongPSG2					; PSG2
+		dw zSongPSG3					; PSG3
+		dw zSongPSG3					; PSG3/Noise
 
 ; =============== S U B	R O U T	I N E =======================================
 ; Pauses/unpauses sound.
@@ -1973,10 +1982,10 @@ zPauseUnpause:
 ;sub_85C
 zFadeOutMusic:
 		ld	a, 28h							; a = 28h
-		ld	(zFadeOutTimeout),a				; Set fade timeout to this (start fading out music)
+		ld	(zFadeOutTimeout), a			; Set fade timeout to this (start fading out music)
 		ld	a, 6							; a = 6
-		ld  (zFadeDelayTimeout), a			; Set fade delay timeout
-		ld  (zFadeDelay), a					; Set fade delay and fall through
+		ld	(zFadeDelayTimeout), a			; Set fade delay timeout
+		ld	(zFadeDelay), a					; Set fade delay and fall through
 
 ; =============== S U B	R O U T	I N E =======================================
 ; Halts FM6, DAC, PSG1, PSG2, PSG3.
@@ -2054,7 +2063,7 @@ zDoMusicFadeIn:
 		bankswitch2							; Bank switch to music
 		ld	hl, zFadeDelay					; Get fade delay
 		dec	(hl)							; Decrement it
-		ret	nz								; Branch if it is not yet zero
+		ret	nz								; Return if it is not yet zero
 		ld	a, (zFadeDelayTimeout)			; Get current fade delay timeout
 		ld	(zFadeDelay), a					; Reset to starting fade delay
 		ld	b, (zSongPSG1-zSongFM1)/zTrack.len	; Number of FM tracks
@@ -2310,8 +2319,6 @@ zFMOperatorWriteLoop:
 ;loc_A16
 zPlaySegaSound:
 		call	zMusicFade					; Fade music before playing the sound
-		ld	a, 1							; a = 1
-		ld	(PlaySegaPCMFlag), a			; Set flag to play SEGA sound
 		xor	a								; a = 0
 		ld	(zMusicNumber), a				; Clear M68K input queue...
 		ld	(zSFXNumber0), a				; ... including SFX slot 0...
@@ -2319,6 +2326,8 @@ zPlaySegaSound:
 		ld	(zSoundQueue0), a				; Also clear music queue entry 0...
 		ld	(zSoundQueue1), a				; ... and entry 1...
 		ld	(zSoundQueue2), a				; ... and entry 2
+		inc	a								; a = 1
+		ld	(PlaySegaPCMFlag), a			; Set flag to play SEGA sound
 		pop	hl								; Don't return to caller of zCycleSoundQueue
 		ret
 
@@ -2346,7 +2355,7 @@ zFadeInToPrevious:
 		ld	(zDACEnable), a					; Restore it
 		or	a
 		jr	z, .no_dac
-		ld	hl, zSongDAC+zTrack.PlaybackControl
+		ld	hl, zSongDAC.PlaybackControl
 		ld	a, 84h							; a = 'track is playing' and 'track is resting' flags
 		or	(hl)							; Add in track playback control bits
 		ld	(hl), a							; Save everything
@@ -2418,7 +2427,7 @@ zFMFrequencies:
 ;sub_B98
 zUpdateDACTrack:
 		dec	(ix+zTrack.DurationTimeout)		; Advance track duration timer
-		ret	nz								; Branch if note is still going
+		ret	nz								; Return if note is still going
 		ld	e, (ix+zTrack.DataPointerLow)	; e = low byte of track data pointer
 		ld	d, (ix+zTrack.DataPointerHigh)	; d = high byte of track data pointer
 
@@ -3271,8 +3280,8 @@ cfLoopContinuousSFX:
 ;loc_EDA
 ;cfToggleAlternateSMPS
 cfToggleAltFreqMode:
-		cp	1								; Is parameter equal to 1?
-		jr	nz, .stop_altfreq_mode			; Branch if not
+		or	a								; Is parameter equal to 0?
+		jr	z, .stop_altfreq_mode			; Branch if so
 		set	3, (ix+zTrack.PlaybackControl)	; Start alternate frequency mode for track
 		ret
 ; ---------------------------------------------------------------------------
@@ -3729,7 +3738,7 @@ zSilencePSGChannel:
 		ld	a, 1Fh							; Set volume to zero on PSG channel
 		add	a, (ix+zTrack.VoiceControl)		; Add in the PSG channel selector
 		or	a								; Is it an actual PSG channel?
-		ret	p								; Branch if not
+		ret	p								; Return if not
 		ld	(zPSG), a						; Silence this channel
 		bit	0, (ix+zTrack.PlaybackControl)	; Is this a noise channel?
 		ret	z								; Return if not
@@ -3847,7 +3856,7 @@ zPlayDigitalAudio:
 		jp	nz, .dac_playback_loop			; Loop if not
 
 		xor	a								; a = 0
-		ld	(zDACIndex),a					; Mark DAC as being idle
+		ld	(zDACIndex), a					; Mark DAC as being idle
 		jp	zPlayDigitalAudio				; Loop
 ; ---------------------------------------------------------------------------
 ; ===========================================================================
@@ -3914,39 +3923,103 @@ DAC_Banks:
 ; Set to zero to not use S3/S&K DAC samples:
 		db		zmake68kBank(DacBank1)
 	if (use_s3_samples<>0)||(use_sk_samples<>0)||(use_s3d_samples<>0)
-		db		zmake68kBank(DAC_81_Data)            ,zmake68kBank(DAC_82_83_84_85_Data)   ,zmake68kBank(DAC_82_83_84_85_Data)   ,zmake68kBank(DAC_82_83_84_85_Data)
-		db		zmake68kBank(DAC_82_83_84_85_Data)   ,zmake68kBank(DAC_86_Data)            ,zmake68kBank(DAC_87_Data)            ,zmake68kBank(DAC_88_Data)
-		db		zmake68kBank(DAC_89_Data)            ,zmake68kBank(DAC_8A_8B_Data)         ,zmake68kBank(DAC_8A_8B_Data)         ,zmake68kBank(DAC_8C_Data)
-		db		zmake68kBank(DAC_8D_8E_Data)         ,zmake68kBank(DAC_8D_8E_Data)         ,zmake68kBank(DAC_8F_Data)            ,zmake68kBank(DAC_90_91_92_93_Data)
-		db		zmake68kBank(DAC_90_91_92_93_Data)   ,zmake68kBank(DAC_90_91_92_93_Data)   ,zmake68kBank(DAC_90_91_92_93_Data)   ,zmake68kBank(DAC_94_95_96_97_Data)
-		db		zmake68kBank(DAC_94_95_96_97_Data)   ,zmake68kBank(DAC_94_95_96_97_Data)   ,zmake68kBank(DAC_94_95_96_97_Data)   ,zmake68kBank(DAC_98_99_9A_Data)
-		db		zmake68kBank(DAC_98_99_9A_Data)      ,zmake68kBank(DAC_98_99_9A_Data)      ,zmake68kBank(DAC_9B_Data)            ,zmake68kBank(DAC_9C_Data)
-		db		zmake68kBank(DAC_9D_Data)            ,zmake68kBank(DAC_9E_Data)
+		db	zmake68kBank(DAC_81_Data)
+		db	zmake68kBank(DAC_82_83_84_85_Data)
+		db	zmake68kBank(DAC_82_83_84_85_Data)
+		db	zmake68kBank(DAC_82_83_84_85_Data)
+		db	zmake68kBank(DAC_82_83_84_85_Data)
+		db	zmake68kBank(DAC_86_Data)
+		db	zmake68kBank(DAC_87_Data)
+		db	zmake68kBank(DAC_88_Data)
+		db	zmake68kBank(DAC_89_Data)
+		db	zmake68kBank(DAC_8A_8B_Data)
+		db	zmake68kBank(DAC_8A_8B_Data)
+		db	zmake68kBank(DAC_8C_Data)
+		db	zmake68kBank(DAC_8D_8E_Data)
+		db	zmake68kBank(DAC_8D_8E_Data)
+		db	zmake68kBank(DAC_8F_Data)
+		db	zmake68kBank(DAC_90_91_92_93_Data)
+		db	zmake68kBank(DAC_90_91_92_93_Data)
+		db	zmake68kBank(DAC_90_91_92_93_Data)
+		db	zmake68kBank(DAC_90_91_92_93_Data)
+		db	zmake68kBank(DAC_94_95_96_97_Data)
+		db	zmake68kBank(DAC_94_95_96_97_Data)
+		db	zmake68kBank(DAC_94_95_96_97_Data)
+		db	zmake68kBank(DAC_94_95_96_97_Data)
+		db	zmake68kBank(DAC_98_99_9A_Data)
+		db	zmake68kBank(DAC_98_99_9A_Data)
+		db	zmake68kBank(DAC_98_99_9A_Data)
+		db	zmake68kBank(DAC_9B_Data)
+		db	zmake68kBank(DAC_9C_Data)
+		db	zmake68kBank(DAC_9D_Data)
+		db	zmake68kBank(DAC_9E_Data)
 	endif
 	if (use_s3_samples<>0)||(use_sk_samples<>0)
-		db		zmake68kBank(DAC_9F_Data)            ,zmake68kBank(DAC_A0_Data)            ,zmake68kBank(DAC_A1_Data)            ,zmake68kBank(DAC_A2_Data)
-		db		zmake68kBank(DAC_A3_Data)            ,zmake68kBank(DAC_A4_Data)            ,zmake68kBank(DAC_A5_Data)            ,zmake68kBank(DAC_A6_Data)
-		db		zmake68kBank(DAC_A7_Data)            ,zmake68kBank(DAC_A8_Data)            ,zmake68kBank(DAC_A9_Data)            ,zmake68kBank(DAC_AA_Data)
-		db		zmake68kBank(DAC_AB_Data)            ,zmake68kBank(DAC_AC_Data)            ,zmake68kBank(DAC_AD_AE_Data)         ,zmake68kBank(DAC_AD_AE_Data)
-		db		zmake68kBank(DAC_AF_B0_Data)         ,zmake68kBank(DAC_AF_B0_Data)         ,zmake68kBank(DAC_B1_Data)            ,zmake68kBank(DAC_B2_B3_Data)
-		db		zmake68kBank(DAC_B2_B3_Data)         ,zmake68kBank(DAC_B4_C1_C2_C3_C4_Data),zmake68kBank(DAC_B5_Data)            ,zmake68kBank(DAC_B6_Data)
-		db		zmake68kBank(DAC_B7_Data)            ,zmake68kBank(DAC_B8_B9_Data)         ,zmake68kBank(DAC_B8_B9_Data)         ,zmake68kBank(DAC_BA_Data)
-		db		zmake68kBank(DAC_BB_Data)            ,zmake68kBank(DAC_BC_Data)            ,zmake68kBank(DAC_BD_Data)            ,zmake68kBank(DAC_BE_Data)
-		db		zmake68kBank(DAC_BF_Data)            ,zmake68kBank(DAC_C0_Data)            ,zmake68kBank(DAC_B4_C1_C2_C3_C4_Data),zmake68kBank(DAC_B4_C1_C2_C3_C4_Data)
-		db		zmake68kBank(DAC_B4_C1_C2_C3_C4_Data),zmake68kBank(DAC_B4_C1_C2_C3_C4_Data)
+		db	zmake68kBank(DAC_9F_Data)
+		db	zmake68kBank(DAC_A0_Data)
+		db	zmake68kBank(DAC_A1_Data)
+		db	zmake68kBank(DAC_A2_Data)
+		db	zmake68kBank(DAC_A3_Data)
+		db	zmake68kBank(DAC_A4_Data)
+		db	zmake68kBank(DAC_A5_Data)
+		db	zmake68kBank(DAC_A6_Data)
+		db	zmake68kBank(DAC_A7_Data)
+		db	zmake68kBank(DAC_A8_Data)
+		db	zmake68kBank(DAC_A9_Data)
+		db	zmake68kBank(DAC_AA_Data)
+		db	zmake68kBank(DAC_AB_Data)
+		db	zmake68kBank(DAC_AC_Data)
+		db	zmake68kBank(DAC_AD_AE_Data)
+		db	zmake68kBank(DAC_AD_AE_Data)
+		db	zmake68kBank(DAC_AF_B0_Data)
+		db	zmake68kBank(DAC_AF_B0_Data)
+		db	zmake68kBank(DAC_B1_Data)
+		db	zmake68kBank(DAC_B2_B3_Data)
+		db	zmake68kBank(DAC_B2_B3_Data)
+		db	zmake68kBank(DAC_B4_C1_C2_C3_C4_Data)
+		db	zmake68kBank(DAC_B5_Data)
+		db	zmake68kBank(DAC_B6_Data)
+		db	zmake68kBank(DAC_B7_Data)
+		db	zmake68kBank(DAC_B8_B9_Data)
+		db	zmake68kBank(DAC_B8_B9_Data)
+		db	zmake68kBank(DAC_BA_Data)
+		db	zmake68kBank(DAC_BB_Data)
+		db	zmake68kBank(DAC_BC_Data)
+		db	zmake68kBank(DAC_BD_Data)
+		db	zmake68kBank(DAC_BE_Data)
+		db	zmake68kBank(DAC_BF_Data)
+		db	zmake68kBank(DAC_C0_Data)
+		db	zmake68kBank(DAC_B4_C1_C2_C3_C4_Data)
+		db	zmake68kBank(DAC_B4_C1_C2_C3_C4_Data)
+		db	zmake68kBank(DAC_B4_C1_C2_C3_C4_Data)
+		db	zmake68kBank(DAC_B4_C1_C2_C3_C4_Data)
 	endif
 	if (use_s2_samples<>0)
-		db		zmake68kBank(DAC_C5_Data)            ,zmake68kBank(DAC_C6_Data)            ,zmake68kBank(DAC_C7_Data)            ,zmake68kBank(DAC_C8_Data)
-		db		zmake68kBank(DAC_C9_CC_CD_CE_CF_Data),zmake68kBank(DAC_CA_D0_D1_D2_Data)   ,zmake68kBank(DAC_CB_D3_D4_D5_Data)   ,zmake68kBank(DAC_C9_CC_CD_CE_CF_Data)
-		db		zmake68kBank(DAC_C9_CC_CD_CE_CF_Data),zmake68kBank(DAC_C9_CC_CD_CE_CF_Data),zmake68kBank(DAC_C9_CC_CD_CE_CF_Data),zmake68kBank(DAC_CA_D0_D1_D2_Data)
-		db		zmake68kBank(DAC_CA_D0_D1_D2_Data)   ,zmake68kBank(DAC_CA_D0_D1_D2_Data)   ,zmake68kBank(DAC_CB_D3_D4_D5_Data)   ,zmake68kBank(DAC_CB_D3_D4_D5_Data)
-		db		zmake68kBank(DAC_CB_D3_D4_D5_Data)
+		db	zmake68kBank(DAC_C5_Data)
+		db	zmake68kBank(DAC_C6_Data)
+		db	zmake68kBank(DAC_C7_Data)
+		db	zmake68kBank(DAC_C8_Data)
+		db	zmake68kBank(DAC_C9_CC_CD_CE_CF_Data)
+		db	zmake68kBank(DAC_CA_D0_D1_D2_Data)
+		db	zmake68kBank(DAC_CB_D3_D4_D5_Data)
+		db	zmake68kBank(DAC_C9_CC_CD_CE_CF_Data)
+		db	zmake68kBank(DAC_C9_CC_CD_CE_CF_Data)
+		db	zmake68kBank(DAC_C9_CC_CD_CE_CF_Data)
+		db	zmake68kBank(DAC_C9_CC_CD_CE_CF_Data)
+		db	zmake68kBank(DAC_CA_D0_D1_D2_Data)
+		db	zmake68kBank(DAC_CA_D0_D1_D2_Data)
+		db	zmake68kBank(DAC_CA_D0_D1_D2_Data)
+		db	zmake68kBank(DAC_CB_D3_D4_D5_Data)
+		db	zmake68kBank(DAC_CB_D3_D4_D5_Data)
+		db	zmake68kBank(DAC_CB_D3_D4_D5_Data)
 	endif
 	if (use_s3d_samples<>0)
-		db		zmake68kBank(DAC_D6_Data)            ,zmake68kBank(DAC_D7_Data)
+		db	zmake68kBank(DAC_D6_Data)
+		db	zmake68kBank(DAC_D7_Data)
 	endif
 	if (use_s3_samples<>0)
-		db		zmake68kBank(DAC_D8_D9_Data)         ,zmake68kBank(DAC_D8_D9_Data)
+		db	zmake68kBank(DAC_D8_D9_Data)
+		db	zmake68kBank(DAC_D8_D9_Data)
 	endif
 ; ---------------------------------------------------------------------------
 
@@ -4021,9 +4094,9 @@ Z80_Snd_Driver2:
 
 z80_SoundDriverPointers:
 		dw	z80_MusicPointers				; This would be the priority array in other drivers
-		dw  z80_SFXPointers
-		dw  z80_ModEnvPointers
-		dw  z80_VolEnvPointers
+		dw	z80_SFXPointers
+		dw	z80_ModEnvPointers
+		dw	z80_VolEnvPointers
 ; ---------------------------------------------------------------------------
 ; ===========================================================================
 ; Modulation Envelope Pointers
