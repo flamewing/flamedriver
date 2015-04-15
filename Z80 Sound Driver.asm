@@ -1736,7 +1736,8 @@ zPlaySound_Bankswitch:
 		ld	a, (zContinousSFX)				; Load last continuous SFX played
 		sub	b								; Is this the same continuous sound that was playing?
 		jp	nz, zPlaySound_NotCont			; Branch if not
-		ld	a, 80h							; a = 80h
+		; If we got here, a is zero.
+		inc	a								; a = 1
 		ld	(zContinousSFXFlag), a			; Flag continuous SFX as being extended
 		rst	GetPointerTable					; hl = pointer to SFX data table
 		pop	af								; Restore af
@@ -3255,11 +3256,10 @@ cfAddKey:
 ;loc_EB8
 cfLoopContinuousSFX:
 		ld	a, (zContinousSFXFlag)			; Get 'continuous sound effect' flag
-		cp	80h								; Is it equal to 80h?
-		jp	z, .run_counter					; Branch if yes
-		xor	a								; a = 0
+		or	a								; Is it set?
+		jp	nz, .run_counter				; Branch if yes
+		; If we got here, a is zero.
 		ld	(zContinousSFX), a				; Clear last continuous SFX played
-		ld	(zContinousSFXFlag), a			; Clear continous sound effect flag
 		inc	de								; Skip a byte
 		ret
 ; ---------------------------------------------------------------------------
