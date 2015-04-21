@@ -113,7 +113,7 @@ zPSG					=	$7F11
 zROMWindow				=	$8000
 ; ---------------------------------------------------------------------------
 ; z80 RAM:
-zDataStart				=	$1C18
+zDataStart				=	$1C1A
 		phase zDataStart
 z80_stack_top:		ds.b $60
 z80_stack:
@@ -139,13 +139,12 @@ zFadeDelay:			ds.b 1
 zFadeDelayTimeout:	ds.b 1
 zPauseFlag:			ds.b 1
 zHaltFlag:			ds.b 1
-zFM3Settings:		ds.b 1
 zTempoAccumulator:	ds.b 1
 zFadeToPrevFlag:	ds.b 1
 zUpdatingSFX:		ds.b 1
 zCurrentTempo:		ds.b 1
-zContinousSFX:		ds.b 1
-zContinousSFXFlag:	ds.b 1
+zContinuousSFX:		ds.b 1
+zContinuousSFXFlag:	ds.b 1
 zSpindashRev:		ds.b 1
 zRingSpeaker:		ds.b 1
 zFadeInTimeout:		ds.b 1
@@ -164,7 +163,6 @@ zSFXVoiceTblPtr:	ds.b 2	; 2 bytes
 zSFXTempoDivider:	ds.b 1
 zSongBank:			ds.b 1	; Bits 15 to 22 of M68K bank address
 PlaySegaPCMFlag:	ds.b 1
-					ds.b 1	; Unused, for alignment only
 ; Now starts song and SFX z80 RAM
 ; Max number of music channels: 6 FM + 3 PSG or 1 DAC + 5 FM + 3 PSG
 zTracksStart:
@@ -633,7 +631,7 @@ zUpdateFMorPSGTrack:
 		call	zPrepareModulation			; Initialize modulation
 		call	zDoPitchSlide				; Apply pitch slide and frequency displacement
 		call	zDoModulation				; Apply modulation
-		call	zFMSendFreq					; Send frequancy to YM2612
+		call	zFMSendFreq					; Send frequency to YM2612
 		jp	zFMNoteOn						; Note on on all operators
 ; ---------------------------------------------------------------------------
 .note_going:
@@ -993,8 +991,8 @@ zDoFMVolEnv:
 		rst	GetPointerTable					; hl = pointer to volume envelope table
 		rst	PointerTableOffset				; hl = pointer to volume envelope for track
 		call	zDoVolEnv					; a = new volume envelope
-		ld	h, (ix+zTrack.TLPtrHigh)			; h = high byte ot TL data pointer
-		ld	l, (ix+zTrack.TLPtrLow)			; l = low byte ot TL data pointer
+		ld	h, (ix+zTrack.TLPtrHigh)			; h = high byte to TL data pointer
+		ld	l, (ix+zTrack.TLPtrLow)			; l = low byte to TL data pointer
 		ld	de, zFMInstrumentTLTable		; de = pointer to FM TL register table
 		ld	b, zFMInstrumentTLTable_End-zFMInstrumentTLTable	; Number of entries
 		ld	c, (ix+zTrack.FMVolEnvMask)		; c = envelope bitmask
@@ -1289,10 +1287,10 @@ zFMInstrumentOperatorTable:
 		db 34h								; Detune/multiple operator 2
 		db 3Ch								; Detune/multiple operator 4
 zFMInstrumentRSARTable:
-		db 50h								; Rate scalling/attack rate operator 1
-		db 58h								; Rate scalling/attack rate operator 3
-		db 54h								; Rate scalling/attack rate operator 2
-		db 5Ch								; Rate scalling/attack rate operator 4
+		db 50h								; Rate scaling/attack rate operator 1
+		db 58h								; Rate scaling/attack rate operator 3
+		db 54h								; Rate scaling/attack rate operator 2
+		db 5Ch								; Rate scaling/attack rate operator 4
 zFMInstrumentAMD1RTable:
 		db 60h								; Amplitude modulation/first decay rate operator 1
 		db 68h								; Amplitude modulation/first decay rate operator 3
@@ -1603,7 +1601,7 @@ zBGMLoad:
 		ldi									; *de++ = *hl++ (copy track address high byte)
 		ldi									; *de++ = *hl++ (default key offset)
 		ldi									; *de++ = *hl++ (track default volume)
-		ld	(zSongPosition), hl				; Store current potition in BGM data
+		ld	(zSongPosition), hl				; Store current position in BGM data
 		call	zInitFMDACTrack				; Init the remainder of the track RAM
 		pop	bc								; Restore bc
 		djnz	.fm_dac_loop				; Loop for all tracks (stored in b)
@@ -1733,12 +1731,12 @@ zPlaySound_Bankswitch:
 		jp	c, zPlaySound_Normal			; Branch if yes
 		push	af							; Save af
 		ld	b, a							; b = sound index
-		ld	a, (zContinousSFX)				; Load last continuous SFX played
+		ld	a, (zContinuousSFX)				; Load last continuous SFX played
 		sub	b								; Is this the same continuous sound that was playing?
 		jp	nz, zPlaySound_NotCont			; Branch if not
 		; If we got here, a is zero.
 		inc	a								; a = 1
-		ld	(zContinousSFXFlag), a			; Flag continuous SFX as being extended
+		ld	(zContinuousSFXFlag), a			; Flag continuous SFX as being extended
 		rst	GetPointerTable					; hl = pointer to SFX data table
 		pop	af								; Restore af
 		rst	PointerTableOffset				; hl = pointer to SFX data
@@ -1752,9 +1750,9 @@ zPlaySound_Bankswitch:
 ;loc_6FB
 zPlaySound_NotCont:
 		xor	a								; a = 0
-		ld	(zContinousSFXFlag), a			; Clear continue continuous SFX flag
+		ld	(zContinuousSFXFlag), a			; Clear continue continuous SFX flag
 		pop	af								; Restore af
-		ld	(zContinousSFX), a				; Store SFX index
+		ld	(zContinuousSFX), a				; Store SFX index
 		jp	zPlaySound
 ; ---------------------------------------------------------------------------
 ;loc_706
@@ -1840,7 +1838,7 @@ zGetSFXChannelPointers:
 		rlca
 		rlca
 		and	7
-		add	a, 2							; Compensate for subtration below
+		add	a, 2							; Compensate for subtraction below
 
 .get_ptrs:
 		sub	2								; Start table at FM3
@@ -2136,9 +2134,7 @@ zMusicFade:
 
 ;loc_979
 zFM3NormalMode:
-		xor	a								; a = 0
-		ld	(zFM3Settings), a				; Save FM3 settings
-		ld	c, a							; FM3 mode: normal mode
+		ld	c, 0							; FM3 mode: normal mode
 		ld	a, 27h							; FM3 special settings
 		call	zWriteFMI					; Set it
 		jp	zClearNextSound
@@ -2680,7 +2676,7 @@ cfSilenceStopTrack:
 ;
 ; For FM tracks, this is a 7-bit value from 0 (lowest volume) to 127 (highest
 ; volume). The value is XOR'ed with 7Fh before being sent, then stripped of the
-; sign bit. The volume change takes effect immediatelly.
+; sign bit. The volume change takes effect immediately.
 ;
 ; For PSG tracks, this is a 4-bit value ranging from 8 (lowest volume) to 78h
 ; (highest volume). The value is shifted 3 bits to the right, XOR'ed with 0Fh
@@ -2882,7 +2878,7 @@ cfSendFMI:
 ;loc_D28
 zGetFMParams:
 		ex	de, hl							; Exchange de and hl
-		ld	a, (hl)							; Get YM2612 regigter selector
+		ld	a, (hl)							; Get YM2612 register selector
 		inc	hl								; Advance pointer
 		ld	c, (hl)							; Get YM2612 register data
 		ex	de, hl							; Exchange back de and hl
@@ -3255,11 +3251,11 @@ cfAddKey:
 ;
 ;loc_EB8
 cfLoopContinuousSFX:
-		ld	a, (zContinousSFXFlag)			; Get 'continuous sound effect' flag
+		ld	a, (zContinuousSFXFlag)			; Get 'continuous sound effect' flag
 		or	a								; Is it set?
 		jp	nz, .run_counter				; Branch if yes
 		; If we got here, a is zero.
-		ld	(zContinousSFX), a				; Clear last continuous SFX played
+		ld	(zContinuousSFX), a				; Clear last continuous SFX played
 		inc	de								; Skip a byte
 		ret
 ; ---------------------------------------------------------------------------
@@ -3268,7 +3264,7 @@ cfLoopContinuousSFX:
 		dec	(hl)							; Decrement it...
 		jp	nz, cfJumpTo					; If result is non-zero, jump to target address
 		xor	a								; a = 0
-		ld	(zContinousSFXFlag), a			; Clear continous sound effect flag
+		ld	(zContinuousSFXFlag), a			; Clear continuous sound effect flag
 		jp	cfJumpTo						; Jump to target address
 
 ; =============== S U B	R O U T	I N E =======================================
@@ -3335,9 +3331,8 @@ cfFM3SpecialMode:
 ; Output:  c    Damaged
 ;sub_F11
 zWriteFM3Settings:
-		ld	(zFM3Settings), a				; Save FM3 settings
 		ld	c, a							; c = FM3 settings
-		ld	a, 27h							; Write data to FM3 settigns register
+		ld	a, 27h							; Write data to FM3 settings register
 		jp	zWriteFMI						; Do it
 ; End of function zWriteFM3Settings
 
@@ -3350,7 +3345,7 @@ zTrackSkip3bytes:
 		ret
 ; ---------------------------------------------------------------------------
 ; Frequency shift data used in cfFM3SpecialMode, above. That function, as well
-; as zFMSendFreq, use invalid addresses for read and write (respectivelly), so
+; as zFMSendFreq, use invalid addresses for read and write (respectively), so
 ; that this data is improperly used.
 ;loc_F1F
 zFM3FreqShiftTable:
