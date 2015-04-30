@@ -243,7 +243,7 @@ zID_VolEnvPointers = 6
 ; ===========================================================================
 ; Macros
 ; ===========================================================================
-bankswitch1 macro
+bankswitch macro
 		ld	hl, zBankRegister
 		ld	(hl), a
 		rept 7
@@ -254,20 +254,8 @@ bankswitch1 macro
 		ld	(hl), a
     endm
 
-bankswitch2 macro
-		ld	hl, zBankRegister
-		ld	(hl), a
-		rept 7
-			rra
-			ld	(hl), a
-		endm
-		xor	a
-		ld	(hl), a
-    endm
-
-bankswitch3 macro
+bankswitchLoop macro
 		ld	b, 8
-
 .bankloop:
 		ld	(zBankRegister), a
 		rrca
@@ -277,15 +265,8 @@ bankswitch3 macro
     endm
 
 bankswitchToMusic macro
-		ld	hl, zBankRegister
 		ld	a, (zSongBank)
-		ld	(hl), a
-		rept 7
-			rra
-			ld	(hl), a
-		endm
-		xor	a
-		ld	(hl), a
+		bankswitch
     endm
 
 ; macro to make a certain error message clearer should you happen to get it...
@@ -420,7 +401,7 @@ zVInt:	rsttarget
 		ld	hl, DAC_Banks					; Make hl point to DAC bank table
 		add	hl, bc							; Offset into entry for current sample
 		ld	a, (hl)							; Get bank index
-		bankswitch1							; Switch to current DAC sample's bank
+		bankswitch							; Switch to current DAC sample's bank
 		exx									; Restore bc,de,hl
 		pop	iy								; Restore iy
 		pop	af								; Restore af
@@ -565,8 +546,7 @@ zUpdateMusic:
 		call	zCycleSoundQueue			; Cycle queue and play third entry
 
 .update_music:
-		ld	a, (zSongBank)					; Get bank ID for music
-		bankswitch2							; Bank switch to it
+		bankswitchToMusic
 		xor	a								; a = 0
 		ld	(zUpdatingSFX), a				; Updating music
 		ld	a, (zFadeToPrevFlag)			; Get fade-to-previous flag
@@ -586,7 +566,7 @@ zUpdateSFXTracks:
 		ld	a, 1							; a = 1
 		ld	(zUpdatingSFX), a				; Updating SFX
 		ld	a, zmake68kBank(SndBank)		; Get SFX bank ID
-		bankswitch2							; Bank switch to SFX
+		bankswitch							; Bank switch to SFX
 		ld	ix, zTracksSFXStart				; ix = start of SFX track RAM
 		ld	b, (zTracksSFXEnd-zTracksSFXStart)/zTrack.len	; Number of channels
 
@@ -1560,7 +1540,7 @@ zBGMLoad:
 		ld	h, a							; hl is the offset to the music bank
 		ld	a, (hl)							; Get bank for the song to play
 		ld	(zSongBank), a					; Save the song's bank...
-		bankswitch2							; ... then bank switch to it
+		bankswitch							; ... then bank switch to it
 		ld	a, 0B6h							; Set Panning / AMS / FMS
 		ld	(zYM2612_A1), a					; Write destination address to YM2612 address register
 		nop
@@ -1720,7 +1700,7 @@ zPlaySound_CheckRing:
 zPlaySound_Bankswitch:
 		ex	af, af'							; Save af
 		ld	a, zmake68kBank(SndBank)		; Load SFX sound bank address
-		bankswitch2							; Bank switch to it
+		bankswitch							; Bank switch to it
 		xor	a								; a = 0
 		ld	c, zID_SFXPointers				; SFX table index
 		ld	(zUpdatingSFX), a				; Clear flag to update SFX
@@ -2022,8 +2002,7 @@ zDoMusicFadeOut:
 		ld	hl, zFadeOutTimeout				; (hl) = fade timeout
 		dec	(hl)							; Decrement it
 		jp	z, zMusicFade					; Stop all music if it is zero
-		ld	a, (zSongBank)					; a = current music bank ID
-		bankswitch2							; Bank switch to music bank
+		bankswitchToMusic
 		ld	ix, zTracksStart				; ix = pointer to track RAM
 		ld	b, (zSongPSG1-zTracksStart)/zTrack.len	; Number of FM+DAC tracks
 
@@ -2058,8 +2037,7 @@ zDoMusicFadeIn:
 		ld	a, (zFadeInTimeout)				; Get fading timeout
 		or	a								; Is music being faded?
 		ret	z								; Return if not
-		ld	a, (zSongBank)					; Get current music bank
-		bankswitch2							; Bank switch to music
+		bankswitchToMusic
 		ld	hl, zFadeDelay					; Get fade delay
 		dec	(hl)							; Decrement it
 		ret	nz								; Return if it is not yet zero
@@ -2343,7 +2321,7 @@ zFadeInToPrevious:
 		ld	(zVoiceTblPtr), hl				; Restore it
 		ld	a, (zSongBankSave)				; Get saved song bank ID
 		ld	(zSongBank), a					; Restore it
-		bankswitch2							; Bank switch to previous song's bank
+		bankswitch							; Bank switch to previous song's bank
 		ld	hl, zTracksSaveStart			; Start of saved track data
 		ld	de, zTracksStart				; Start of track data
 		ld	bc, zTracksSaveEnd-zTracksSaveStart	; Number of bytes to copy
@@ -3033,7 +3011,7 @@ cfStopTrack:
 		call	zGetFMInstrumentOffset		; hl = pointer to instrument data
 		call	zSendFMInstrument			; Send FM instrument
 		ld	a, zmake68kBank(SndBank)		; Get SFX bank
-		bankswitch2							; Bank switch to it
+		bankswitch							; Bank switch to it
 		ld	a, (ix+zTrack.HaveSSGEGFlag)	; Get custom SSG-EG flag
 		or	a								; Does track have custom SSG-EG data?
 		jp	p, zStopCleanExit				; Exit if not
@@ -3872,7 +3850,7 @@ zPlaySEGAPCM:
 		ld	a, 80h							; Value to enable DAC
 		ld	(zYM2612_D0), a					; Enable DAC
 		ld	a, zmake68kBank(SEGA_PCM)		; a = sound bank index
-		bankswitch3							; Bank switch to sound bank
+		bankswitchLoop						; Bank switch to sound bank
 		ld	hl, zmake68kPtr(SEGA_PCM)		; hl = pointer to SEGA PCM
 		ld	de, SEGA_PCM_End-SEGA_PCM		; de = length of SEGA PCM
 		ld	a, 2Ah							; DAC channel register
