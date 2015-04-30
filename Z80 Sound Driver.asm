@@ -2441,27 +2441,19 @@ zUpdateDACTrack_cont:
 
 .got_sample:
 		ld	(ix+zTrack.SavedDAC), a			; Store new DAC sample
-		cp	NoteRest						; Is it a rest?
-		jp	z, zUpdateDACTrack_GetDuration	; Branch if yes
-		res	7, a							; Clear bit 7
-		push	de							; Save de
-		ld	hl, zSongFM6					; Get pointer to FM6 track
-		set	2, (hl)							; Mark track as being overridden
-		ex	af, af'							; Save af
+		sub	NoteRest						; Is it a rest?
+		jp	z, .get_duration				; Branch if yes
+		bit	2, (ix+zTrack.PlaybackControl)	; Is SFX overriding DAC channel?
+		jp	nz, .get_duration				; Branch if yes
+		ld	(zDACIndex), a					; Queue DAC sample
+		push	ix							; Save track pointer
+		ld	ix, zSongFM6					; Get pointer to FM6 track data
+		set	2, (ix+zTrack.PlaybackControl)	; Mark track as being overridden
 		call	zKeyOffIfActive				; Kill note (will do nothing if 'do not attack' is on)
 		call	zFM3NormalMode				; Set FM3 to normal mode
-		ex	af, af'							; Restore af
-		ld	ix, zSongDAC					; ix = pointer to DAC track data
-		bit	2, (ix+zTrack.PlaybackControl)	; Is SFX overriding DAC channel?
-		jp	nz, .dont_play					; Branch if yes
-		ld	(zDACIndex), a					; Queue DAC sample
+		pop	ix								; Restore track pointer
 
-.dont_play:
-		pop	de								; Restore de
-		ld	hl, zSongFM6					; Get pointer to FM6 track
-		res	2, (hl)							; Clear track as being overridden
-
-zUpdateDACTrack_GetDuration:
+.get_duration:
 		ld	a, (de)							; Get note duration
 		inc	de								; Advance pointer
 		or	a								; Is it a duration?
