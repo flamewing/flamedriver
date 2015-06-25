@@ -1594,33 +1594,18 @@ zBGMLoad:
 
 .got_dac:
 		; Setup FM Channel 6 specifically if it's not in use
-		ld	hl, zSongFM6
+		ld	hl, zSongFM6					; Get FM3 track
 		ld	b, zTrack.len-2					; Loop counter
-		ld	(hl), 14h
-		inc	hl
-		ld	(hl), 6
+		ld	(hl), 14h						; Set 'SFX is overriding this track' and 'Track is resting' bits, clear 'Track is playing' bit
+		inc	hl								; Point to voice control byte
+		ld	(hl), 6							; This is FM6
+		xor	a								; Clear 'a'
 
 .loop:
 		inc	hl								; Advance to next byte
-		ld	(hl), 0							; Put 0 into this byte
+		ld	(hl), a							; Put 0 into this byte
 		djnz	.loop						; Loop until end of track
 
-		ld	a, 28h							; Key on/off FM register
-		ld	c, 6							; FM channel 6
-		call	zWriteFMI					; All operators off
-		ld	a, 42h							; Starting at FM Channel 6 Operator 1 Total Level register
-		ld	c, 0FFh							; Silence value
-		ld	b, 4							; Write to all four FM Channel 6 operators
-
-		; Set all TL values to silence!
-.fm6loop:
-		call	zWriteFMII
-		add	a, 4							; Next operator
-		djnz	.fm6loop
-
-		ld	a, 0B6h							; Set Panning / AMS / FMS
-		ld	c, 0C0h							; default Panning / AMS / FMS settings (only stereo L/R enabled)
-		call	zWriteFMII
 		ld	a, 80h							; FM Channel 6 is NOT in use (will enable DAC)
 
 .set_dac:
@@ -1858,10 +1843,11 @@ zZeroFillTrackRAM:
 		ld	(hl), 1							; Current note duration timeout
 
 		ld	b, zTrack.len-zTrack.DurationTimeout-1	; Loop counter
+		xor	a
 
 .loop:
 		inc	hl								; Advance to next byte
-		ld	(hl), 0							; Put 0 into this byte
+		ld	(hl), a							; Put 0 into this byte
 		djnz	.loop						; Loop until end of track
 
 		inc	hl								; Make hl point to next track
@@ -1874,7 +1860,7 @@ zSFXChannelData:
 		dw zSFX_FM3						; FM3
 		dw zSFX_FM4						; FM4
 		dw zSFX_FM5						; FM5
-		dw zSFX_FM6						; FM6 or DAC
+		dw zSFX_FM6						; FM6
 		dw zSFX_PSG1					; PSG1
 		dw zSFX_PSG2					; PSG2
 		dw zSFX_PSG3					; PSG3
@@ -2081,14 +2067,13 @@ zDoMusicFadeIn:
 ; Wipes music data and fades all FM, PSG and DAC channels.
 ;sub_944
 zMusicFade:
-		; The following block sets to zero the z80 RAM from 1C0Dh to 1FD4h
+		; The following block sets to zero the z80 RAM that keeps music and SFX state
 		ld	hl, zFadeOutTimeout				; Starting source address for copy
 		ld	de, zFadeDelay					; Starting destination address for copy
 		ld	bc, zTracksSaveEnd-zFadeDelay	; Length of copy
-		ld	(hl), 0							; Initial value of zero
-		ldir								; while (--length) *de++ = *hl++
-
 		xor	a								; a = 0
+		ld	(hl), a							; Initial value of zero
+		ldir								; while (--length) *de++ = *hl++
 		ld	(zTempoSpeedup), a				; Fade in normal speed
 
 		ld	ix, zFMDACInitBytes				; Initialization data for channels
@@ -3988,65 +3973,10 @@ DAC_Banks:
 	endif
 ; ---------------------------------------------------------------------------
 
-; ===========================================================================
-; MUSIC BANKS
-; ===========================================================================
-z80_MusicBanks:
-	db zmake68kBank(Mus_AIZ1)
-	db zmake68kBank(Mus_AIZ2)
-	db zmake68kBank(Mus_HCZ1)
-	db zmake68kBank(Mus_HCZ2)
-	db zmake68kBank(Mus_MGZ1)
-	db zmake68kBank(Mus_MGZ2)
-	db zmake68kBank(Mus_CNZ1)
-	db zmake68kBank(Mus_CNZ2)
-	db zmake68kBank(Mus_FBZ1)
-	db zmake68kBank(Mus_FBZ2)
-	db zmake68kBank(Mus_ICZ1)
-	db zmake68kBank(Mus_ICZ2)
-	db zmake68kBank(Mus_LBZ1)
-	db zmake68kBank(Mus_LBZ2)
-	db zmake68kBank(Mus_MHZ1)
-	db zmake68kBank(Mus_MHZ2)
-	db zmake68kBank(Mus_SOZ1)
-	db zmake68kBank(Mus_SOZ2)
-	db zmake68kBank(Mus_LRZ1)
-	db zmake68kBank(Mus_LRZ2)
-	db zmake68kBank(Mus_SSZ)
-	db zmake68kBank(Mus_DEZ1)
-	db zmake68kBank(Mus_DEZ2)
-	db zmake68kBank(Mus_Minib_SK)
-	db zmake68kBank(Mus_Boss)
-	db zmake68kBank(Mus_DDZ)
-	db zmake68kBank(Mus_PachBonus)
-	db zmake68kBank(Mus_SpecialS)
-	db zmake68kBank(Mus_SlotBonus)
-	db zmake68kBank(Mus_GumBonus)
-	db zmake68kBank(Mus_Knux)
-	db zmake68kBank(Mus_ALZ)
-	db zmake68kBank(Mus_BPZ)
-	db zmake68kBank(Mus_DPZ)
-	db zmake68kBank(Mus_CGZ)
-	db zmake68kBank(Mus_EMZ)
-	db zmake68kBank(Mus_Title)
-	db zmake68kBank(Mus_S3Credits)
-	db zmake68kBank(Mus_GameOver)
-	db zmake68kBank(Mus_Continue)
-	db zmake68kBank(Mus_Results)
-	db zmake68kBank(Mus_1UP)
-	db zmake68kBank(Mus_Emerald)
-	db zmake68kBank(Mus_Invic)
-	db zmake68kBank(Mus_2PMenu)
-	db zmake68kBank(Mus_Minib_SK)
-	db zmake68kBank(Mus_Menu)
-	db zmake68kBank(Mus_FinalBoss)
-	db zmake68kBank(Mus_Drown)
-	db zmake68kBank(Mus_PresSega)
-	db zmake68kBank(Mus_SKCredits)
-; ---------------------------------------------------------------------------
-
 	if $ > 1300h
 		fatal "Your Z80 code won't fit before its tables. It's \{$-1300h}h bytes past the start of music data \{1300h}h"
+	else
+		message "Z80 free space before 1300h: \{1300h-$}h bytes"
 	endif
 z80_SoundDriverEnd:
 Z80_Snd_Driver2:
@@ -4056,7 +3986,6 @@ Z80_Snd_Driver2:
 ; ===========================================================================
 ; Pointers
 ; ===========================================================================
-
 z80_SoundDriverPointers:
 		dw	z80_MusicPointers				; This would be the priority array in other drivers
 		dw	z80_SFXPointers
@@ -4076,7 +4005,6 @@ z80_ModEnvPointers:
 		dw	ModEnv_05
 		dw	ModEnv_06
 		dw	ModEnv_07
-
 ModEnv_01:	db    0
 ModEnv_00:	db    1,   2,   1,   0,0FFh,0FEh,0FDh,0FCh,0FDh,0FEh,0FFh, 83h
 ModEnv_02:	db    0,   0,   0,   0, 13h, 26h, 39h, 4Ch, 5Fh, 72h, 7Fh, 72h, 83h
@@ -4088,7 +4016,6 @@ ModEnv_06:	db    0,   0,   0,   0, 16h, 2Ch, 42h, 2Ch, 16h,   0,0EAh,0D4h,0BEh,0
         	db    3
 ModEnv_07:	db    1,   2,   3,   4,   3,   2,   1,   0,0FFh,0FEh,0FDh,0FCh,0FDh,0FEh,0FFh,   0
         	db  82h,   1
-
 ; ---------------------------------------------------------------------------
 ; ===========================================================================
 ; Volume Envelope Pointers
@@ -4104,7 +4031,6 @@ z80_VolEnvPointers:
 		dw		VolEnv_24,VolEnv_25,VolEnv_26,VolEnv_27,VolEnv_28,VolEnv_29
 		dw		VolEnv_2A,VolEnv_2B,VolEnv_2C,VolEnv_2D,VolEnv_2E,VolEnv_2F
 		dw		VolEnv_30,VolEnv_31,VolEnv_32,VolEnv_33
-
 VolEnv_00:	db    2, 83h
 VolEnv_01:
 VolEnv_0E:
@@ -4191,12 +4117,66 @@ VolEnv_32:	db	  4,   4,   3,   3,   2,   2,   1,   1,   1,   1,   1,   1,   1,  
           	db	  5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   6,   6,   6,   6,   6,   6
           	db	  6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   7, 81h
 VolEnv_33:	db	0Eh, 0Dh, 0Ch, 0Bh, 0Ah,   9,   8,   7,   6,   5,   4,   3,   2,   1,   0, 81h
-
+; ---------------------------------------------------------------------------
+; ===========================================================================
+; MUSIC BANKS
+; ===========================================================================
+z80_MusicBanks:
+	db zmake68kBank(Mus_AIZ1)
+	db zmake68kBank(Mus_AIZ2)
+	db zmake68kBank(Mus_HCZ1)
+	db zmake68kBank(Mus_HCZ2)
+	db zmake68kBank(Mus_MGZ1)
+	db zmake68kBank(Mus_MGZ2)
+	db zmake68kBank(Mus_CNZ1)
+	db zmake68kBank(Mus_CNZ2)
+	db zmake68kBank(Mus_FBZ1)
+	db zmake68kBank(Mus_FBZ2)
+	db zmake68kBank(Mus_ICZ1)
+	db zmake68kBank(Mus_ICZ2)
+	db zmake68kBank(Mus_LBZ1)
+	db zmake68kBank(Mus_LBZ2)
+	db zmake68kBank(Mus_MHZ1)
+	db zmake68kBank(Mus_MHZ2)
+	db zmake68kBank(Mus_SOZ1)
+	db zmake68kBank(Mus_SOZ2)
+	db zmake68kBank(Mus_LRZ1)
+	db zmake68kBank(Mus_LRZ2)
+	db zmake68kBank(Mus_SSZ)
+	db zmake68kBank(Mus_DEZ1)
+	db zmake68kBank(Mus_DEZ2)
+	db zmake68kBank(Mus_Minib_SK)
+	db zmake68kBank(Mus_Boss)
+	db zmake68kBank(Mus_DDZ)
+	db zmake68kBank(Mus_PachBonus)
+	db zmake68kBank(Mus_SpecialS)
+	db zmake68kBank(Mus_SlotBonus)
+	db zmake68kBank(Mus_GumBonus)
+	db zmake68kBank(Mus_Knux)
+	db zmake68kBank(Mus_ALZ)
+	db zmake68kBank(Mus_BPZ)
+	db zmake68kBank(Mus_DPZ)
+	db zmake68kBank(Mus_CGZ)
+	db zmake68kBank(Mus_EMZ)
+	db zmake68kBank(Mus_Title)
+	db zmake68kBank(Mus_S3Credits)
+	db zmake68kBank(Mus_GameOver)
+	db zmake68kBank(Mus_Continue)
+	db zmake68kBank(Mus_Results)
+	db zmake68kBank(Mus_1UP)
+	db zmake68kBank(Mus_Emerald)
+	db zmake68kBank(Mus_Invic)
+	db zmake68kBank(Mus_2PMenu)
+	db zmake68kBank(Mus_Minib_SK)
+	db zmake68kBank(Mus_Menu)
+	db zmake68kBank(Mus_FinalBoss)
+	db zmake68kBank(Mus_Drown)
+	db zmake68kBank(Mus_PresSega)
+	db zmake68kBank(Mus_SKCredits)
 ; ---------------------------------------------------------------------------
 ; ===========================================================================
 ; Music Pointers
 ; ===========================================================================
-
 z80_MusicPointers:
 MusPtr_AIZ1:		dw zmake68kPtr(Mus_AIZ1)
 MusPtr_AIZ2:		dw zmake68kPtr(Mus_AIZ2)
@@ -4254,7 +4234,6 @@ zMusIDPtr__End
 ; ===========================================================================
 ; SFX Pointers
 ; ===========================================================================
-
 z80_SFXPointers:
 Sound_33_Ptr:	dw zmake68kPtr(Sound_33)
 Sound_34_Ptr:	dw zmake68kPtr(Sound_34)
@@ -4433,6 +4412,8 @@ Sound_End_Ptr
 ; ---------------------------------------------------------------------------
 	if $ > z80_stack_top
 		fatal "Your Z80 tables won't fit before the z80 stack. It's \{$-z80_stack_top}h bytes past the start of the bottom of the stack, at \{z80_stack_top}h"
+	else
+		message "Z80 free space before stack: \{z80_stack_top-$}h bytes"
 	endif
 
 z80_SoundDriverPointersEnd:
