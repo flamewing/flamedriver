@@ -1843,11 +1843,10 @@ zZeroFillTrackRAM:
 		ld	(hl), 1							; Current note duration timeout
 
 		ld	b, zTrack.len-zTrack.DurationTimeout-1	; Loop counter
-		xor	a
 
 .loop:
 		inc	hl								; Advance to next byte
-		ld	(hl), a							; Put 0 into this byte
+		ld	(hl), 0							; Put 0 into this byte
 		djnz	.loop						; Loop until end of track
 
 		inc	hl								; Make hl point to next track
