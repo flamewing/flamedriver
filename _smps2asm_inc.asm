@@ -225,7 +225,9 @@ smpsHeaderVoiceUVB macro
 	if songStart<>*
 		fatal "Missing smpsHeaderStartSong or smpsHeaderStartSongConvert"
 	endif
-	if SonicDriverVer>=3
+	if SonicDriverVer>=5
+		dc.w	z80_ptr(z80_UniVoiceBank)
+	elseif SonicDriverVer>=3
 		dc.w	little_endian(z80_UniVoiceBank)
 	endif
 	endm
