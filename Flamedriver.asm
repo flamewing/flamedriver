@@ -217,19 +217,18 @@ z80_SoundDriver:
 		listing purecode
 ; ---------------------------------------------------------------------------
 MusID__First			= 01h
-MusID_1UP				= 2Ah
-MusID_Emerald			= 2Bh
+MusID_ExtraLife			= 2Ah
 MusID__End				= 33h
 SndID__First			= MusID__End
 SndID_Ring				= SndID__First
-SndID_Spindash			= 0ABh
+SndID_SpindashRev		= 0ABh
 SndID__FirstContinuous	= 0BCh
 MusID_SKCredits			= 0DCh
 SndID__End				= 0E0h
 FadeID__First			= 0E1h
 FadeID__End				= 0E6h
-SndID_StopSega			= 0FEh
-SndID_Sega				= 0FFh
+MusID_StopSega			= 0FEh
+MusID_SegaSound			= 0FFh
 ; ---------------------------------------------------------------------------
 NoteRest				= 080h
 FirstCoordFlag			= 0E0h
@@ -508,10 +507,10 @@ zUpdateMusic:
 		call	zDoMusicFadeOut				; Check if music should be faded out and fade if needed
 		call	zDoMusicFadeIn				; Check if music should be faded in and fade if needed
 		ld	a, (zFadeToPrevFlag)			; Get fade-to-prev flag
-		cp	MusID_1UP-1						; Is it still 1-Up?
+		cp	MusID_ExtraLife-1				; Is it still 1-Up?
 		jr	nz, .check_fade_in				; Branch if not
 		ld	a, (zMusicNumber)				; Get next music to play
-		cp	MusID_1UP						; Is it another 1-Up?
+		cp	MusID_ExtraLife					; Is it another 1-Up?
 		jr	z, .clr_queue					; Branch if yes
 		cp	MusID__End-1					; Is it music (except credits song)?
 		jr	c, .clr_sfx						; Branch if not
@@ -541,7 +540,7 @@ zUpdateMusic:
 		or	e								; Is anything in the play queue?
 		jr	z, .update_music				; Branch if not
 		call	zFillSoundQueue				; Transfer M68K input
-		call	zCycleSoundQueue			; Cycle queue and play first entry
+		call	zCycleMusicQueue			; Cycle queue and play first entry (moves on to second)
 		call	zCycleSoundQueue			; Cycle queue and play second entry
 		call	zCycleSoundQueue			; Cycle queue and play third entry
 
@@ -1375,15 +1374,39 @@ zSendFMInstrDataRSAR:
 ; the queue.
 ;loc_4E2
 zCycleSoundQueue:
-		ld	a, (zSoundQueue0)				; Get first item in sound queue
+		ld	a, (zSoundQueue1)				; Get first item in sound queue
 		ld	(zNextSound), a					; Save into next sound variable
-		ld	a, (zSoundQueue1)				; Get second item in queue
-		ld	(zSoundQueue0), a				; Move to first spot
-		ld	a, (zSoundQueue2)				; Get third item in queue
-		ld	(zSoundQueue1), a				; Move to second spot
+		ld	a, (zSoundQueue2)				; Get second item in queue
+		ld	(zSoundQueue1), a				; Move to first spot
 		xor	a								; a = 0
 		ld	(zSoundQueue2), a				; Clear third spot in queue
 		ld	a, (zNextSound)					; a = next sound to play
+		; Fall through to zPlaySFXByIndex
+
+zPlaySFXByIndex:
+	if SndID__First=1
+		or	a								; Is this below the sound start point?
+		ret	z								; Return if yes
+	else
+		cp	SndID__First					; Is this below the sound start point?
+		ret	c								; Return if yes
+	endif
+		cp	SndID__End						; Is this a sound effect?
+		jp	c, zPlaySound_CheckRing			; Branch if yes
+		ret
+; End of function zPlaySFXByIndex
+
+; =============== S U B	R O U T	I N E =======================================
+; Rotates sound queue and clears last entry. Then plays the popped sound from
+; the queue.
+;loc_4E2
+zCycleMusicQueue:
+		ld	a, (zSoundQueue0)				; Get queued music
+		ld	(zNextSound), a					; Save into next sound variable
+		xor	a								; a = 0
+		ld	(zSoundQueue0), a				; Clear music spot
+		ld	a, (zNextSound)					; a = next sound to play
+		; Fall through to zPlaySoundByIndex
 ; End of function zCycleSoundQueue
 
 ; ===========================================================================
@@ -1397,14 +1420,10 @@ zCycleSoundQueue:
 ; TypeCheck:
 ;sub_4FB
 zPlaySoundByIndex:
-		cp	MusID_SKCredits					; Is this the credits music?
-		jp	z, zPlayMusicCredits			; Branch if yes
-		cp	SndID_Sega						; Is this the SEGA sound?
+		cp	MusID_SegaSound					; Is this the SEGA sound?
 		jp	z, zPlaySegaSound				; Branch if yes
 		cp	MusID__End						; Is this a music?
 		jp	c, zPlayMusic					; Branch if yes
-		cp	SndID__End						; Is this a sound effect?
-		jp	c, zPlaySound_CheckRing			; Branch if yes
 		cp	FadeID__First					; Is it before the first fade effect?
 		jp	c, zMusicFade					; Branch if yes
 		cp	FadeID__End						; Is this after the last fade effect?
@@ -1464,7 +1483,7 @@ zPlayMusic:
 		sub	1								; Remap index from 1h-32h to 0h-31h (see also credits music, above)
 		ret	m								; Return if negative (id = 0)
 		push	af							; Save af
-		cp	MusID_1UP-1						; Is it the 1-up music?
+		cp	MusID_ExtraLife-1				; Is it the 1-up music?
 		jp	nz, zPlayMusic_DoFade			; Branch if not
 		ld	a, (zFadeInTimeout)				; Fading timeout
 		or	a								; Is music being faded?
@@ -1482,7 +1501,7 @@ zPlayMusic:
 ; ---------------------------------------------------------------------------
 .no_fade:
 		ld	a, (zFadeToPrevFlag)			; Get fade-to-prev flag
-		cp	MusID_1UP-1						; Was it triggered by the 1-up song?
+		cp	MusID_ExtraLife-1				; Was it triggered by the 1-up song?
 		jp	z, zBGMLoad						; Branch if yes
 		xor	a								; a = 0
 		ld	(zMusicNumber), a				; Clear M68K input queue...
@@ -1515,7 +1534,7 @@ zPlayMusic:
 		add	hl, de							; Advance to next track
 		djnz	.loop						; Loop for all tracks
 
-		ld	a, MusID_1UP-1					; a = 1-up id-1
+		ld	a, MusID_ExtraLife-1			; a = 1-up id-1
 		ld	(zFadeToPrevFlag), a			; Set fade-to-prev flag to it
 		ld	a, (zCurrentTempo)				; Get current tempo
 		ld	(zCurrentTempoSave), a			; Save it
@@ -1587,10 +1606,8 @@ zBGMLoad:
 		djnz	.fm_dac_loop				; Loop for all tracks (stored in b)
 
 		ld	a, (iy+2)						; a = number of FM + DAC channels
-		cp	7								; Does it equal 7? (6 FM channels)
-		jr	nz, .got_dac					; If not, skip this next part
-		xor	a								; Clear 'a'
-		jr	.set_dac						; jump to zloc_87E
+		sub	7								; Does it equal 7? (6 FM channels)
+		jr	z, .set_dac						; If yes, skip this next part
 
 .got_dac:
 		; Setup FM Channel 6 specifically if it's not in use
@@ -1690,7 +1707,7 @@ zPlaySound_Bankswitch:
 		ld	c, zID_SFXPointers				; SFX table index
 		ld	(zUpdatingSFX), a				; Clear flag to update SFX
 		ex	af, af'							; Restore af
-		cp	SndID_Spindash-SndID__First		; Is this the spindash sound?
+		cp	SndID_SpindashRev-SndID__First	; Is this the spindash sound?
 		jp	z, zPlaySound					; Branch if yes
 		cp	SndID__FirstContinuous-SndID__First	; Is this before sound 0BCh?
 		jp	c, zPlaySound_Normal			; Branch if yes
@@ -2489,7 +2506,7 @@ zCoordFlagSwitchTable:
 ;loc_C3D
 zExtraCoordFlagSwitchTable:
 		dw cfSetTempo						; 0FFh 00h
-		dw cfPlaySoundByIndex				; 0FFh 01h
+		dw cfPlaySFXByIndex					; 0FFh 01h
 		dw cfHaltSound						; 0FFh 02h
 		dw cfCopyData						; 0FFh 03h
 		dw cfSetTempoDivider				; 0FFh 04h
@@ -2501,6 +2518,7 @@ zExtraCoordFlagSwitchTable:
 		dw cfNoteFillSet					; 0FFh 0Ah
 		dw cfPitchSlide						; 0FFh 0Bh
 		dw cfSetLFO							; 0FFh 0Ch
+		dw cfPlayMusicByIndex				; 0FFh 0Dh
 ; =============== S U B	R O U T	I N E =======================================
 ; Sets a new DAC sample for play.
 ;
@@ -3330,7 +3348,7 @@ cfSetTempo:
 		ret
 
 ; =============== S U B	R O U T	I N E =======================================
-; Plays another song or SFX.
+; Plays another SFX.
 ;
 ; Has one parameter byte, the ID of what is to be played.
 ;
@@ -3338,7 +3356,22 @@ cfSetTempo:
 ; will wreak havok with the track update.
 ;
 ;loc_F3A:
-cfPlaySoundByIndex:
+cfPlaySFXByIndex:
+		push	ix							; Save track pointer
+		call	zPlaySFXByIndex				; Play sound specified by parameter
+		pop	ix								; Restore track pointer
+		ret
+
+; =============== S U B	R O U T	I N E =======================================
+; Plays another song.
+;
+; Has one parameter byte, the ID of what is to be played.
+;
+; DO NOT USE THIS TO PLAY THE SEGA PCM! It tampers with the stack pointer, and
+; will wreak havok with the track update.
+;
+;loc_F3A:
+cfPlayMusicByIndex:
 		push	ix							; Save track pointer
 		call	zPlaySoundByIndex			; Play sound specified by parameter
 		pop	ix								; Restore track pointer
@@ -3822,7 +3855,7 @@ DecTable:
 ; disables interrupts) until either of the following conditions hold:
 ;
 ;	(1)	The SEGA PCM is fully played
-;	(2)	The next song to play is 0FEh (SndID_StopSega)
+;	(2)	The next song to play is 0FEh (MusID_StopSega)
 ;loc_1126
 zPlaySEGAPCM:
 		di									; Disable interrupts
@@ -3845,7 +3878,7 @@ zPlaySEGAPCM:
 		ld	a, (hl)							; a = next byte of SEGA PCM
 		ld	(zYM2612_D0), a					; Send to DAC
 		ld	a, (zMusicNumber)				; Check next song number
-		cp	SndID_StopSega					; Is it the command to stop playing SEGA PCM?
+		cp	MusID_StopSega					; Is it the command to stop playing SEGA PCM?
 		jr	z, .done						; Break the loop if yes
 		nop
 		nop
@@ -3977,10 +4010,8 @@ DAC_Banks:
 	else
 		message "Z80 free space before 1300h: \{1300h-$}h bytes"
 	endif
-z80_SoundDriverEnd:
-Z80_Snd_Driver2:
 ; ---------------------------------------------------------------------------
-		!org	1300h						; z80 Align, handled by the build process
+		org	1300h							; z80 Align, handled by the build process
 ; ---------------------------------------------------------------------------
 ; ===========================================================================
 ; Pointers
@@ -4032,8 +4063,7 @@ z80_VolEnvPointers:
 		dw		VolEnv_30,VolEnv_31,VolEnv_32,VolEnv_33
 VolEnv_00:	db    2, 83h
 VolEnv_01:
-VolEnv_0E:
-VolEnv_28:	db    0,   2,   4,   6,   8, 10h, 83h
+VolEnv_0E:	db    0,   2,   4,   6,   8, 10h, 83h
 VolEnv_02:	db    2,   1,   0,   0,   1,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2
           	db    2,   3,   3,   3,   4,   4,   4,   5, 81h
 VolEnv_03:	db    0,   0,   2,   3,   4,   4,   5,   5,   5,   6,   6, 81h
@@ -4089,6 +4119,7 @@ VolEnv_25:	db    0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   1,   1,   1, 
 VolEnv_26:	db    0,   2,   2,   2,   3,   3,   3,   4,   4,   4,   5,   5, 83h
 VolEnv_27:	db	  0,   0,   0,   1,   1,   1,   2,   2,   2,   3,   3,   3,   4,   4,   4,   5
           	db	  5,   5,   6,   6,   6,   7, 81h
+VolEnv_28:	db    0,   2,   4,   6,   8, 10h, 81h
 VolEnv_29:	db	  0,   0,   1,   1,   2,   2,   3,   3,   4,   4,   5,   5,   6,   6,   7,   7, 81h
 VolEnv_2A:	db	  0,   0,   2,   3,   4,   4,   5,   5,   5,   6, 81h
 VolEnv_2C:	db	  3,   3,   3,   2,   2,   2,   2,   1,   1,   1,   0,   0,   0,   0, 81h
@@ -4100,7 +4131,7 @@ VolEnv_2D:	db	  0,   0,   0,   0,   0,   0,   1,   1,   1,   1,   1,   2,   2,  
 VolEnv_2E:	db	  0,   0,   0,   0,   0,   1,   1,   1,   1,   1,   2,   2,   2,   2,   2,   2
           	db	  3,   3,   3,   3,   3,   4,   4,   4,   4,   4,   5,   5,   5,   5,   5,   6
           	db	  6,   6,   6,   6,   7,   7,   7, 81h
-VolEnv_2F:	db	  0,   1,   2,   3,   4,   5,   6,   7,   8,   9, 0Ah, 0Bh, 0Ch, 0Dh, 0Eh, 0Fh, 83h
+VolEnv_2F:	db	  0,   1,   2,   3,   4,   5,   6,   7,   8,   9, 0Ah, 0Bh, 0Ch, 0Dh, 0Eh, 0Fh, 81h
 VolEnv_30:	db	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   1,   1,   1,   1,   1,   1
           	db	  1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1
           	db	  1,   1,   1,   1,   1,   1,   1,   1,   2,   2,   2,   2,   2,   2,   2,   2
