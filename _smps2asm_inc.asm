@@ -1,6 +1,6 @@
-; =============================================================================================
+; ===========================================================================
 ; Created by Flamewing, based on S1SMPS2ASM version 1.1 by Marc Gordon (AKA Cinossu)
-; =============================================================================================
+; ===========================================================================
 
 ; PSG conversion to S3/S&K/S3D drivers require a tone shift of 12 semi-tones.
 psgdelta	EQU 12
@@ -484,9 +484,13 @@ smpsModSet macro wait,speed,change,step
 	endm
 
 ; Turn on Modulation
-smpsModOn macro
+smpsModOn macro type
 	if SonicDriverVer>=3
-		dc.b	$F4,$80
+		if "type"<>""
+			dc.b	$F4,type
+		else
+			dc.b	$F4,$80
+		endif
 	else
 		dc.b	$F1
 	endif
@@ -612,6 +616,9 @@ smpsFM3SpecialMode macro ind1,ind2,ind3,ind4
 	endm
 
 smpsPlaySound macro index
+	if SonicDriverVer>=5
+		message "smpsPlaySound only plays SFX in Flamedriver; use smpsPlayMusic to play music or fade effects."
+	endif
 	dc.b	$FF,$01,index
 	endm
 
@@ -654,6 +661,10 @@ smpsPitchSlide macro enable
 
 smpsSetLFO macro enable,amsfms
 	dc.b	$FF,$0C,enable,amsfms
+	endm
+
+smpsPlayMusic macro index
+	dc.b	$FF,$0D,index
 	endm
 	endif
 
