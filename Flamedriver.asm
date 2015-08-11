@@ -410,7 +410,7 @@ zVInt:	rsttarget
 ;loc_85
 zInitAudioDriver:
 		ld	sp, z80_stack					; set the stack pointer to 0x2000 (end of z80 RAM)
-			; The following instruction block keeps the z80 in a tight loop.
+		; The following instruction block keeps the z80 in a tight loop.
 		ld	c, 0							; c = 0
 
 .loop:
