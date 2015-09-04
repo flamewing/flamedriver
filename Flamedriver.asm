@@ -134,6 +134,15 @@ zMusicNumber:		ds.b 1	; Play_Sound
 zSFXNumber0:		ds.b 1	; Play_Sound_2
 zSFXNumber1:		ds.b 1	; Play_Sound_2
 	shared zQueueVariables,zMusicNumber,zSFXNumber0,zSFXNumber1
+	if (zQueueVariables&1)<>0
+		fatal "zQueueVariables must be at an even address."
+	endif
+zContinuousSFX:		ds.b 1
+zContinuousSFXFlag:	ds.b 1
+zContSFXLoopCnt:	ds.b 1	; Used as a loop counter for continuous SFX
+zSFXSaveIndex:		ds.b 1
+zSFXVoiceTblPtr:	ds.b 2	; 2 bytes
+zSFXTempoDivider:	ds.b 1
 zFadeOutTimeout:	ds.b 1
 zFadeDelay:			ds.b 1
 zFadeDelayTimeout:	ds.b 1
@@ -143,8 +152,6 @@ zTempoAccumulator:	ds.b 1
 zFadeToPrevFlag:	ds.b 1
 zUpdatingSFX:		ds.b 1
 zCurrentTempo:		ds.b 1
-zContinuousSFX:		ds.b 1
-zContinuousSFXFlag:	ds.b 1
 zSpindashRev:		ds.b 1
 zRingSpeaker:		ds.b 1
 zFadeInTimeout:		ds.b 1
@@ -154,13 +161,9 @@ zSongBankSave:		ds.b 1	; For 1-up
 zTempoSpeedupSave:	ds.b 1	; For 1-up
 zSpeedupTimeout:	ds.b 1
 zDACIndex:			ds.b 1	; bit 7 = 1 if playing, 0 if not; remaining 7 bits are index into DAC tables (1-based)
-zContSFXLoopCnt:	ds.b 1	; Used as a loop counter for continuous SFX
-zSFXSaveIndex:		ds.b 1
 zSongPosition:		ds.b 2
 zTrackInitPos:		ds.b 2	; 2 bytes
 zVoiceTblPtr:		ds.b 2	; 2 bytes
-zSFXVoiceTblPtr:	ds.b 2	; 2 bytes
-zSFXTempoDivider:	ds.b 1
 zSongBank:			ds.b 1	; Bits 15 to 22 of M68K bank address
 PlaySegaPCMFlag:	ds.b 1
 ; Now starts song and SFX z80 RAM
@@ -1540,6 +1543,7 @@ zPlayMusic:
 		ld	(zCurrentTempoSave), a			; Save it
 		ld	hl, (zVoiceTblPtr)				; Get voice table pointer
 		ld	(zVoiceTblPtrSave), hl			; Save it
+		call	zMusicFadeSimple
 		jp	zBGMLoad
 ; ---------------------------------------------------------------------------
 
@@ -1676,6 +1680,8 @@ zFMDACInitBytes:
 		db 80h, 6
 		db 80h, 0
 		db 80h, 1
+
+zFMDACInitBytesFM3:
 		db 80h, 2
 		db 80h, 4
 		db 80h, 5
@@ -2092,6 +2098,7 @@ zMusicFade:
 		ldir								; while (--length) *de++ = *hl++
 		ld	(zTempoSpeedup), a				; Fade in normal speed
 
+zMusicFadeSimple:
 		ld	ix, zFMDACInitBytes				; Initialization data for channels
 		ld	b, (zSongPSG1-zSongFM1)/zTrack.len	; Number of FM channels
 

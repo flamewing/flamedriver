@@ -470,6 +470,10 @@ smpsSetvoice macro voice,songID
 	endif
 	endm
 
+smpsFMvoice macro
+	smpsSetvoice ALLARGS
+	endm
+
 ; F0wwxxyyzz - Modulation - ww: wait time - xx: modulation speed - yy: change per step - zz: number of steps
 smpsModSet macro wait,speed,change,step
 	dc.b	$F0
