@@ -6,7 +6,7 @@
 ; ===========================================================================
 ; Disassembled by MarkeyJester
 ; Routines, pointers and stuff by Linncaki
-; Thoroughly commented and improved (including optional bugfixes) by Flamewing
+; Thoroughly commented and improved by Flamewing
 ; ===========================================================================
 ; Constants
 ; ===========================================================================
@@ -675,9 +675,9 @@ zFMSendFreq:
 		inc	hl								; Advance pointer
 		push	hl							; Save hl
 		ex	de, hl							; Exchange de and hl
-		ld	c, (hl)							; Get byte from whatever the hell de was pointing to
+		ld	c, (hl)							; Get byte from FM3 data
 		inc	hl								; Advance pointer
-		ld	b, (hl)							; Get byte from whatever the hell de was pointing to
+		ld	b, (hl)							; Get byte from FM3 data
 		inc	hl								; Advance pointer
 		ex	de, hl							; Exchange de and hl
 		ld	l, (ix+zTrack.FreqLow)			; l = low byte of track frequency
@@ -1137,7 +1137,7 @@ zDoModEnvelope_cont:
 ;zlocChangeFlutterIndex
 zlocChangeModEnvIndex:
 		inc	bc								; Increment bc
-		ld	a, (bc)							; Use it as a pointer??? Getting bytes from code region?
+		ld	a, (bc)							; Get next byte from modulation envelope
 		jr	zModEnvSetIndex					; Set position to nonsensical value
 ; ---------------------------------------------------------------------------
 ;loc_44D
@@ -1150,7 +1150,7 @@ zlocResetModEnvMod:
 ;zlocFlutterIncMultiplier
 zlocModEnvIncMultiplier:
 		inc	bc								; Increment bc
-		ld	a, (bc)							; Use it as a pointer??? Getting bytes from code region?
+		ld	a, (bc)							; Get next byte from modulation envelope
 		add	a, (ix+zTrack.ModEnvSens)		; Add envelope sensibility to a...
 		ld	(ix+zTrack.ModEnvSens), a		; ... then store new value
 		inc	(ix+zTrack.ModEnvIndex)			; Advance envelope modulation...
@@ -3265,13 +3265,11 @@ cfToggleAltFreqMode:
 		ret
 
 ; =============== S U B	R O U T	I N E =======================================
-; If current track is FM3, it is put into special mode. The function is weird,
-; and may not work correctly (subject to verification).
+; If current track is FM3, it is put into special mode.
 ;
 ; It has 4 1-byte parameters: all of them are indexes into a lookup table of
-; unknown purpose, and must be in the 0-7 range. It is possible that this
-; lookup table held frequencies (or frequency shifts) for FM3 and its operators
-; in special mode.
+; frequency shifts, and must be in the 0-7 range. Each parameter corresponds
+; to one of the operators for channel 3.
 ;
 ;loc_EE8
 cfFM3SpecialMode:
@@ -3323,9 +3321,7 @@ zTrackSkip3bytes:
 		inc	de								; ... and again.
 		ret
 ; ---------------------------------------------------------------------------
-; Frequency shift data used in cfFM3SpecialMode, above. That function, as well
-; as zFMSendFreq, use invalid addresses for read and write (respectively), so
-; that this data is improperly used.
+; Frequency shift data used in cfFM3SpecialMode, above.
 ;loc_F1F
 zFM3FreqShiftTable:
 		dw    0, 132h, 18Eh, 1E4h, 234h, 27Eh, 2C2h, 2F0h
@@ -3678,8 +3674,8 @@ zDoVolEnv:
 		cp	80h								; Is it a command to reset envelope?
 		jr	z, zDoVolEnvReset				; Branch if yes
 
-		inc	bc								; Increment envelope index
-		ld	a, (bc)							; Get value from wherever the hell bc is pointing to
+		inc	bc								; Increment envelope position
+		ld	a, (bc)							; Get next byte from volume envelope
 		jr	zDoVolEnvSetValue				; Use this as new envelope index
 ; ---------------------------------------------------------------------------
 ;loc_1057
@@ -4467,22 +4463,24 @@ Z80_Snd_Driver_End:
 ; Function to make a little endian (z80) pointer
 k68z80Pointer function addr,((((addr&$7FFF)+$8000)<<8)&$FF00)+(((addr&$7FFF)+$8000)>>8)
 
-little_endian function x,(x)<<8&$FF00|(x)>>8&$FF
+little_endian function x,((x)<<8)&$FF00|((x)>>8)&$FF
 
 startBank macro {INTLABEL}
+soundBankDecl := *
 	align	$8000
 __LABEL__ label *
 soundBankStart := __LABEL__
+soundBankPadding := soundBankStart - soundBankDecl
 soundBankName := "__LABEL__"
     endm
 
-DebugSoundbanks := 1
+DebugSoundbanks = 1
 
 finishBank macro
 	if * > soundBankStart + $8000
 		fatal "soundBank \{soundBankName} must fit in $8000 bytes but was $\{*-soundBankStart}. Try moving something to the other bank."
 	elseif (DebugSoundbanks<>0)&&(MOMPASS=1)
-		message "soundBank \{soundBankName} has $\{$8000+soundBankStart-*} bytes free at end."
+		message "soundBank \{soundBankName} has $\{$8000+soundBankStart-*} bytes free at end, needed $\{soundBankPadding} bytes padding at start."
 	endif
     endm
 
@@ -4495,9 +4493,9 @@ offsetBankTableEntry macro ptr
 DACBINCLUDE macro file,{INTLABEL}
 __LABEL__ label *
 	BINCLUDE file
-__LABEL___Len  := little_endian(*-__LABEL__)
-__LABEL___Ptr  := k68z80Pointer(__LABEL__-soundBankStart)
-__LABEL___Bank := soundBankStart
+__LABEL___Len  = little_endian(*-__LABEL__)
+__LABEL___Ptr  = k68z80Pointer(__LABEL__-soundBankStart)
+__LABEL___Bank = soundBankStart
     endm
 
 ; Setup macro for DAC samples.
