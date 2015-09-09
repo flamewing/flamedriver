@@ -137,12 +137,6 @@ zSFXNumber1:		ds.b 1	; Play_Sound_2
 	if (zQueueVariables&1)<>0
 		fatal "zQueueVariables must be at an even address."
 	endif
-zContinuousSFX:		ds.b 1
-zContinuousSFXFlag:	ds.b 1
-zContSFXLoopCnt:	ds.b 1	; Used as a loop counter for continuous SFX
-zSFXSaveIndex:		ds.b 1
-zSFXVoiceTblPtr:	ds.b 2	; 2 bytes
-zSFXTempoDivider:	ds.b 1
 zFadeOutTimeout:	ds.b 1
 zFadeDelay:			ds.b 1
 zFadeDelayTimeout:	ds.b 1
@@ -166,6 +160,12 @@ zTrackInitPos:		ds.b 2	; 2 bytes
 zVoiceTblPtr:		ds.b 2	; 2 bytes
 zSongBank:			ds.b 1	; Bits 15 to 22 of M68K bank address
 PlaySegaPCMFlag:	ds.b 1
+zContinuousSFX:		ds.b 1
+zContinuousSFXFlag:	ds.b 1
+zContSFXLoopCnt:	ds.b 1	; Used as a loop counter for continuous SFX
+zSFXSaveIndex:		ds.b 1
+zSFXVoiceTblPtr:	ds.b 2	; 2 bytes
+zSFXTempoDivider:	ds.b 1
 ; Now starts song and SFX z80 RAM
 ; Max number of music channels: 6 FM + 3 PSG or 1 DAC + 5 FM + 3 PSG
 zTracksStart:
@@ -285,7 +285,9 @@ __LABEL__ label $
 zmake68kPtr function addr,zROMWindow+(addr&7FFFh)
 
 ; function to turn a 68k address into a bank byte
-zmake68kBank function addr,(((addr&3F8000h)/zROMWindow))
+; Note: This discards a bit (should be 0FF8000h instead of 7F8000h). This is
+; relatively harmless since the driver only uses 8 bits anyway.
+zmake68kBank function addr,(((addr&7F8000h)>>15))
 ; ---------------------------------------------------------------------------
 ; ===========================================================================
 ; Entry Point
@@ -3725,9 +3727,9 @@ zSilencePSGChannel:
 		or	a								; Is it an actual PSG channel?
 		ret	p								; Return if not
 		ld	(zPSG), a						; Silence this channel
-		bit	0, (ix+zTrack.PlaybackControl)	; Is this a noise channel?
-		ret	z								; Return if not
-		ld	a, 0FFh							; Command to silence PSG3/Noise channel
+		cp	0DFh							; Was this PSG3/Noise?
+		ret	nz								; Return if not
+		ld	a, 0FFh							; Command to silence Noise channel
 		ld	(zPSG), a						; Do it
 		ret
 ; End of function zSilencePSGChannel
@@ -4021,7 +4023,7 @@ DAC_Banks:
 ; ===========================================================================
 z80_SoundDriverPointers:
 		dw	z80_MusicPointers				; This would be the priority array in other drivers
-		dw	z80_SFXPointers
+		dw	zmake68kPtr(SFXPointers)
 		dw	z80_ModEnvPointers
 		dw	z80_VolEnvPointers
 ; ---------------------------------------------------------------------------
@@ -4264,185 +4266,6 @@ MusPtr_PresSega:	dw zmake68kPtr(Mus_PresSega)
 MusPtr_SKCredits:	dw zmake68kPtr(Mus_SKCredits)
 zMusIDPtr__End
 ; ---------------------------------------------------------------------------
-; ===========================================================================
-; SFX Pointers
-; ===========================================================================
-z80_SFXPointers:
-Sound_33_Ptr:	dw zmake68kPtr(Sound_33)
-Sound_34_Ptr:	dw zmake68kPtr(Sound_34)
-Sound_35_Ptr:	dw zmake68kPtr(Sound_35)
-Sound_36_Ptr:	dw zmake68kPtr(Sound_36)
-Sound_37_Ptr:	dw zmake68kPtr(Sound_37)
-Sound_38_Ptr:	dw zmake68kPtr(Sound_38)
-Sound_39_Ptr:	dw zmake68kPtr(Sound_39)
-Sound_3A_Ptr:	dw zmake68kPtr(Sound_3A)
-Sound_3B_Ptr:	dw zmake68kPtr(Sound_3B)
-Sound_3C_Ptr:	dw zmake68kPtr(Sound_3C)
-Sound_3D_Ptr:	dw zmake68kPtr(Sound_3D)
-Sound_3E_Ptr:	dw zmake68kPtr(Sound_3E)
-Sound_3F_Ptr:	dw zmake68kPtr(Sound_3F)
-Sound_40_Ptr:	dw zmake68kPtr(Sound_40)
-Sound_41_Ptr:	dw zmake68kPtr(Sound_41)
-Sound_42_Ptr:	dw zmake68kPtr(Sound_42)
-Sound_43_Ptr:	dw zmake68kPtr(Sound_43)
-Sound_44_Ptr:	dw zmake68kPtr(Sound_44)
-Sound_45_Ptr:	dw zmake68kPtr(Sound_45)
-Sound_46_Ptr:	dw zmake68kPtr(Sound_46)
-Sound_47_Ptr:	dw zmake68kPtr(Sound_47)
-Sound_48_Ptr:	dw zmake68kPtr(Sound_48)
-Sound_49_Ptr:	dw zmake68kPtr(Sound_49)
-Sound_4A_Ptr:	dw zmake68kPtr(Sound_4A)
-Sound_4B_Ptr:	dw zmake68kPtr(Sound_4B)
-Sound_4C_Ptr:	dw zmake68kPtr(Sound_4C)
-Sound_4D_Ptr:	dw zmake68kPtr(Sound_4D)
-Sound_4E_Ptr:	dw zmake68kPtr(Sound_4E)
-Sound_4F_Ptr:	dw zmake68kPtr(Sound_4F)
-Sound_50_Ptr:	dw zmake68kPtr(Sound_50)
-Sound_51_Ptr:	dw zmake68kPtr(Sound_51)
-Sound_52_Ptr:	dw zmake68kPtr(Sound_52)
-Sound_53_Ptr:	dw zmake68kPtr(Sound_53)
-Sound_54_Ptr:	dw zmake68kPtr(Sound_54)
-Sound_55_Ptr:	dw zmake68kPtr(Sound_55)
-Sound_56_Ptr:	dw zmake68kPtr(Sound_56)
-Sound_57_Ptr:	dw zmake68kPtr(Sound_57)
-Sound_58_Ptr:	dw zmake68kPtr(Sound_58)
-Sound_59_Ptr:	dw zmake68kPtr(Sound_59)
-Sound_5A_Ptr:	dw zmake68kPtr(Sound_5A)
-Sound_5B_Ptr:	dw zmake68kPtr(Sound_5B)
-Sound_5C_Ptr:	dw zmake68kPtr(Sound_5C)
-Sound_5D_Ptr:	dw zmake68kPtr(Sound_5D)
-Sound_5E_Ptr:	dw zmake68kPtr(Sound_5E)
-Sound_5F_Ptr:	dw zmake68kPtr(Sound_5F)
-Sound_60_Ptr:	dw zmake68kPtr(Sound_60)
-Sound_61_Ptr:	dw zmake68kPtr(Sound_61)
-Sound_62_Ptr:	dw zmake68kPtr(Sound_62)
-Sound_63_Ptr:	dw zmake68kPtr(Sound_63)
-Sound_64_Ptr:	dw zmake68kPtr(Sound_64)
-Sound_65_Ptr:	dw zmake68kPtr(Sound_65)
-Sound_66_Ptr:	dw zmake68kPtr(Sound_66)
-Sound_67_Ptr:	dw zmake68kPtr(Sound_67)
-Sound_68_Ptr:	dw zmake68kPtr(Sound_68)
-Sound_69_Ptr:	dw zmake68kPtr(Sound_69)
-Sound_6A_Ptr:	dw zmake68kPtr(Sound_6A)
-Sound_6B_Ptr:	dw zmake68kPtr(Sound_6B)
-Sound_6C_Ptr:	dw zmake68kPtr(Sound_6C)
-Sound_6D_Ptr:	dw zmake68kPtr(Sound_6D)
-Sound_6E_Ptr:	dw zmake68kPtr(Sound_6E)
-Sound_6F_Ptr:	dw zmake68kPtr(Sound_6F)
-Sound_70_Ptr:	dw zmake68kPtr(Sound_70)
-Sound_71_Ptr:	dw zmake68kPtr(Sound_71)
-Sound_72_Ptr:	dw zmake68kPtr(Sound_72)
-Sound_73_Ptr:	dw zmake68kPtr(Sound_73)
-Sound_74_Ptr:	dw zmake68kPtr(Sound_74)
-Sound_75_Ptr:	dw zmake68kPtr(Sound_75)
-Sound_76_Ptr:	dw zmake68kPtr(Sound_76)
-Sound_77_Ptr:	dw zmake68kPtr(Sound_77)
-Sound_78_Ptr:	dw zmake68kPtr(Sound_78)
-Sound_79_Ptr:	dw zmake68kPtr(Sound_79)
-Sound_7A_Ptr:	dw zmake68kPtr(Sound_7A)
-Sound_7B_Ptr:	dw zmake68kPtr(Sound_7B)
-Sound_7C_Ptr:	dw zmake68kPtr(Sound_7C)
-Sound_7D_Ptr:	dw zmake68kPtr(Sound_7D)
-Sound_7E_Ptr:	dw zmake68kPtr(Sound_7E)
-Sound_7F_Ptr:	dw zmake68kPtr(Sound_7F)
-Sound_80_Ptr:	dw zmake68kPtr(Sound_80)
-Sound_81_Ptr:	dw zmake68kPtr(Sound_81)
-Sound_82_Ptr:	dw zmake68kPtr(Sound_82)
-Sound_83_Ptr:	dw zmake68kPtr(Sound_83)
-Sound_84_Ptr:	dw zmake68kPtr(Sound_84)
-Sound_85_Ptr:	dw zmake68kPtr(Sound_85)
-Sound_86_Ptr:	dw zmake68kPtr(Sound_86)
-Sound_87_Ptr:	dw zmake68kPtr(Sound_87)
-Sound_88_Ptr:	dw zmake68kPtr(Sound_88)
-Sound_89_Ptr:	dw zmake68kPtr(Sound_89)
-Sound_8A_Ptr:	dw zmake68kPtr(Sound_8A)
-Sound_8B_Ptr:	dw zmake68kPtr(Sound_8B)
-Sound_8C_Ptr:	dw zmake68kPtr(Sound_8C)
-Sound_8D_Ptr:	dw zmake68kPtr(Sound_8D)
-Sound_8E_Ptr:	dw zmake68kPtr(Sound_8E)
-Sound_8F_Ptr:	dw zmake68kPtr(Sound_8F)
-Sound_90_Ptr:	dw zmake68kPtr(Sound_90)
-Sound_91_Ptr:	dw zmake68kPtr(Sound_91)
-Sound_92_Ptr:	dw zmake68kPtr(Sound_92)
-Sound_93_Ptr:	dw zmake68kPtr(Sound_93)
-Sound_94_Ptr:	dw zmake68kPtr(Sound_94)
-Sound_95_Ptr:	dw zmake68kPtr(Sound_95)
-Sound_96_Ptr:	dw zmake68kPtr(Sound_96)
-Sound_97_Ptr:	dw zmake68kPtr(Sound_97)
-Sound_98_Ptr:	dw zmake68kPtr(Sound_98)
-Sound_99_Ptr:	dw zmake68kPtr(Sound_99)
-Sound_9A_Ptr:	dw zmake68kPtr(Sound_9A)
-Sound_9B_Ptr:	dw zmake68kPtr(Sound_9B)
-Sound_9C_Ptr:	dw zmake68kPtr(Sound_9C)
-Sound_9D_Ptr:	dw zmake68kPtr(Sound_9D)
-Sound_9E_Ptr:	dw zmake68kPtr(Sound_9E)
-Sound_9F_Ptr:	dw zmake68kPtr(Sound_9F)
-Sound_A0_Ptr:	dw zmake68kPtr(Sound_A0)
-Sound_A1_Ptr:	dw zmake68kPtr(Sound_A1)
-Sound_A2_Ptr:	dw zmake68kPtr(Sound_A2)
-Sound_A3_Ptr:	dw zmake68kPtr(Sound_A3)
-Sound_A4_Ptr:	dw zmake68kPtr(Sound_A4)
-Sound_A5_Ptr:	dw zmake68kPtr(Sound_A5)
-Sound_A6_Ptr:	dw zmake68kPtr(Sound_A6)
-Sound_A7_Ptr:	dw zmake68kPtr(Sound_A7)
-Sound_A8_Ptr:	dw zmake68kPtr(Sound_A8)
-Sound_A9_Ptr:	dw zmake68kPtr(Sound_A9)
-Sound_AA_Ptr:	dw zmake68kPtr(Sound_AA)
-Sound_AB_Ptr:	dw zmake68kPtr(Sound_AB)
-Sound_AC_Ptr:	dw zmake68kPtr(Sound_AC)
-Sound_AD_Ptr:	dw zmake68kPtr(Sound_AD)
-Sound_AE_Ptr:	dw zmake68kPtr(Sound_AE)
-Sound_AF_Ptr:	dw zmake68kPtr(Sound_AF)
-Sound_B0_Ptr:	dw zmake68kPtr(Sound_B0)
-Sound_B1_Ptr:	dw zmake68kPtr(Sound_B1)
-Sound_B2_Ptr:	dw zmake68kPtr(Sound_B2)
-Sound_B3_Ptr:	dw zmake68kPtr(Sound_B3)
-Sound_B4_Ptr:	dw zmake68kPtr(Sound_B4)
-Sound_B5_Ptr:	dw zmake68kPtr(Sound_B5)
-Sound_B6_Ptr:	dw zmake68kPtr(Sound_B6)
-Sound_B7_Ptr:	dw zmake68kPtr(Sound_B7)
-Sound_B8_Ptr:	dw zmake68kPtr(Sound_B8)
-Sound_B9_Ptr:	dw zmake68kPtr(Sound_B9)
-Sound_BA_Ptr:	dw zmake68kPtr(Sound_BA)
-Sound_BB_Ptr:	dw zmake68kPtr(Sound_BB)
-Sound_BC_Ptr:	dw zmake68kPtr(Sound_BC)
-Sound_BD_Ptr:	dw zmake68kPtr(Sound_BD)
-Sound_BE_Ptr:	dw zmake68kPtr(Sound_BE)
-Sound_BF_Ptr:	dw zmake68kPtr(Sound_BF)
-Sound_C0_Ptr:	dw zmake68kPtr(Sound_C0)
-Sound_C1_Ptr:	dw zmake68kPtr(Sound_C1)
-Sound_C2_Ptr:	dw zmake68kPtr(Sound_C2)
-Sound_C3_Ptr:	dw zmake68kPtr(Sound_C3)
-Sound_C4_Ptr:	dw zmake68kPtr(Sound_C4)
-Sound_C5_Ptr:	dw zmake68kPtr(Sound_C5)
-Sound_C6_Ptr:	dw zmake68kPtr(Sound_C6)
-Sound_C7_Ptr:	dw zmake68kPtr(Sound_C7)
-Sound_C8_Ptr:	dw zmake68kPtr(Sound_C8)
-Sound_C9_Ptr:	dw zmake68kPtr(Sound_C9)
-Sound_CA_Ptr:	dw zmake68kPtr(Sound_CA)
-Sound_CB_Ptr:	dw zmake68kPtr(Sound_CB)
-Sound_CC_Ptr:	dw zmake68kPtr(Sound_CC)
-Sound_CD_Ptr:	dw zmake68kPtr(Sound_CD)
-Sound_CE_Ptr:	dw zmake68kPtr(Sound_CE)
-Sound_CF_Ptr:	dw zmake68kPtr(Sound_CF)
-Sound_D0_Ptr:	dw zmake68kPtr(Sound_D0)
-Sound_D1_Ptr:	dw zmake68kPtr(Sound_D1)
-Sound_D2_Ptr:	dw zmake68kPtr(Sound_D2)
-Sound_D3_Ptr:	dw zmake68kPtr(Sound_D3)
-Sound_D4_Ptr:	dw zmake68kPtr(Sound_D4)
-Sound_D5_Ptr:	dw zmake68kPtr(Sound_D5)
-Sound_D6_Ptr:	dw zmake68kPtr(Sound_D6)
-Sound_D7_Ptr:	dw zmake68kPtr(Sound_D7)
-Sound_D8_Ptr:	dw zmake68kPtr(Sound_D8)
-Sound_D9_Ptr:	dw zmake68kPtr(Sound_D9)
-Sound_DA_Ptr:	dw zmake68kPtr(Sound_DA)
-Sound_DB_Ptr:	dw zmake68kPtr(Sound_DB)
-	dw zmake68kPtr(Sound_DB)
-	dw zmake68kPtr(Sound_DB)
-	dw zmake68kPtr(Sound_DB)
-	dw zmake68kPtr(Sound_DB)
-Sound_End_Ptr
-; ---------------------------------------------------------------------------
 	if $ > z80_stack_top
 		fatal "Your Z80 tables won't fit before the z80 stack. It's \{$-z80_stack_top}h bytes past the start of the bottom of the stack, at \{z80_stack_top}h"
 	else
@@ -4460,10 +4283,10 @@ z80_SoundDriverPointersEnd:
 
 Z80_Snd_Driver_End:
 
-; Function to make a little endian (z80) pointer
-k68z80Pointer function addr,((((addr&$7FFF)+$8000)<<8)&$FF00)+(((addr&$7FFF)+$8000)>>8)
-
 little_endian function x,((x)<<8)&$FF00|((x)>>8)&$FF
+
+; Function to make a little endian (z80) pointer
+k68z80Pointer function addr,little_endian((addr&$7FFF)+$8000)
 
 startBank macro {INTLABEL}
 soundBankDecl := *
@@ -4486,7 +4309,7 @@ finishBank macro
 
 ; macro to declare an entry in an offset table rooted at a bank
 offsetBankTableEntry macro ptr
-	dc.ATTRIBUTE k68z80Pointer(ptr-soundBankStart)
+	dc.ATTRIBUTE k68z80Pointer(ptr)
     endm
 
 ; Special BINCLUDE wrapper function
@@ -4869,6 +4692,181 @@ DAC_D7_Data:			DACBINCLUDE "Sound/DAC/D7.bin"
 ; ===========================================================================
 SndBank:			startBank
 
+; ===========================================================================
+; SFX Pointers
+; ===========================================================================
+SFXPointers:
+Sound_33_Ptr:	offsetBankTableEntry.w Sound_33
+Sound_34_Ptr:	offsetBankTableEntry.w Sound_34
+Sound_35_Ptr:	offsetBankTableEntry.w Sound_35
+Sound_36_Ptr:	offsetBankTableEntry.w Sound_36
+Sound_37_Ptr:	offsetBankTableEntry.w Sound_37
+Sound_38_Ptr:	offsetBankTableEntry.w Sound_38
+Sound_39_Ptr:	offsetBankTableEntry.w Sound_39
+Sound_3A_Ptr:	offsetBankTableEntry.w Sound_3A
+Sound_3B_Ptr:	offsetBankTableEntry.w Sound_3B
+Sound_3C_Ptr:	offsetBankTableEntry.w Sound_3C
+Sound_3D_Ptr:	offsetBankTableEntry.w Sound_3D
+Sound_3E_Ptr:	offsetBankTableEntry.w Sound_3E
+Sound_3F_Ptr:	offsetBankTableEntry.w Sound_3F
+Sound_40_Ptr:	offsetBankTableEntry.w Sound_40
+Sound_41_Ptr:	offsetBankTableEntry.w Sound_41
+Sound_42_Ptr:	offsetBankTableEntry.w Sound_42
+Sound_43_Ptr:	offsetBankTableEntry.w Sound_43
+Sound_44_Ptr:	offsetBankTableEntry.w Sound_44
+Sound_45_Ptr:	offsetBankTableEntry.w Sound_45
+Sound_46_Ptr:	offsetBankTableEntry.w Sound_46
+Sound_47_Ptr:	offsetBankTableEntry.w Sound_47
+Sound_48_Ptr:	offsetBankTableEntry.w Sound_48
+Sound_49_Ptr:	offsetBankTableEntry.w Sound_49
+Sound_4A_Ptr:	offsetBankTableEntry.w Sound_4A
+Sound_4B_Ptr:	offsetBankTableEntry.w Sound_4B
+Sound_4C_Ptr:	offsetBankTableEntry.w Sound_4C
+Sound_4D_Ptr:	offsetBankTableEntry.w Sound_4D
+Sound_4E_Ptr:	offsetBankTableEntry.w Sound_4E
+Sound_4F_Ptr:	offsetBankTableEntry.w Sound_4F
+Sound_50_Ptr:	offsetBankTableEntry.w Sound_50
+Sound_51_Ptr:	offsetBankTableEntry.w Sound_51
+Sound_52_Ptr:	offsetBankTableEntry.w Sound_52
+Sound_53_Ptr:	offsetBankTableEntry.w Sound_53
+Sound_54_Ptr:	offsetBankTableEntry.w Sound_54
+Sound_55_Ptr:	offsetBankTableEntry.w Sound_55
+Sound_56_Ptr:	offsetBankTableEntry.w Sound_56
+Sound_57_Ptr:	offsetBankTableEntry.w Sound_57
+Sound_58_Ptr:	offsetBankTableEntry.w Sound_58
+Sound_59_Ptr:	offsetBankTableEntry.w Sound_59
+Sound_5A_Ptr:	offsetBankTableEntry.w Sound_5A
+Sound_5B_Ptr:	offsetBankTableEntry.w Sound_5B
+Sound_5C_Ptr:	offsetBankTableEntry.w Sound_5C
+Sound_5D_Ptr:	offsetBankTableEntry.w Sound_5D
+Sound_5E_Ptr:	offsetBankTableEntry.w Sound_5E
+Sound_5F_Ptr:	offsetBankTableEntry.w Sound_5F
+Sound_60_Ptr:	offsetBankTableEntry.w Sound_60
+Sound_61_Ptr:	offsetBankTableEntry.w Sound_61
+Sound_62_Ptr:	offsetBankTableEntry.w Sound_62
+Sound_63_Ptr:	offsetBankTableEntry.w Sound_63
+Sound_64_Ptr:	offsetBankTableEntry.w Sound_64
+Sound_65_Ptr:	offsetBankTableEntry.w Sound_65
+Sound_66_Ptr:	offsetBankTableEntry.w Sound_66
+Sound_67_Ptr:	offsetBankTableEntry.w Sound_67
+Sound_68_Ptr:	offsetBankTableEntry.w Sound_68
+Sound_69_Ptr:	offsetBankTableEntry.w Sound_69
+Sound_6A_Ptr:	offsetBankTableEntry.w Sound_6A
+Sound_6B_Ptr:	offsetBankTableEntry.w Sound_6B
+Sound_6C_Ptr:	offsetBankTableEntry.w Sound_6C
+Sound_6D_Ptr:	offsetBankTableEntry.w Sound_6D
+Sound_6E_Ptr:	offsetBankTableEntry.w Sound_6E
+Sound_6F_Ptr:	offsetBankTableEntry.w Sound_6F
+Sound_70_Ptr:	offsetBankTableEntry.w Sound_70
+Sound_71_Ptr:	offsetBankTableEntry.w Sound_71
+Sound_72_Ptr:	offsetBankTableEntry.w Sound_72
+Sound_73_Ptr:	offsetBankTableEntry.w Sound_73
+Sound_74_Ptr:	offsetBankTableEntry.w Sound_74
+Sound_75_Ptr:	offsetBankTableEntry.w Sound_75
+Sound_76_Ptr:	offsetBankTableEntry.w Sound_76
+Sound_77_Ptr:	offsetBankTableEntry.w Sound_77
+Sound_78_Ptr:	offsetBankTableEntry.w Sound_78
+Sound_79_Ptr:	offsetBankTableEntry.w Sound_79
+Sound_7A_Ptr:	offsetBankTableEntry.w Sound_7A
+Sound_7B_Ptr:	offsetBankTableEntry.w Sound_7B
+Sound_7C_Ptr:	offsetBankTableEntry.w Sound_7C
+Sound_7D_Ptr:	offsetBankTableEntry.w Sound_7D
+Sound_7E_Ptr:	offsetBankTableEntry.w Sound_7E
+Sound_7F_Ptr:	offsetBankTableEntry.w Sound_7F
+Sound_80_Ptr:	offsetBankTableEntry.w Sound_80
+Sound_81_Ptr:	offsetBankTableEntry.w Sound_81
+Sound_82_Ptr:	offsetBankTableEntry.w Sound_82
+Sound_83_Ptr:	offsetBankTableEntry.w Sound_83
+Sound_84_Ptr:	offsetBankTableEntry.w Sound_84
+Sound_85_Ptr:	offsetBankTableEntry.w Sound_85
+Sound_86_Ptr:	offsetBankTableEntry.w Sound_86
+Sound_87_Ptr:	offsetBankTableEntry.w Sound_87
+Sound_88_Ptr:	offsetBankTableEntry.w Sound_88
+Sound_89_Ptr:	offsetBankTableEntry.w Sound_89
+Sound_8A_Ptr:	offsetBankTableEntry.w Sound_8A
+Sound_8B_Ptr:	offsetBankTableEntry.w Sound_8B
+Sound_8C_Ptr:	offsetBankTableEntry.w Sound_8C
+Sound_8D_Ptr:	offsetBankTableEntry.w Sound_8D
+Sound_8E_Ptr:	offsetBankTableEntry.w Sound_8E
+Sound_8F_Ptr:	offsetBankTableEntry.w Sound_8F
+Sound_90_Ptr:	offsetBankTableEntry.w Sound_90
+Sound_91_Ptr:	offsetBankTableEntry.w Sound_91
+Sound_92_Ptr:	offsetBankTableEntry.w Sound_92
+Sound_93_Ptr:	offsetBankTableEntry.w Sound_93
+Sound_94_Ptr:	offsetBankTableEntry.w Sound_94
+Sound_95_Ptr:	offsetBankTableEntry.w Sound_95
+Sound_96_Ptr:	offsetBankTableEntry.w Sound_96
+Sound_97_Ptr:	offsetBankTableEntry.w Sound_97
+Sound_98_Ptr:	offsetBankTableEntry.w Sound_98
+Sound_99_Ptr:	offsetBankTableEntry.w Sound_99
+Sound_9A_Ptr:	offsetBankTableEntry.w Sound_9A
+Sound_9B_Ptr:	offsetBankTableEntry.w Sound_9B
+Sound_9C_Ptr:	offsetBankTableEntry.w Sound_9C
+Sound_9D_Ptr:	offsetBankTableEntry.w Sound_9D
+Sound_9E_Ptr:	offsetBankTableEntry.w Sound_9E
+Sound_9F_Ptr:	offsetBankTableEntry.w Sound_9F
+Sound_A0_Ptr:	offsetBankTableEntry.w Sound_A0
+Sound_A1_Ptr:	offsetBankTableEntry.w Sound_A1
+Sound_A2_Ptr:	offsetBankTableEntry.w Sound_A2
+Sound_A3_Ptr:	offsetBankTableEntry.w Sound_A3
+Sound_A4_Ptr:	offsetBankTableEntry.w Sound_A4
+Sound_A5_Ptr:	offsetBankTableEntry.w Sound_A5
+Sound_A6_Ptr:	offsetBankTableEntry.w Sound_A6
+Sound_A7_Ptr:	offsetBankTableEntry.w Sound_A7
+Sound_A8_Ptr:	offsetBankTableEntry.w Sound_A8
+Sound_A9_Ptr:	offsetBankTableEntry.w Sound_A9
+Sound_AA_Ptr:	offsetBankTableEntry.w Sound_AA
+Sound_AB_Ptr:	offsetBankTableEntry.w Sound_AB
+Sound_AC_Ptr:	offsetBankTableEntry.w Sound_AC
+Sound_AD_Ptr:	offsetBankTableEntry.w Sound_AD
+Sound_AE_Ptr:	offsetBankTableEntry.w Sound_AE
+Sound_AF_Ptr:	offsetBankTableEntry.w Sound_AF
+Sound_B0_Ptr:	offsetBankTableEntry.w Sound_B0
+Sound_B1_Ptr:	offsetBankTableEntry.w Sound_B1
+Sound_B2_Ptr:	offsetBankTableEntry.w Sound_B2
+Sound_B3_Ptr:	offsetBankTableEntry.w Sound_B3
+Sound_B4_Ptr:	offsetBankTableEntry.w Sound_B4
+Sound_B5_Ptr:	offsetBankTableEntry.w Sound_B5
+Sound_B6_Ptr:	offsetBankTableEntry.w Sound_B6
+Sound_B7_Ptr:	offsetBankTableEntry.w Sound_B7
+Sound_B8_Ptr:	offsetBankTableEntry.w Sound_B8
+Sound_B9_Ptr:	offsetBankTableEntry.w Sound_B9
+Sound_BA_Ptr:	offsetBankTableEntry.w Sound_BA
+Sound_BB_Ptr:	offsetBankTableEntry.w Sound_BB
+Sound_BC_Ptr:	offsetBankTableEntry.w Sound_BC
+Sound_BD_Ptr:	offsetBankTableEntry.w Sound_BD
+Sound_BE_Ptr:	offsetBankTableEntry.w Sound_BE
+Sound_BF_Ptr:	offsetBankTableEntry.w Sound_BF
+Sound_C0_Ptr:	offsetBankTableEntry.w Sound_C0
+Sound_C1_Ptr:	offsetBankTableEntry.w Sound_C1
+Sound_C2_Ptr:	offsetBankTableEntry.w Sound_C2
+Sound_C3_Ptr:	offsetBankTableEntry.w Sound_C3
+Sound_C4_Ptr:	offsetBankTableEntry.w Sound_C4
+Sound_C5_Ptr:	offsetBankTableEntry.w Sound_C5
+Sound_C6_Ptr:	offsetBankTableEntry.w Sound_C6
+Sound_C7_Ptr:	offsetBankTableEntry.w Sound_C7
+Sound_C8_Ptr:	offsetBankTableEntry.w Sound_C8
+Sound_C9_Ptr:	offsetBankTableEntry.w Sound_C9
+Sound_CA_Ptr:	offsetBankTableEntry.w Sound_CA
+Sound_CB_Ptr:	offsetBankTableEntry.w Sound_CB
+Sound_CC_Ptr:	offsetBankTableEntry.w Sound_CC
+Sound_CD_Ptr:	offsetBankTableEntry.w Sound_CD
+Sound_CE_Ptr:	offsetBankTableEntry.w Sound_CE
+Sound_CF_Ptr:	offsetBankTableEntry.w Sound_CF
+Sound_D0_Ptr:	offsetBankTableEntry.w Sound_D0
+Sound_D1_Ptr:	offsetBankTableEntry.w Sound_D1
+Sound_D2_Ptr:	offsetBankTableEntry.w Sound_D2
+Sound_D3_Ptr:	offsetBankTableEntry.w Sound_D3
+Sound_D4_Ptr:	offsetBankTableEntry.w Sound_D4
+Sound_D5_Ptr:	offsetBankTableEntry.w Sound_D5
+Sound_D6_Ptr:	offsetBankTableEntry.w Sound_D6
+Sound_D7_Ptr:	offsetBankTableEntry.w Sound_D7
+Sound_D8_Ptr:	offsetBankTableEntry.w Sound_D8
+Sound_D9_Ptr:	offsetBankTableEntry.w Sound_D9
+Sound_DA_Ptr:	offsetBankTableEntry.w Sound_DA
+Sound_DB_Ptr:	offsetBankTableEntry.w Sound_DB
+Sound_End_Ptr
+; ---------------------------------------------------------------------------
 SEGA_PCM:	binclude "Sound/Sega PCM.bin"
 SEGA_PCM_End
 		even
