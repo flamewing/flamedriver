@@ -4125,7 +4125,7 @@ DAC_Banks:
 
 	if $ > 1300h
 		fatal "Your Z80 code won't fit before its tables. It's \{$-1300h}h bytes past the start of music data \{1300h}h"
-	else
+	elseif MOMPASS=2
 		message "Z80 free space before 1300h: \{1300h-$}h bytes"
 	endif
 ; ---------------------------------------------------------------------------
@@ -4324,7 +4324,7 @@ z80_MusicBanks:
 ; ---------------------------------------------------------------------------
 	if $ > z80_stack_top
 		fatal "Your Z80 tables won't fit before the z80 stack. It's \{$-z80_stack_top}h bytes past the start of the bottom of the stack, at \{z80_stack_top}h"
-	else
+	elseif MOMPASS=2
 		message "Z80 free space before stack: \{z80_stack_top-$}h bytes"
 	endif
 
