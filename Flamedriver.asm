@@ -128,6 +128,7 @@ zSoundQueue0:		ds.b 1
 zSoundQueue1:		ds.b 1
 zSoundQueue2:		ds.b 1
 zTempoSpeedup:		ds.b 1
+zTempoSpeedupReq:	ds.b 1
 zNextSound:			ds.b 1
 ; The following 3 variables are used for M68K input
 zMusicNumber:		ds.b 1	; Play_Sound
@@ -137,6 +138,9 @@ zSFXNumber1:		ds.b 1	; Play_Sound_2
 	if (zQueueVariables&1)<>0
 		fatal "zQueueVariables must be at an even address."
 	endif
+zContinuousSFX:		ds.b 1
+zContinuousSFXFlag:	ds.b 1
+zContSFXLoopCnt:	ds.b 1	; Used as a loop counter for continuous SFX
 zFadeOutTimeout:	ds.b 1
 zFadeDelay:			ds.b 1
 zFadeDelayTimeout:	ds.b 1
@@ -160,10 +164,6 @@ zTrackInitPos:		ds.b 2	; 2 bytes
 zVoiceTblPtr:		ds.b 2	; 2 bytes
 zSongBank:			ds.b 1	; Bits 15 to 22 of M68K bank address
 PlaySegaPCMFlag:	ds.b 1
-zContinuousSFX:		ds.b 1
-zContinuousSFXFlag:	ds.b 1
-zContSFXLoopCnt:	ds.b 1	; Used as a loop counter for continuous SFX
-zSFXSaveIndex:		ds.b 1
 zSFXVoiceTblPtr:	ds.b 2	; 2 bytes
 zSFXTempoDivider:	ds.b 1
 ; Now starts song and SFX z80 RAM
@@ -1519,10 +1519,15 @@ zPlayMusic:
 		ld	(zSongBankSave), a				; ... and save it
 		ld	a, (zTempoSpeedup)				; Get current tempo speed-up value...
 		ld	(zTempoSpeedupSave), a			; ... and save it
+		ld	a, (zCurrentTempo)				; Get current tempo
+		ld	(zCurrentTempoSave), a			; Save it
 		ld	a, (zDACEnable)					; Get song DAC enable for extant track...
 		ld	(zDACEnableSave), a				; ... and save it
 		xor	a								; a = 0
 		ld	(zTempoSpeedup), a				; 1-Up should play on normal speed
+		ld	(zContinuousSFX), a				; Clear continuous SFX ID
+		ld	(zContinuousSFXFlag), a			; Clear continuous SFX flag
+		ld	(zContSFXLoopCnt), a			; Clear continuous SFX counter
 		ld	hl, zTracksStart				; hl = pointer to song RAM
 		ld	de, zTracksSaveStart			; de = pointer to RAM area to save the song data to
 		ld	bc, zTracksSaveEnd-zTracksSaveStart		; Number of bytes to copy
@@ -1541,8 +1546,6 @@ zPlayMusic:
 
 		ld	a, MusID_ExtraLife-1			; a = 1-up id-1
 		ld	(zFadeToPrevFlag), a			; Set fade-to-prev flag to it
-		ld	a, (zCurrentTempo)				; Get current tempo
-		ld	(zCurrentTempoSave), a			; Save it
 		ld	hl, (zVoiceTblPtr)				; Get voice table pointer
 		ld	(zVoiceTblPtrSave), hl			; Save it
 		call	zMusicFadeSimple
@@ -1550,7 +1553,7 @@ zPlayMusic:
 ; ---------------------------------------------------------------------------
 
 zPlayMusic_DoFade:
-		call	zMusicFade					; Stop all music
+		call	zMusicFadeKeepSFX			; Stop all music
 
 ;loc_5DE
 zBGMLoad:
@@ -1597,7 +1600,23 @@ zBGMLoad:
 		push	bc							; Save bc (gets damaged by ldi instructions)
 		ld	hl, (zTrackInitPos)				; Restore saved position for init bytes
 		ldi									; *de++ = *hl++	(copy initial playback control)
+		ex	af, af'							; Save tempo divider
+		push	hl							; Save track data
+		ld	a, (hl)							; Get initial channel assignment bits
+		call	zIsSFXTrackOverriding_Part2	; Is SFX overriding?
+		pop	hl								; Restore track data
+		jp	p, .not_overriding_fm			; Branch if not
+		ex	hl, de							; Swap hl and de
+		dec	hl								; Point to track playback control
+		set	2, (hl)							; Set 'SFX is overriding this track' bit
+		inc	hl								; Point back to channel assignment bits
+		ex	hl, de							; Swap hl and de
+
+.not_overriding_fm:
 		ldi									; *de++ = *hl++	(copy channel assignment bits)
+
+.continue_fm_init:
+		ex	af, af'							; Restore tempo divider
 		ld	(de), a							; Copy tempo divider
 		inc	de								; Advance pointer
 		ld	(zTrackInitPos), hl				; Save current position in channel assignment bits
@@ -1650,8 +1669,24 @@ zBGMLoad:
 .psg_loop:
 		push	bc							; Save bc (gets damaged by ldi instructions)
 		ld	hl, (zTrackInitPos)				; Restore saved position for init bytes
-		ldi									; *de++ = *hl++
-		ldi									; *de++ = *hl++
+		ldi									; *de++ = *hl++	(copy initial playback control)
+		ex	af, af'							; Save tempo divider
+		push	hl							; Save track data
+		ld	a, (hl)							; Get initial channel assignment bits
+		call	zIsSFXTrackOverriding_Part2	; Is SFX overriding?
+		pop	hl								; Restore track data
+		jp	p, .not_overriding_psg			; Branch if not
+		ex	hl, de							; Swap hl and de
+		dec	hl								; Point to track playback control
+		set	2, (hl)							; Set 'SFX is overriding this track' bit
+		inc	hl								; Point back to channel assignment bits
+		ex	hl, de							; Swap hl and de
+
+.not_overriding_psg:
+		ldi									; *de++ = *hl++	(copy channel assignment bits)
+
+.continue_psg_init:
+		ex	af, af'							; Restore tempo divider
 		ld	(de), a							; Copy tempo divider
 		inc	de								; Advance pointer
 		ld	(zTrackInitPos), hl				; Save current position in channel assignment bits
@@ -1662,6 +1697,7 @@ zBGMLoad:
 		call	zZeroFillTrackRAM			; Init the remainder of the track RAM
 		pop	bc								; Restore bc
 		djnz	.psg_loop					; Loop for all tracks (stored in b)
+		; FALL THROUGH
 
 ; =============== S U B	R O U T	I N E =======================================
 ; Clears next sound to play.
@@ -1802,37 +1838,47 @@ zSFXTrackInitLoop:
 		ld	(ix+zTrack.VoicesLow), l		; Low byte of voice pointer
 		ld	(ix+zTrack.VoicesHigh), h		; High byte of voice pointer
 		call	zKeyOffIfActive				; Kill channel notes
-		call	zFMClearSSGEGOps			; Clear SSG-EG operators for track's channels
+		bit	7, (ix+zTrack.VoiceControl)		; Is this a PSG track?
+		call	z, zFMClearSSGEGOps			; Clear SSG-EG operators for track's channels if not
+		call	zSilencePSGChannel			; Silence PSG channel
 		pop		hl							; Restore hl
 		pop		bc							; Restore bc
 		djnz	zSFXTrackInitLoop			; Loop for all SFX tracks
 		jp	zClearNextSound
 
 ; =============== S U B	R O U T	I N E =======================================
+; Gets SFX channel index for given channel assignment bits
 ;
-;sub_78F
-zGetSFXChannelPointers:
-		bit	7, c							; Is this a PSG track?
-		jr	nz, .is_psg						; Branch if yes
-		ld	a, c							; a = c
-		bit	2, a							; Is this FM4, FM5 or FM6?
-		jr	z, .get_ptrs					; Branch if not
-		dec	a								; Remove gap between FM3 and FM4+
-		jr	.get_ptrs
+; Input:  a     Channel assignment bits
+; Output: a     SFX channel index
+;         f     m for FM1/FM2, z for FM3, p for FM4-FM6 or PSG1-PSG3
+zGetSFXChannelIndex:
+		or	a								; Is this a PSG track?
+		jp	m, .is_psg						; Branch if yes
+		sub	3								; Is this FM4, FM5 or FM6?
+		ret	nc								; Branch if yes
+		inc	a								; Is this FM3?
+		ret
 ; ---------------------------------------------------------------------------
 .is_psg:
-		call	zSilencePSGChannel			; Silence channel at ix
-		ld	a, c							; a = channel identifier
 		; Shift high 3 bits to low bits so that we can convert it to a table index
 		rlca
 		rlca
 		rlca
 		and	7
-		add	a, 2							; Compensate for subtraction below
+		ret
 
-.get_ptrs:
-		sub	2								; Start table at FM3
-		ld	(zSFXSaveIndex), a				; Save index of overridden channel
+; =============== S U B	R O U T	I N E =======================================
+; Gets SFX channel and overridden channel for given channel assignment bits
+;
+; Input:  c     Channel assignment bits
+; Output: ix    SFX channel
+;         hl    Overridden channel
+;sub_78F
+zGetSFXChannelPointers:
+		ld	a, c							; a = channel identifier
+		call	zGetSFXChannelIndex			; Get channel index
+		ret	m								; Return if FM1 or FM2
 		push	af							; Save af
 		ld	hl, zSFXChannelData				; Pointer table for track RAM
 		rst	PointerTableOffset				; hl = track RAM
@@ -1845,6 +1891,27 @@ zGetSFXChannelPointers:
 		jp	PointerTableOffset				; hl = RAM destination to mark as overridden
 ; End of function zGetSFXChannelPointers
 
+; =============== S U B	R O U T	I N E =======================================
+; Checks if matching SFX channel is overriding the channel pointed to by ix.
+;
+; Input:  ix    Pointer to channel data
+; Output: a     Playback control byte of matching SFX track or 0 for FM1/FM2
+;         f     m if matching SFX track is playing, 0 otherwise
+zIsSFXTrackOverriding:
+		ld	a, (ix+zTrack.VoiceControl)		; Fetch channel assignment byte
+
+zIsSFXTrackOverriding_Part2:
+		call	zGetSFXChannelIndex			; Get channel index
+		jp	m, .is_fm1fm2					; Return if FM1 or FM2
+		ld	hl, zSFXChannelData				; Pointer table for track RAM
+		rst	PointerTableOffset				; hl = track RAM
+		ld	a, (hl)							; Get playback control byte for SFX track
+		or	a								; Is SFX track overriding this?
+		ret
+; ---------------------------------------------------------------------------
+.is_fm1fm2:
+		xor	a								; Return 0 (aka 'SFX track not playing')
+		ret
 
 ; =============== S U B	R O U T	I N E =======================================
 ;
@@ -2086,19 +2153,37 @@ zDoMusicFadeIn:
 		ret
 ; End of function zDoMusicFadeIn
 
+; =============== S U B	R O U T	I N E =======================================
+; Wipes music data (except SFX stuff) and fades all channels not overridden by
+; SFX channels.
+zMusicFadeKeepSFX:
+		; The following block sets to zero the z80 RAM that keeps music and SFX state
+		ld	hl, zFadeOutTimeout				; Starting source address for copy
+		ld	de, zFadeDelay					; Starting destination address for copy
+		ld	bc, zTracksEnd-zFadeDelay		; Length of copy
+		jp	zMusicFade.common
 
 ; =============== S U B	R O U T	I N E =======================================
 ; Wipes music data and fades all FM, PSG and DAC channels.
 ;sub_944
 zMusicFade:
 		; The following block sets to zero the z80 RAM that keeps music and SFX state
-		ld	hl, zFadeOutTimeout				; Starting source address for copy
-		ld	de, zFadeDelay					; Starting destination address for copy
+		ld	hl, zContinuousSFX				; Starting source address for copy
+		ld	de, zContinuousSFXFlag			; Starting destination address for copy
 		ld	bc, zTracksSaveEnd-zFadeDelay	; Length of copy
+
+.common:
 		xor	a								; a = 0
 		ld	(hl), a							; Initial value of zero
 		ldir								; while (--length) *de++ = *hl++
+		ld	a, (zTempoSpeedupReq)			; Get flag indicating if tempo is to be kept
+		or	a								; Is it set?
+		jr	nz, .keep_tempo					; Branch if yes
 		ld	(zTempoSpeedup), a				; Fade in normal speed
+
+.keep_tempo:
+		xor	a								; a = 0
+		ld	(zTempoSpeedupReq), a			; Clear for next time around
 
 zMusicFadeSimple:
 		ld	ix, zFMDACInitBytes				; Initialization data for channels
@@ -2106,19 +2191,41 @@ zMusicFadeSimple:
 
 .loop:
 		push	bc							; Save bc for loop
+		call	zIsSFXTrackOverriding		; Is SFX overriding?
+		jp	m, .skip_fmchannel				; Branch if yes
 		call	zFMSilenceChannel			; Silence track's channel
 		call	zFMClearSSGEGOps			; Clears the SSG-EG operators for this channel
+		ld	a, (ix+zTrack.VoiceControl)		; Fetch channel assignment byte
+		cp	2								; Is this FM3?
+		jr	nz, .skip_fmchannel				; Branch if yes
+		ld	c, 0							; FM3 mode: normal mode
+		ld	a, 27h							; FM3 special settings
+		call	zWriteFMI					; Set it
+
+.skip_fmchannel:
 		inc	ix								; Go to next channel byte
 		inc	ix								; But skip the 80h
 		pop	bc								; Restore bc for loop counter
 		djnz	.loop						; Loop while b > 0
 
+		ld	ix, zPSGInitBytes				; Initialization data for channels
+		ld	b, (zTracksEnd-zSongPSG1)/zTrack.len	; Loop 4 times: 3 PSG channels + noise channel
+
+.looppsg:
+		push	bc							; Save bc for loop
+		call	zIsSFXTrackOverriding		; Is SFX overriding?
+		call	p, zSilencePSGChannel		; Silence if not
+		inc	ix								; Go to next channel byte
+		inc	ix								; But skip the 80h
+		pop	bc								; Restore bc for loop counter
+		djnz	.looppsg					; Loop for all PSG channels
+
 		xor	a								; a = 0
 		ld	(zFadeOutTimeout), a			; Set fade timeout to zero... again
-		call	zPSGSilenceAll				; Silence PSG
-		ld	c, 0							; Write a zero...
+		ld	c, a							; Write a zero...
 		ld	a, 2Bh							; ... to DAC enable register
 		call	zWriteFMI					; Disable DAC
+		jp	zClearNextSound
 
 ;loc_979
 zFM3NormalMode:
@@ -2336,6 +2443,12 @@ zFadeInToPrevious:
 		ld	de, zTracksStart				; Start of track data
 		ld	bc, zTracksSaveEnd-zTracksSaveStart	; Number of bytes to copy
 		ldir								; while (bc-- > 0) *de++ = *hl++;
+		xor	a								; a = 0
+		ld	hl, zTracksSaveStart			; Start of saved track data
+		ld	de, zTracksSaveStart+1			; Start of track data
+		ld	(hl), a							; Prepare to zero-fill save RAM
+		ld	bc, zTracksSaveEnd-zTracksSaveStart-1	; Number of bytes to copy
+		ldir								; while (bc-- > 0) *de++ = *hl++;
 		ld	a, (zDACEnableSave)				; Get saved DAC enable
 		ld	(zDACEnable), a					; Restore it
 		or	a
@@ -2438,7 +2551,6 @@ zUpdateDACTrack_cont:
 		ld	ix, zSongFM6					; Get pointer to FM6 track data
 		set	2, (ix+zTrack.PlaybackControl)	; Mark track as being overridden
 		call	zKeyOffIfActive				; Kill note (will do nothing if 'do not attack' is on)
-		call	zFM3NormalMode				; Set FM3 to normal mode
 		pop	ix								; Restore track pointer
 
 .get_duration:
@@ -2982,6 +3094,7 @@ cfSetModulation:
 cfStopTrack:
 		res	7, (ix+zTrack.PlaybackControl)	; Clear 'track playing' flag
 		call	zKeyOffIfActive				; Send key off for track channel
+		call	zSilencePSGChannel			; Silence PSG channel
 		ld	c, (ix+zTrack.VoiceControl)		; c = voice control bits
 		push	ix							; Save track pointer
 		call	zGetSFXChannelPointers		; ix = track pointer, hl = overridden track pointer
