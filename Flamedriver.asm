@@ -4135,7 +4135,7 @@ DAC_Banks:
 ; Pointers
 ; ===========================================================================
 z80_SoundDriverPointers:
-		dw	z80_MusicPointers				; This would be the priority array in other drivers
+		dw	zmake68kPtr(MusicPointers)
 		dw	zmake68kPtr(SFXPointers)
 		dw	z80_ModEnvPointers
 		dw	z80_VolEnvPointers
@@ -4321,63 +4321,6 @@ z80_MusicBanks:
 	db zmake68kBank(Mus_Drown)
 	db zmake68kBank(Mus_PresSega)
 	db zmake68kBank(Mus_SKCredits)
-; ---------------------------------------------------------------------------
-; ===========================================================================
-; Music Pointers
-; ===========================================================================
-z80_MusicPointers:
-MusPtr_AIZ1:		dw zmake68kPtr(Mus_AIZ1)
-MusPtr_AIZ2:		dw zmake68kPtr(Mus_AIZ2)
-MusPtr_HCZ1:		dw zmake68kPtr(Mus_HCZ1)
-MusPtr_HCZ2:		dw zmake68kPtr(Mus_HCZ2)
-MusPtr_MGZ1:		dw zmake68kPtr(Mus_MGZ1)
-MusPtr_MGZ2:		dw zmake68kPtr(Mus_MGZ2)
-MusPtr_CNZ1:		dw zmake68kPtr(Mus_CNZ1)
-MusPtr_CNZ2:		dw zmake68kPtr(Mus_CNZ2)
-MusPtr_FBZ1:		dw zmake68kPtr(Mus_FBZ1)
-MusPtr_FBZ2:		dw zmake68kPtr(Mus_FBZ2)
-MusPtr_ICZ1:		dw zmake68kPtr(Mus_ICZ1)
-MusPtr_ICZ2:		dw zmake68kPtr(Mus_ICZ2)
-MusPtr_LBZ1:		dw zmake68kPtr(Mus_LBZ1)
-MusPtr_LBZ2:		dw zmake68kPtr(Mus_LBZ2)
-MusPtr_MHZ1:		dw zmake68kPtr(Mus_MHZ1)
-MusPtr_MHZ2:		dw zmake68kPtr(Mus_MHZ2)
-MusPtr_SOZ1:		dw zmake68kPtr(Mus_SOZ1)
-MusPtr_SOZ2:		dw zmake68kPtr(Mus_SOZ2)
-MusPtr_LRZ1:		dw zmake68kPtr(Mus_LRZ1)
-MusPtr_LRZ2:		dw zmake68kPtr(Mus_LRZ2)
-MusPtr_SSZ:			dw zmake68kPtr(Mus_SSZ)
-MusPtr_DEZ1:		dw zmake68kPtr(Mus_DEZ1)
-MusPtr_DEZ2:		dw zmake68kPtr(Mus_DEZ2)
-MusPtr_Minib_SK:	dw zmake68kPtr(Mus_Minib_SK)
-MusPtr_Boss:		dw zmake68kPtr(Mus_Boss)
-MusPtr_DDZ:			dw zmake68kPtr(Mus_DDZ)
-MusPtr_PachBonus:	dw zmake68kPtr(Mus_PachBonus)
-MusPtr_SpecialS:	dw zmake68kPtr(Mus_SpecialS)
-MusPtr_SlotBonus:	dw zmake68kPtr(Mus_SlotBonus)
-MusPtr_GumBonus:	dw zmake68kPtr(Mus_GumBonus)
-MusPtr_Knux:		dw zmake68kPtr(Mus_Knux)
-MusPtr_ALZ:			dw zmake68kPtr(Mus_ALZ)
-MusPtr_BPZ:			dw zmake68kPtr(Mus_BPZ)
-MusPtr_DPZ:			dw zmake68kPtr(Mus_DPZ)
-MusPtr_CGZ:			dw zmake68kPtr(Mus_CGZ)
-MusPtr_EMZ:			dw zmake68kPtr(Mus_EMZ)
-MusPtr_Title:		dw zmake68kPtr(Mus_Title)
-MusPtr_S3Credits:	dw zmake68kPtr(Mus_S3Credits)
-MusPtr_GameOver:	dw zmake68kPtr(Mus_GameOver)
-MusPtr_Continue:	dw zmake68kPtr(Mus_Continue)
-MusPtr_Results:		dw zmake68kPtr(Mus_Results)
-MusPtr_1UP:			dw zmake68kPtr(Mus_1UP)
-MusPtr_Emerald:		dw zmake68kPtr(Mus_Emerald)
-MusPtr_Invic:		dw zmake68kPtr(Mus_Invic)
-MusPtr_2PMenu:		dw zmake68kPtr(Mus_2PMenu)
-MusPtr_Minib_SK:	dw zmake68kPtr(Mus_Minib_SK)
-MusPtr_Menu:		dw zmake68kPtr(Mus_Menu)
-MusPtr_FinalBoss:	dw zmake68kPtr(Mus_FinalBoss)
-MusPtr_Drown:		dw zmake68kPtr(Mus_Drown)
-MusPtr_PresSega:	dw zmake68kPtr(Mus_PresSega)
-MusPtr_SKCredits:	dw zmake68kPtr(Mus_SKCredits)
-zMusIDPtr__End
 ; ---------------------------------------------------------------------------
 	if $ > z80_stack_top
 		fatal "Your Z80 tables won't fit before the z80 stack. It's \{$-z80_stack_top}h bytes past the start of the bottom of the stack, at \{z80_stack_top}h"
@@ -4651,35 +4594,75 @@ DAC_D8_Setup:			DAC_Setup $16,DAC_D8_D9_Data
 DAC_D9_Setup:			DAC_Setup $20,DAC_D8_D9_Data
 	endif
 	endm
+
+declsong macro song
+	ifndef song_Ptr
+song_Ptr	label *
+	endif
+	dc.w	k68z80Pointer(song)
+	endm
+
+Music_Master_Table macro
+	ifndef MusicPointers
+MusicPointers label *
+	endif
+	declsong Mus_AIZ1
+	declsong Mus_AIZ2
+	declsong Mus_HCZ1
+	declsong Mus_HCZ2
+	declsong Mus_MGZ1
+	declsong Mus_MGZ2
+	declsong Mus_CNZ1
+	declsong Mus_CNZ2
+	declsong Mus_FBZ1
+	declsong Mus_FBZ2
+	declsong Mus_ICZ1
+	declsong Mus_ICZ2
+	declsong Mus_LBZ1
+	declsong Mus_LBZ2
+	declsong Mus_MHZ1
+	declsong Mus_MHZ2
+	declsong Mus_SOZ1
+	declsong Mus_SOZ2
+	declsong Mus_LRZ1
+	declsong Mus_LRZ2
+	declsong Mus_SSZ
+	declsong Mus_DEZ1
+	declsong Mus_DEZ2
+	declsong Mus_Minib_SK
+	declsong Mus_Boss
+	declsong Mus_DDZ
+	declsong Mus_PachBonus
+	declsong Mus_SpecialS
+	declsong Mus_SlotBonus
+	declsong Mus_GumBonus
+	declsong Mus_Knux
+	declsong Mus_ALZ
+	declsong Mus_BPZ
+	declsong Mus_DPZ
+	declsong Mus_CGZ
+	declsong Mus_EMZ
+	declsong Mus_Title
+	declsong Mus_S3Credits
+	declsong Mus_GameOver
+	declsong Mus_Continue
+	declsong Mus_Results
+	declsong Mus_1UP
+	declsong Mus_Emerald
+	declsong Mus_Invic
+	declsong Mus_2PMenu
+	declsong Mus_Minib_SK
+	declsong Mus_Menu
+	declsong Mus_FinalBoss
+	declsong Mus_Drown
+	declsong Mus_PresSega
+	declsong Mus_SKCredits
+	ifndef zMusIDPtr__End
+zMusIDPtr__End label *
+	endif
+	endm
 ; ---------------------------------------------------------------------------
-; ===========================================================================
-; Playlist
-; ===========================================================================
-LevelMusic_Playlist:
-	dc.b $01,$02
-	dc.b $03,$04
-	dc.b $05,$06
-	dc.b $07,$08
-	dc.b $09,$0A
-	dc.b $0B,$0C
-	dc.b $0D,$0E
-	dc.b $0F,$10
-	dc.b $11,$12
-	dc.b $13,$14
-	dc.b $15,$15
-	dc.b $16,$17
-	dc.b $1A,$1A
-	dc.b $1C,$15
-	dc.b $20,$20
-	dc.b $21,$21
-	dc.b $22,$22
-	dc.b $23,$23
-	dc.b $24,$24
-	dc.b $1E,$1E
-	dc.b $1B,$1B
-	dc.b $1D,$1D
-	dc.b $19,$14
-	dc.b $17,$14
+
 ; ---------------------------------------------------------------------------
 ; ===========================================================================
 ; DAC Banks
@@ -5162,6 +5145,7 @@ Sound_DB:	include "Sound/SFX/DB.asm"
 ; Music Bank 1
 ; ---------------------------------------------------------------------------
 Mus_Bank1_Start:	startBank
+	Music_Master_Table
 z80_UniVoiceBank:	include "Sound/UniBank.asm"
 Mus_FBZ1:			include	"Sound/Music/FBZ1.asm"
 Mus_FBZ2:			include	"Sound/Music/FBZ2.asm"
@@ -5188,6 +5172,7 @@ Mus_Knux:			include	"Sound/Music/Knuckles.asm"
 ; Music Bank 2
 ; ---------------------------------------------------------------------------
 Mus_Bank2_Start:	startBank
+	Music_Master_Table
 					include "Sound/UniBank.asm"
 Mus_Title:			include	"Sound/Music/Title.asm"
 Mus_1UP:			include	"Sound/Music/1UP.asm"
@@ -5207,6 +5192,7 @@ Mus_CNZ1:			include	"Sound/Music/CNZ1.asm"
 ; Music Bank 3
 ; ---------------------------------------------------------------------------
 Mus_Bank3_Start:	startBank
+	Music_Master_Table
 					include "Sound/UniBank.asm"
 Mus_ICZ2:			include	"Sound/Music/ICZ2.asm"
 Mus_ICZ1:			include	"Sound/Music/ICZ1.asm"
@@ -5227,6 +5213,7 @@ Mus_PresSega:		include	"Sound/Music/Game Complete.asm"
 ; Music Bank 4
 ; ---------------------------------------------------------------------------
 Mus_Bank4_Start:	startBank
+	Music_Master_Table
 					include "Sound/UniBank.asm"
 Mus_GumBonus:		include	"Sound/Music/Gum Ball Machine.asm"
 Mus_ALZ:			include	"Sound/Music/Azure Lake.asm"
