@@ -327,8 +327,8 @@ panCenter set $C0 ; silly Americans :U
 	dc.b $E0,direction+amsfms
 	endm
 
-; E1xx - Set channel frequency displacement to xx
-smpsAlterNote macro val
+; E1xx - Set channel detune to val
+smpsDetune macro val
 	dc.b	$E1,val
 	endm
 
@@ -401,7 +401,7 @@ smpsNoteFill macro val
 	endm
 
 ; Add xx to channel pitch
-smpsAlterPitch macro val
+smpsChangeTransposition macro val
 	if SonicDriverVer>=3
 		dc.b	$FB,val
 	else
@@ -462,16 +462,12 @@ smpsStopSpecial macro
 	endm
 
 ; EFxx[yy] - Set Voice of FM channel to xx; xx < 0 means yy present
-smpsSetvoice macro voice,songID
+smpsFMvoice macro voice,songID
 	if (SonicDriverVer>=3)&&("songID"<>"")
 		dc.b	$EF,voice|$80,songID+$81
 	else
 		dc.b	$EF,voice
 	endif
-	endm
-
-smpsFMvoice macro
-	smpsSetvoice ALLARGS
 	endm
 
 ; F0wwxxyyzz - Modulation - ww: wait time - xx: modulation speed - yy: change per step - zz: number of steps
@@ -645,10 +641,6 @@ smpsFMVolEnv macro tone,mask
 	dc.b	$FF,$06,tone,mask
 	endm
 
-smpsFMFlutter macro tone,mask
-	smpsFMVolEnv	tone,mask
-	endm
-
 smpsResetSpindashRev macro val
 	dc.b	$FF,$07
 	endm
@@ -676,7 +668,7 @@ smpsPlayMusic macro index
 ; ---------------------------------------------------------------------------
 ; S1/S2 only coordination flag
 ; Sets D1L to maximum volume (minimum attenuation) and RR to maximum for operators 3 and 4 of FM1
-smpsWeirdD1LRR macro
+smpsMaxRelRate macro
 	if SonicDriverVer>=3
 		; Emulate it in S3/S&K/S3D driver
 		smpsFMICommand $88,$0F
@@ -684,6 +676,27 @@ smpsWeirdD1LRR macro
 	else
 		dc.b	$F9
 	endif
+	endm
+; ---------------------------------------------------------------------------
+; Backwards compatibility
+smpsAlterNote macro
+	smpsDetune	ALLARGS
+	endm
+
+smpsAlterPitch macro
+	smpsChangeTransposition	ALLARGS
+	endm
+
+smpsFMFlutter macro
+	smpsFMVolEnv	ALLARGS
+	endm
+
+smpsWeirdD1LRR macro
+	smpsMaxRelRate ALLARGS
+	endm
+
+smpsSetvoice macro
+	smpsFMvoice ALLARGS
 	endm
 ; ---------------------------------------------------------------------------
 ; Macros for FM instruments

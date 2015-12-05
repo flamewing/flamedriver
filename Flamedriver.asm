@@ -49,7 +49,7 @@ zTrack STRUCT DOTS
 	TempoDivider:		ds.b 1	; S&K: 2
 	DataPointerLow:		ds.b 1	; S&K: 3
 	DataPointerHigh:	ds.b 1	; S&K: 4
-	KeyOffset:			ds.b 1	; S&K: 5
+	Transpose:			ds.b 1	; S&K: 5
 	Volume:				ds.b 1	; S&K: 6
 	ModulationCtrl:		ds.b 1	; S&K: 7		; Modulation is on if nonzero. If only bit 7 is set, then it is normal modulation; otherwise, this-1 is index on modulation envelope pointer table
 	VoiceIndex:			ds.b 1	; S&K: 8		; FM instrument/PSG voice
@@ -64,7 +64,7 @@ zTrack STRUCT DOTS
 	; ---------------------------------
 	FreqHigh:			ds.b 1	; S&K: 0Eh		; For FM/PSG channels
 	VoiceSongID:		ds.b 1	; S&K: 0Fh		; For using voices from a different song
-	FreqDisplacement:	ds.b 1	; S&K: 10h/11h	; In S&K, some places used 11h instead of 10h
+	Detune:				ds.b 1	; S&K: 10h/11h	; In S&K, some places used 11h instead of 10h
 						;ds.b 6	; S&K: 11h-16h	; Unused
 	VolEnv:				ds.b 1	; S&K: 17h		; Used for dynamic volume adjustments
 	; ---------------------------------
@@ -613,7 +613,7 @@ zUpdateFMorPSGTrack:
 		bit	4, (ix+zTrack.PlaybackControl)	; Is track resting?
 		ret	nz								; Return if yes
 		call	zPrepareModulation			; Initialize modulation
-		call	zDoPitchSlide				; Apply pitch slide and frequency displacement
+		call	zDoPitchSlide				; Apply pitch slide and detune
 		call	zDoModulation				; Apply modulation
 		call	zFMSendFreq					; Send frequency to YM2612
 		jp	zFMNoteOn						; Note on on all operators
@@ -629,7 +629,7 @@ zUpdateFMorPSGTrack:
 		jp	z, zKeyOffIfActive				; Send key off if needed
 
 .keep_going:
-		call	zDoPitchSlide				; Apply pitch slide and frequency displacement
+		call	zDoPitchSlide				; Apply pitch slide and detune
 		bit	6, (ix+zTrack.PlaybackControl)	; Is 'sustain frequency' bit set?
 		ret	nz								; Return if yes
 		call	zDoModulation				; Apply modulation then fall through
@@ -755,7 +755,7 @@ zGetNextNote_cont:
 		jr	zGetNoteDuration
 ; ---------------------------------------------------------------------------
 .got_note:
-		add	a, (ix+zTrack.KeyOffset)		; Add in key displacement
+		add	a, (ix+zTrack.Transpose)		; Add in transposition
 		ld	hl, zPSGFrequencies				; PSG frequency lookup table
 		push	af							; Save af
 		rst	PointerTableOffset				; hl = frequency value for note
@@ -806,7 +806,7 @@ zApplyPitchSlide:
 		; in the Battletoads sound driver.
 		ld	a, (de)							; Get new pitch slide value from track
 		inc	de								; Advance pointer
-		ld	(ix+zTrack.FreqDisplacement), a	; Store pitch slide
+		ld	(ix+zTrack.Detune), a			; Store detune
 		jr	zGetRawDuration
 ; ---------------------------------------------------------------------------
 ;loc_2E8
@@ -818,7 +818,7 @@ zAltFreqMode:
 		; Each byte on the track is either a coordination flag (0E0h to 0FFh) or
 		; the high byte of a frequency. For the latter case, the following byte
 		; is then the low byte of this same frequency.
-		; If the frequency is nonzero, the (sign extended) key displacement is
+		; If the frequency is nonzero, the (sign extended) transposition is
 		; simply *added* to this frequency.
 		; After the frequency, there is then a byte that is unused.
 		; Finally, there is a raw duration byte following.
@@ -832,12 +832,12 @@ zAltFreqMode:
 		ld	l, a							; l = last byte read from track
 		or	h								; Is hl nonzero?
 		jr	z, .got_zero					; Branch if not
-		ld	a, (ix+zTrack.KeyOffset)		; a = key displacement
-		ld	c, a							; bc = sign extension of key displacement
-		rla									; Carry contains sign of key displacement
+		ld	a, (ix+zTrack.Transpose)		; a = transposition
+		ld	c, a							; bc = sign extension of transposition
+		rla									; Carry contains sign of transposition
 		sbc	a, a							; a = 0 or -1 if carry is 0 or 1
-		ld	b, a							; bc = sign extension of key displacement
-		add	hl, bc							; hl += key displacement
+		ld	b, a							; bc = sign extension of transposition
+		add	hl, bc							; hl += transposition
 
 .got_zero:
 		ld	(ix+zTrack.FreqLow), l			; Store low byte of note frequency
@@ -846,7 +846,7 @@ zAltFreqMode:
 		jr	z, zGetRawDuration
 		ld	a, (de)							; Get pitch slide value from the track
 		inc	de								; Advance to next byte in track
-		ld	(ix+zTrack.FreqDisplacement), a	; Store pitch slide
+		ld	(ix+zTrack.Detune), a			; Store detune
 ;loc_306
 zGetRawDuration:
 		ld	a, (de)							; Get raw duration from track
@@ -1180,7 +1180,7 @@ zlocApplyModEnvMod:
 ; End of function zDoModulation
 
 ; =============== S U B	R O U T	I N E =======================================
-; Adds the current frequency displacement (signed) to note frequency.
+; Adds the current detune (signed) to note frequency.
 ;
 ; Input:   ix    Track RAM
 ; Output:  hl    Shifted frequency
@@ -1192,11 +1192,11 @@ zlocApplyModEnvMod:
 zDoPitchSlide:
 		ld	h, (ix+zTrack.FreqHigh)			; h = high byte of note frequency
 		ld	l, (ix+zTrack.FreqLow)			; l = low byte of note frequency
-		ld	a, (ix+zTrack.FreqDisplacement)	; a = frequency displacement
-		ld	c, a							; bc = sign extension of frequency displacement
-		rla									; Carry contains sign of frequency displacement
+		ld	a, (ix+zTrack.Detune)			; a = detune
+		ld	c, a							; bc = sign extension of detune
+		rla									; Carry contains sign of detune
 		sbc	a, a							; a = 0 or -1 if carry is 0 or 1
-		ld	b, a							; bc = sign extension of frequency displacement
+		ld	b, a							; bc = sign extension of detune
 		add	hl, bc							; Add to frequency
 
 		; Battletoads did this check under zApplyFreq below. Putting it
@@ -1623,7 +1623,7 @@ zBGMLoad:
 		ld	hl, (zSongPosition)				; Load current position in BGM data
 		ldi									; *de++ = *hl++ (copy track address low byte)
 		ldi									; *de++ = *hl++ (copy track address high byte)
-		ldi									; *de++ = *hl++ (default key offset)
+		ldi									; *de++ = *hl++ (default transposition)
 		ldi									; *de++ = *hl++ (track default volume)
 		ld	(zSongPosition), hl				; Store current position in BGM data
 		call	zInitFMDACTrack				; Init the remainder of the track RAM
@@ -1692,7 +1692,7 @@ zBGMLoad:
 		ld	(zTrackInitPos), hl				; Save current position in channel assignment bits
 		ld	hl, (zSongPosition)				; Load current position in BGM data
 		ld	bc, 6							; Copy 6 bytes
-		ldir								; while (bc-- > 0) *de++ = *hl++; (copy track address, default key offset, default volume, modulation control, default PSG tone)
+		ldir								; while (bc-- > 0) *de++ = *hl++; (copy track address, default transposition, default volume, modulation control, default PSG tone)
 		ld	(zSongPosition), hl				; Store current potition in BGM data
 		call	zZeroFillTrackRAM			; Init the remainder of the track RAM
 		pop	bc								; Restore bc
@@ -1828,7 +1828,7 @@ zSFXTrackInitLoop:
 		inc	de								; Advance pointer
 		ldi									; *de++ = *hl++ (low byte of channel data pointer)
 		ldi									; *de++ = *hl++ (high byte of channel data pointer)
-		ldi									; *de++ = *hl++ (key displacement)
+		ldi									; *de++ = *hl++ (transposition)
 		ldi									; *de++ = *hl++ (channel volume)
 		call	zInitFMDACTrack				; Init the remainder of the track RAM
 
@@ -2593,7 +2593,7 @@ loc_BF9:
 ;loc_BFD
 zCoordFlagSwitchTable:
 		dw cfPanningAMSFMS					; 0E0h
-		dw cfAlterNoteFreq					; 0E1h
+		dw cfDetune							; 0E1h
 		dw cfFadeInToPrevious				; 0E2h
 		dw cfSilenceStopTrack				; 0E3h
 		dw cfSetVolume						; 0E4h
@@ -2619,7 +2619,7 @@ zCoordFlagSwitchTable:
 		dw cfJumpToGosub					; 0F8h
 		dw cfJumpReturn						; 0F9h
 		dw cfDisableModulation				; 0FAh
-		dw cfAddKey							; 0FBh
+		dw cfChangeTransposition			; 0FBh
 		dw cfLoopContinuousSFX				; 0FCh
 		dw cfToggleAltFreqMode				; 0FDh
 		dw cfFM3SpecialMode					; 0FEh
@@ -2701,7 +2701,7 @@ cfSetLFO:
 ; The saved value for the spindash rev is reset to zero every time a "normal"
 ; SFX is played (i.e., not a continuous SFX and not the spindash sound).
 ; Every time this function is called, the spindash rev value is added to the
-; track key offset; unless this sum is exactly 10h, then the spindash rev is
+; track transposition; unless this sum is exactly 10h, then the spindash rev is
 ; further increased by 1 for future calls.
 ;
 ; Has no parameter bytes.
@@ -2710,8 +2710,8 @@ cfSetLFO:
 cfSpindashRev:
 		ld	hl, zSpindashRev				; hl = pointer to escalating transposition
 		ld	a, (hl)							; a = value of escalating transposition
-		add	a, (ix+zTrack.KeyOffset)		; Add in current track key offset
-		ld	(ix+zTrack.KeyOffset), a		; Store result as new track key offset
+		add	a, (ix+zTrack.Transpose)		; Add in current track transposition
+		ld	(ix+zTrack.Transpose), a		; Store result as new track transposition
 		cp	10h								; Is the current transposition 10h?
 		jp	z, .skip_rev					; Branch if yes
 		inc	(hl)							; Otherwise, increase escalating transposition
@@ -2723,16 +2723,16 @@ cfSpindashRev:
 
 
 ; =============== S U B	R O U T	I N E =======================================
-; Sets frequency displacement (signed). The final note frequency is shifted
+; Sets detune (signed). The final note frequency is shifted
 ; by this value.
 ;
-; Has one parameter byte, the new frequency displacement.
+; Has one parameter byte, the new detune.
 ;
-;sub_C77
-cfAlterNoteFreq:
-		ld	(ix+zTrack.FreqDisplacement), a	; Set frequency displacement
+;sub_C77 cfAlterNoteFreq
+cfDetune:
+		ld	(ix+zTrack.Detune), a			; Set detune
 		ret
-; End of function cfAlterNoteFreq
+; End of function cfDetune
 
 
 ; =============== S U B	R O U T	I N E =======================================
@@ -2945,15 +2945,15 @@ zStoreTrackVolume:
 		ret
 
 ; =============== S U B	R O U T	I N E =======================================
-; Changes the track's key displacement.
+; Changes the track's transposition.
 ;
-; There is a single parameter byte, the new track key offset + 40h (that is,
-; 40h is subtracted from the parameter byte before the key displacement is set)
+; There is a single parameter byte, the new track transposition + 40h (that is,
+; 40h is subtracted from the parameter byte before the transposition is set)
 ;
 ;loc_D1B
 cfSetKey:
-		sub	40h								; Subtract 40h from key displacement
-		ld	(ix+zTrack.KeyOffset), a		; Store result as new key displacement
+		sub	40h								; Subtract 40h from transposition
+		ld	(ix+zTrack.Transpose), a		; Store result as new transposition
 		ret
 
 ; =============== S U B	R O U T	I N E =======================================
@@ -3235,7 +3235,7 @@ cfPitchSlide:
 .disable_slide:
 		res	1, (ix+zTrack.PlaybackControl)	; Clear 'don't attack' flag
 		res	5, (ix+zTrack.PlaybackControl)	; Stop pitch slide
-		ld	(ix+zTrack.FreqDisplacement), a	; Clear frequency displacement (we already know a is zero)
+		ld	(ix+zTrack.Detune), a			; Clear detune (we already know a is zero)
 		ret
 
 ; =============== S U B	R O U T	I N E =======================================
@@ -3324,14 +3324,14 @@ cfDisableModulation:
 		ret
 
 ; =============== S U B	R O U T	I N E =======================================
-; Adds a signed value to channel key displacement.
+; Adds a signed value to channel transposition.
 ;
-; Has one parameter byte, the change in channel key displacement.
+; Has one parameter byte, the change in channel transposition.
 ;
-;loc_EB1
-cfAddKey:
-		add	a, (ix+zTrack.KeyOffset)		; Add current key displacement to parameter
-		ld	(ix+zTrack.KeyOffset), a		; Store result as new key displacement
+;loc_EB1 cfAddKey
+cfChangeTransposition:
+		add	a, (ix+zTrack.Transpose)		; Add current transposition to parameter
+		ld	(ix+zTrack.Transpose), a		; Store result as new transposition
 		ret
 
 ; =============== S U B	R O U T	I N E =======================================
@@ -3703,7 +3703,7 @@ zUpdatePSGTrack:
 		jp	z, zRestTrack					; Put PSG track at rest if needed
 
 .skip_fill:
-		call	zDoPitchSlide				; Apply pitch slide and frequency displacement
+		call	zDoPitchSlide				; Apply pitch slide and detune
 		call	zDoModulation				; Do modulation
 		bit	2, (ix+zTrack.PlaybackControl)	; Is SFX overriding this track?
 		ret	nz								; Return if yes
@@ -3886,7 +3886,7 @@ zPlayDigitalAudio:
 		ld	a, (hl)							; a = DAC index
 		dec	a								; a -= 1
 		set	7, (hl)							; Set bit 7 to indicate that DAC sample is being played
-		ld	hl, zROMWindow					; hl = pointer to ROM window
+		ld	hl, zmake68kPtr(DACPointers)	; hl = pointer to ROM window
 		rst	PointerTableOffset				; hl = pointer to DAC data
 		ld	c, 80h							; c is an accumulator below; this initializes it to 80h
 		ld	a, (hl)							; a = DAC rate
@@ -4386,6 +4386,11 @@ DAC_Setup macro rate,dacptr
 
 ; Macro for printing the DAC master table
 DAC_Master_Table macro
+	ifndef DACPointers
+DACPointers label *
+	elseif (DACPointers&$7FFF)<>(*&$7FFF)
+		fatal "Inconsistent placement of DAC_Master_Table macro on bank soundBankName"
+	endif
 	if (use_s3_samples<>0)||(use_sk_samples<>0)||(use_s3d_samples<>0)
 		offsetBankTableEntry.w	DAC_81_Setup
 		offsetBankTableEntry.w	DAC_82_Setup
@@ -4605,6 +4610,8 @@ song_Ptr	label *
 Music_Master_Table macro
 	ifndef MusicPointers
 MusicPointers label *
+	elseif (MusicPointers&$7FFF)<>((*)&$7FFF)
+		fatal "Inconsistent placement of Music_Master_Table macro on bank"
 	endif
 	declsong Mus_AIZ1
 	declsong Mus_AIZ2
