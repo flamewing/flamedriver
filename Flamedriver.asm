@@ -3745,13 +3745,11 @@ zUpdatePSGTrack:
 		or	(ix+zTrack.VoiceControl)		; Mask in the PSG channel bits
 		add	a, 10h							; Flag to latch volume
 		bit	0, (ix+zTrack.PlaybackControl)	; Is this a noise channel?
-		jr	nz, .set_noise					; Branch if yes
-		ld	(zPSG), a						; Set PSG volume
-		ret
-; ---------------------------------------------------------------------------
-.set_noise:
+		jr	z, .not_noise					; Branch if not
 		add	a, 20h							; Change to noise channel
-		ld	(zPSG), a						; Set noise channel volume
+
+.not_noise:
+		ld	(zPSG), a						; Set channel volume
 		ret
 ; ---------------------------------------------------------------------------
 ;loc_1037
@@ -3796,7 +3794,6 @@ zDoVolEnv:
 ;loc_1057
 ;zDoFlutterFullRest
 zDoVolEnvFullRest:
-		set	4, (ix+zTrack.PlaybackControl)	; Set 'track is resting' bit
 		pop	hl								; Pop return value from stack (causes a 'ret' to return to caller of zUpdatePSGTrack)
 		jp	zRestTrack						; Put track at rest
 ; ---------------------------------------------------------------------------
