@@ -182,6 +182,19 @@ PSGPitchConvert macro pitch
 		dc.b	pitch
 	endif
 	endm
+
+CheckedChannelPointer macro loc
+	if SonicDriverVer<>1
+		dc.w	z80_ptr(loc)
+	else
+		if MOMPASS==2
+			if loc<songStart
+				fatal "Tracks for Sonic 1 songs must come after the start of the song"
+			endif
+		endif
+		dc.w	loc-songStart
+	endif
+	endm
 ; ---------------------------------------------------------------------------
 ; Header Macros
 smpsHeaderStartSong macro ver
@@ -229,6 +242,8 @@ smpsHeaderVoiceUVB macro
 		dc.w	z80_ptr(z80_UniVoiceBank)
 	elseif SonicDriverVer>=3
 		dc.w	little_endian(z80_UniVoiceBank)
+	else
+		fatal "Universal Voice Bank does not exist in Sonic 1 or Sonic 2 drivers"
 	endif
 	endm
 
@@ -246,11 +261,7 @@ smpsHeaderTempo macro div,mod
 
 ; Header - Set up DAC Channel
 smpsHeaderDAC macro loc,pitch,vol
-	if SonicDriverVer<>1
-		dc.w	z80_ptr(loc)
-	else
-		dc.w	loc-songStart
-	endif
+	CheckedChannelPointer loc
 	if ("pitch"<>"")
 		dc.b	pitch
 		if ("vol"<>"")
@@ -265,21 +276,13 @@ smpsHeaderDAC macro loc,pitch,vol
 
 ; Header - Set up FM Channel
 smpsHeaderFM macro loc,pitch,vol
-	if SonicDriverVer<>1
-		dc.w	z80_ptr(loc)
-	else
-		dc.w	loc-songStart
-	endif
+	CheckedChannelPointer loc
 	dc.b	pitch,vol
 	endm
 
 ; Header - Set up PSG Channel
 smpsHeaderPSG macro loc,pitch,vol,mod,voice
-	if SonicDriverVer<>1
-		dc.w	z80_ptr(loc)
-	else
-		dc.w	loc-songStart
-	endif
+	CheckedChannelPointer loc
 	PSGPitchConvert pitch
 	dc.b	vol,mod,voice
 	endm
@@ -303,11 +306,7 @@ smpsHeaderSFXChannel macro chanid,loc,pitch,vol
 		fatal "Using channel ID of FM6 ($06) in Sonic 1 or Sonic 2 drivers is unsupported. Change it to another channel."
 	endif
 	dc.b	$80,chanid
-	if SonicDriverVer<>1
-		dc.w	z80_ptr(loc)
-	else
-		dc.w	loc-songStart
-	endif
+	CheckedChannelPointer loc
 	if (chanid&$80)<>0
 		PSGPitchConvert pitch
 	else
@@ -360,6 +359,8 @@ smpsFade macro val
 		if SourceDriver<3
 			smpsStop
 		endif
+	elseif (SourceDriver>=3) && ("val"<>"") && ("val"<>"$FF")
+		; This is one of those weird S3+ "fades" that we don't need
 	else
 		dc.b	$E4
 	endif
