@@ -273,13 +273,6 @@ Mus84_SLZ_Call09:
 	smpsAlterVol        $07
 	smpsReturn
 
-; Unused dead data
-Mus84_SLZ_Jump07:
-	smpsJump            Mus84_SLZ_Jump07
-
-Mus84_SLZ_Jump08:
-	smpsJump            Mus84_SLZ_Jump08
-
 ; PSG3 Data
 Mus84_SLZ_PSG3:
 	smpsPSGform         $E7
