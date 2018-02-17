@@ -26,6 +26,11 @@ use_s3_samples			= 1
 ; Set the following to non-zero to use all S&K DAC samples,
 ; or to zero otherwise.
 use_sk_samples			= 1
+
+; ---------------------------------------------------------------------------
+
+z80_SoundDriverStart:
+
 ; ---------------------------------------------------------------------------
 zTrack STRUCT DOTS
 	; Playback control bits:
@@ -213,6 +218,7 @@ zTracksSaveEnd:
 	endif
 		dephase
 ; ---------------------------------------------------------------------------
+		!org z80_SoundDriverStart
 z80_SoundDriver:
 		save
 		!org	0							; z80 Align, handled by the build process
