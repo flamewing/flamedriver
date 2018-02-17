@@ -4388,8 +4388,8 @@ DAC_Setup macro rate,dacptr
 DAC_Master_Table macro
 	ifndef DACPointers
 DACPointers label *
-	elseif (DACPointers&$7FFF)<>(*&$7FFF)
-		fatal "Inconsistent placement of DAC_Master_Table macro on bank soundBankName"
+	elseif (DACPointers&$7FFF)<>((*)&$7FFF)
+		fatal "Inconsistent placement of DAC_Master_Table macro on bank \{soundBankName}"
 	endif
 	if (use_s3_samples<>0)||(use_sk_samples<>0)||(use_s3d_samples<>0)
 		offsetBankTableEntry.w	DAC_81_Setup
