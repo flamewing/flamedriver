@@ -842,6 +842,24 @@ vcTLMask2 set 0
 vcTLMask1 set 0
 	endif
 
+	if (SonicDriverVer>=3)&&(SourceDriver<3)
+; Alternatively, if we're converting an SMPS 68k song to SMPS Z80,
+; then we *want* the TL bits to match the algorithm, because SMPS 68k
+; prefers the algorithm over the TL bits, ignoring the latter, while
+; SMPS Z80 does the opposite.
+; Unfortunately, there's nothing we can do if we're trying to convert
+; an SMPS Z80 song to SMPS 68k. It will ignore the bits no matter
+; what we do.
+vcTLMask4 set ((vcAlgorithm==7)<<7)
+vcTLMask3 set ((vcAlgorithm>=4)<<7)
+vcTLMask2 set ((vcAlgorithm>=5)<<7)
+vcTLMask1 set $80
+vcTL1 set vcTL1&$7F
+vcTL2 set vcTL2&$7F
+vcTL3 set vcTL3&$7F
+vcTL4 set vcTL4&$7F
+	endif
+
 	if SonicDriverVer==2
 		dc.b	(vcDT4<<4)+vcCF4 ,(vcDT2<<4)+vcCF2 ,(vcDT3<<4)+vcCF3 ,(vcDT1<<4)+vcCF1
 		dc.b	(vcRS4<<6)+vcAR4 ,(vcRS2<<6)+vcAR2 ,(vcRS3<<6)+vcAR3 ,(vcRS1<<6)+vcAR1
