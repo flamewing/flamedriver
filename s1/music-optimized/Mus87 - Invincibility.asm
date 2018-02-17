@@ -124,9 +124,6 @@ Mus87_Invincibility_Loop00:
 	dc.b	dSnare, dSnare, dSnare, dSnare, dSnare, dSnare, dSnare, dSnare, dSnare, dSnare
 	smpsJump            Mus87_Invincibility_Loop00
 
-; Unreachable
-	smpsStop
-
 Mus87_Invincibility_Voices:
 ;	Voice $00
 ;	$3A
