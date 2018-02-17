@@ -219,29 +219,9 @@ songStart set *
 
 	endm
 
-smpsHeaderStartSongConvert macro ver, sourcesmps2asmver
-
-SourceDriver set ver
-
-	if ("sourcesmps2asmver"<>"")
-SourceSMPS2ASM set sourcesmps2asmver
-	else
-SourceSMPS2ASM set 0
-	endif
-
-songStart set *
-
-	if MOMPASS==2
-	if SMPS2ASMVer < SourceSMPS2ASM
-	message "Song at 0x\{songStart} was made for a newer version of SMPS2ASM (this is version \{SMPS2ASMVer}, but song wants at least version \{SourceSMPS2ASM})."
-	endif
-	endif
-
-	endm
-
 smpsHeaderVoiceNull macro
 	if songStart<>*
-		fatal "Missing smpsHeaderStartSong or smpsHeaderStartSongConvert"
+		fatal "Missing smpsHeaderStartSong"
 	endif
 	dc.w	$0000
 	endm
@@ -250,7 +230,7 @@ smpsHeaderVoiceNull macro
 ; Common to music and SFX
 smpsHeaderVoice macro loc
 	if songStart<>*
-		fatal "Missing smpsHeaderStartSong or smpsHeaderStartSongConvert"
+		fatal "Missing smpsHeaderStartSong"
 	endif
 	if SonicDriverVer<>1
 		dc.w	z80_ptr(loc)
@@ -268,7 +248,7 @@ smpsHeaderVoice macro loc
 ; Common to music and SFX
 smpsHeaderVoiceUVB macro
 	if songStart<>*
-		fatal "Missing smpsHeaderStartSong or smpsHeaderStartSongConvert"
+		fatal "Missing smpsHeaderStartSong"
 	endif
 	if SonicDriverVer>=5
 		dc.w	z80_ptr(z80_UniVoiceBank)
