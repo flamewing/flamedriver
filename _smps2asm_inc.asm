@@ -490,7 +490,7 @@ smpsStopSpecial macro
 		dc.b	$EE
 	else
 		message "Coord. Flag to stop special SFX does not exist in S2 or S3 drivers. Complain to Flamewing to add it. With adequate caution, smpsStop can do this job."
-		dc.b	$F2
+		smpsStop
 	endif
 	endm
 
