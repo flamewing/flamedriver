@@ -2,6 +2,8 @@
 ; Created by Flamewing, based on S1SMPS2ASM version 1.1 by Marc Gordon (AKA Cinossu)
 ; ===========================================================================
 
+SMPS2ASMVer	= 1
+
 ; PSG conversion to S3/S&K/S3D drivers require a tone shift of 12 semi-tones.
 psgdelta	EQU 12
 ; ---------------------------------------------------------------------------
@@ -197,14 +199,44 @@ CheckedChannelPointer macro loc
 	endm
 ; ---------------------------------------------------------------------------
 ; Header Macros
-smpsHeaderStartSong macro ver
+smpsHeaderStartSong macro ver, sourcesmps2asmver
+
 SourceDriver set ver
+
+	if ("sourcesmps2asmver"<>"")
+SourceSMPS2ASM set sourcesmps2asmver
+	else
+SourceSMPS2ASM set 0
+	endif
+
 songStart set *
+
+	if MOMPASS==2
+	if SMPS2ASMVer < SourceSMPS2ASM
+	message "Song at 0x\{songStart} was made for a newer version of SMPS2ASM (this is version \{SMPS2ASMVer}, but song wants at least version \{SourceSMPS2ASM})."
+	endif
+	endif
+
 	endm
 
-smpsHeaderStartSongConvert macro ver
+smpsHeaderStartSongConvert macro ver, sourcesmps2asmver
+
 SourceDriver set ver
+
+	if ("sourcesmps2asmver"<>"")
+SourceSMPS2ASM set sourcesmps2asmver
+	else
+SourceSMPS2ASM set 0
+	endif
+
 songStart set *
+
+	if MOMPASS==2
+	if SMPS2ASMVer < SourceSMPS2ASM
+	message "Song at 0x\{songStart} was made for a newer version of SMPS2ASM (this is version \{SMPS2ASMVer}, but song wants at least version \{SourceSMPS2ASM})."
+	endif
+	endif
+
 	endm
 
 smpsHeaderVoiceNull macro
@@ -796,10 +828,20 @@ vcTL4 set op4
 	dc.b	(vcUnusedBits<<6)+(vcFeedback<<3)+vcAlgorithm
 ;   0     1     2     3     4     5     6     7
 ;%1000,%1000,%1000,%1000,%1010,%1110,%1110,%1111
+	if SourceSMPS2ASM==0
+; The original SMPS2ASM decides TL high bits automatically
 vcTLMask4 set ((vcAlgorithm==7)<<7)
 vcTLMask3 set ((vcAlgorithm>=4)<<7)
 vcTLMask2 set ((vcAlgorithm>=5)<<7)
 vcTLMask1 set $80
+	else
+; Later versions leave it up to the user
+vcTLMask4 set 0
+vcTLMask3 set 0
+vcTLMask2 set 0
+vcTLMask1 set 0
+	endif
+
 	if SonicDriverVer==2
 		dc.b	(vcDT4<<4)+vcCF4 ,(vcDT2<<4)+vcCF2 ,(vcDT3<<4)+vcCF3 ,(vcDT1<<4)+vcCF1
 		dc.b	(vcRS4<<6)+vcAR4 ,(vcRS2<<6)+vcAR2 ,(vcRS3<<6)+vcAR3 ,(vcRS1<<6)+vcAR1
