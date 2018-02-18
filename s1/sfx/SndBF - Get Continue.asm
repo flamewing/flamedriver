@@ -1,5 +1,5 @@
 SndBF_Get_Continue_Header:
-	smpsHeaderStartSong 1
+	smpsHeaderStartSong 1, 1
 	smpsHeaderVoice     SndBF_Get_Continue_Voices
 	smpsHeaderTempoSFX  $01
 	smpsHeaderChanSFX   $03
@@ -61,5 +61,5 @@ SndBF_Get_Continue_Voices:
 	smpsVcDecayRate2    $09, $0D, $08, $0B
 	smpsVcDecayLevel    $00, $08, $09, $00
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $0A, $05, $24
+	smpsVcTotalLevel    $80, $0A, $05, $24
 
