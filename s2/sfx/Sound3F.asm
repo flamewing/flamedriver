@@ -1,5 +1,5 @@
 Sound3F_ContinueJingle_Header:
-	smpsHeaderStartSong 2
+	smpsHeaderStartSong 2, 1
 	smpsHeaderVoice     Sound3F_40_42_Voices
 	smpsHeaderTempoSFX  $01
 	smpsHeaderChanSFX   $03
@@ -61,5 +61,5 @@ Sound3F_40_42_Voices:
 	smpsVcDecayRate2    $09, $0D, $08, $0B
 	smpsVcDecayLevel    $00, $08, $09, $00
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $0A, $05, $24
+	smpsVcTotalLevel    $80, $0A, $05, $24
 
