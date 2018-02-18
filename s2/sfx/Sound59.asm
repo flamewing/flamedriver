@@ -1,5 +1,5 @@
 Sound59_LargeBumper_Header:
-	smpsHeaderStartSong 2
+	smpsHeaderStartSong 2, 1
 	smpsHeaderVoice     Sound59_LargeBumper_Voices
 	smpsHeaderTempoSFX  $01
 	smpsHeaderChanSFX   $03
@@ -62,5 +62,5 @@ Sound59_LargeBumper_Voices:
 	smpsVcDecayRate2    $08, $08, $08, $12
 	smpsVcDecayLevel    $05, $05, $05, $01
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $00, $00, $07
+	smpsVcTotalLevel    $80, $80, $80, $07
 
