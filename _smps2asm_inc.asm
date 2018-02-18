@@ -760,16 +760,16 @@ vcAR4 set op4
 	endm
 
 ; Voices - Amplitude Modulation
-smpsVcAmpMod macro op1,op2,op3,op4
-	if SMPS2ASMVer==0
 ; The original SMPS2ASM erroneously assumed the 6th and 7th bits
 ; were the Amplitude Modulation.
+; According to several docs, however, it's actually the high bit.
+smpsVcAmpMod macro op1,op2,op3,op4
+	if SMPS2ASMVer==0
 vcAM1 set op1<<5
 vcAM2 set op2<<5
 vcAM3 set op3<<5
 vcAM4 set op4<<5
 	else
-; According to several docs, however, it's actually the high bit.
 vcAM1 set op1<<7
 vcAM2 set op2<<7
 vcAM3 set op3<<7
@@ -810,6 +810,15 @@ vcRR4 set op4
 	endm
 
 ; Voices - Total Level
+; The original SMPS2ASM decides TL high bits automatically,
+; but later versions leave it up to the user.
+; Alternatively, if we're converting an SMPS 68k song to SMPS Z80,
+; then we *want* the TL bits to match the algorithm, because SMPS 68k
+; prefers the algorithm over the TL bits, ignoring the latter, while
+; SMPS Z80 does the opposite.
+; Unfortunately, there's nothing we can do if we're trying to convert
+; an SMPS Z80 song to SMPS 68k. It will ignore the bits no matter
+; what we do, so we just print a warning.
 smpsVcTotalLevel macro op1,op2,op3,op4
 vcTL1 set op1
 vcTL2 set op2
@@ -819,13 +828,11 @@ vcTL4 set op4
 ;   0     1     2     3     4     5     6     7
 ;%1000,%1000,%1000,%1000,%1010,%1110,%1110,%1111
 	if SourceSMPS2ASM==0
-; The original SMPS2ASM decides TL high bits automatically
 vcTLMask4 set ((vcAlgorithm==7)<<7)
 vcTLMask3 set ((vcAlgorithm>=4)<<7)
 vcTLMask2 set ((vcAlgorithm>=5)<<7)
 vcTLMask1 set $80
 	else
-; Later versions leave it up to the user
 vcTLMask4 set 0
 vcTLMask3 set 0
 vcTLMask2 set 0
@@ -833,13 +840,6 @@ vcTLMask1 set 0
 	endif
 
 	if (SonicDriverVer>=3)&&(SourceDriver<3)
-; Alternatively, if we're converting an SMPS 68k song to SMPS Z80,
-; then we *want* the TL bits to match the algorithm, because SMPS 68k
-; prefers the algorithm over the TL bits, ignoring the latter, while
-; SMPS Z80 does the opposite.
-; Unfortunately, there's nothing we can do if we're trying to convert
-; an SMPS Z80 song to SMPS 68k. It will ignore the bits no matter
-; what we do.
 vcTLMask4 set ((vcAlgorithm==7)<<7)
 vcTLMask3 set ((vcAlgorithm>=4)<<7)
 vcTLMask2 set ((vcAlgorithm>=5)<<7)
