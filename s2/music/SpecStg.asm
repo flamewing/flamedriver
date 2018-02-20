@@ -1,5 +1,5 @@
 SpecStg_Header:
-	smpsHeaderStartSong 2
+	smpsHeaderStartSong 2, 1
 	smpsHeaderVoice     SpecStg_Voices
 	smpsHeaderChan      $06, $03
 	smpsHeaderTempo     $01, $FF
@@ -47,7 +47,7 @@ SpecStg_FM2:
 	smpsAlterPitch      $0C
 	smpsAlterVol        $F6
 	smpsPan             panCenter, $00
-	dc.b	nRst, $30, nRst, $30
+	dc.b	nRst, $30, $30
 	smpsSetvoice        $05
 	dc.b	nG4, $12, nAb4, nA4, $0C, nBb4, $12, nB4, nC5, $0C, nB4, $12
 	dc.b	nC5, nCs5, $0C, nC5, $12, nCs5, nD5, $0C
@@ -127,9 +127,9 @@ SpecStg_Loop07:
 	dc.b	$12, nAb4, $06, nRst, $18
 	smpsLoop            $01, $02, SpecStg_Loop07
 	smpsPan             panCenter, $00
-	dc.b	nRst, $30, nRst, nRst, nRst, nAb4, $06, nRst, $0C, nRst, $06, nRst
-	dc.b	$0C, nAb4, $06, nRst, nAb4, nRst, $0C, nRst, $06, nRst, $0C, nAb4
-	dc.b	$06, nRst, nAb4, nRst, $0C, nRst, $06, nRst, $0C, nAb4, $06, nRst
+	dc.b	nRst, $30, nRst, nRst, nRst, nAb4, $06, nRst, $0C, $06, nRst
+	dc.b	$0C, nAb4, $06, nRst, nAb4, nRst, $0C, $06, nRst, $0C, nAb4
+	dc.b	$06, nRst, nAb4, nRst, $0C, $06, nRst, $0C, nAb4, $06, nRst
 	dc.b	nAb4, nRst, $2A
 	smpsLoop            $00, $02, SpecStg_Loop08
 	smpsPan             panLeft, $00
@@ -167,9 +167,9 @@ SpecStg_Loop04:
 	dc.b	nE4, $06, nRst, $0C, nE4, $06, nRst, $0C, nE4, $06, nRst, nD4
 	dc.b	$12, nE4, $06, nRst, $18
 	smpsLoop            $01, $02, SpecStg_Loop04
-	dc.b	nRst, $30, nRst, nRst, nRst, nE4, $06, nRst, $0C, nRst, $06, nRst
-	dc.b	$0C, nE4, $06, nRst, nE4, nRst, $0C, nRst, $06, nRst, $0C, nE4
-	dc.b	$06, nRst, nE4, nRst, $0C, nRst, $06, nRst, $0C, nE4, $06, nRst
+	dc.b	nRst, $30, nRst, nRst, nRst, nE4, $06, nRst, $0C, $06, nRst
+	dc.b	$0C, nE4, $06, nRst, nE4, nRst, $0C, $06, nRst, $0C, nE4
+	dc.b	$06, nRst, nE4, nRst, $0C, $06, nRst, $0C, nE4, $06, nRst
 	dc.b	nE4, nRst, $2A
 	smpsLoop            $00, $02, SpecStg_Loop05
 
@@ -329,7 +329,7 @@ SpecStg_Voices:
 	smpsVcDecayRate2    $04, $00, $00, $00
 	smpsVcDecayLevel    $00, $01, $0F, $01
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $27, $28, $18
+	smpsVcTotalLevel    $80, $27, $28, $18
 
 ;	Voice $01
 ;	$3A
@@ -347,7 +347,7 @@ SpecStg_Voices:
 	smpsVcDecayRate2    $06, $03, $03, $02
 	smpsVcDecayLevel    $0B, $0A, $07, $05
 	smpsVcReleaseRate   $05, $02, $02, $02
-	smpsVcTotalLevel    $00, $23, $1C, $1A
+	smpsVcTotalLevel    $80, $23, $1C, $1A
 
 ;	Voice $02
 ;	$3D
@@ -365,7 +365,7 @@ SpecStg_Voices:
 	smpsVcDecayRate2    $00, $00, $00, $00
 	smpsVcDecayLevel    $01, $02, $02, $02
 	smpsVcReleaseRate   $0B, $0B, $0B, $0B
-	smpsVcTotalLevel    $00, $00, $00, $19
+	smpsVcTotalLevel    $80, $80, $80, $19
 
 ;	Voice $03
 ;	$38
@@ -401,7 +401,7 @@ SpecStg_Voices:
 	smpsVcDecayRate2    $00, $00, $00, $00
 	smpsVcDecayLevel    $01, $02, $02, $02
 	smpsVcReleaseRate   $08, $08, $08, $06
-	smpsVcTotalLevel    $00, $00, $00, $19
+	smpsVcTotalLevel    $80, $80, $80, $19
 
 ;	Voice $05
 ;	$3A
@@ -419,7 +419,7 @@ SpecStg_Voices:
 	smpsVcDecayRate2    $07, $00, $00, $00
 	smpsVcDecayLevel    $00, $01, $0F, $01
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $27, $28, $18
+	smpsVcTotalLevel    $80, $27, $28, $18
 
 ;	Voice $06
 ;	$3A

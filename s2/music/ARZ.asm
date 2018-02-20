@@ -1,5 +1,5 @@
 ARZ_Header:
-	smpsHeaderStartSong 2
+	smpsHeaderStartSong 2, 1
 	smpsHeaderVoice     ARZ_Voices
 	smpsHeaderChan      $06, $03
 	smpsHeaderTempo     $01, $E0
@@ -15,7 +15,7 @@ ARZ_Header:
 	smpsHeaderPSG       ARZ_PSG3,	$00, $01, $00, fTone_02
 
 ARZ_Call04:
-	dc.b	nD5, $06, nC5, nD5, $12, nF5, nD5, $0C, nE5, nRst, $06, nRst
+	dc.b	nD5, $06, nC5, nD5, $12, nF5, nD5, $0C, nE5, nRst, $06
 	dc.b	$12, nG5, $0C, nF5, $06, nRst, nC6, nA5, $30, smpsNoAttack, $0C
 	smpsReturn
 
@@ -83,7 +83,7 @@ ARZ_Jump03:
 	dc.b	nRst, $06, nA5, nRst, nBb5, $12, nA5, nG5, $06, nF5, nE5, $18
 	dc.b	nG5, nFs5, $30, smpsNoAttack, $18, nRst, $0C
 	smpsCall            ARZ_Call04
-	dc.b	nRst, $06, nRst, $0C, nBb5, $12, nA5, nG5, $06, nF5, nE5, $18
+	dc.b	nRst, $06, $0C, nBb5, $12, nA5, nG5, $06, nF5, nE5, $18
 	dc.b	nCs5, nD5, $30, smpsNoAttack, $18, nRst, $18
 	smpsSetvoice        $01
 	smpsAlterVol        $F8
@@ -113,7 +113,7 @@ ARZ_Jump02:
 	dc.b	nRst, $06, nA5, nRst, nBb5, $12, nA5, nG5, $06, nF5, nE5, $18
 	dc.b	nG5, nFs5, $30, smpsNoAttack, $18, nRst, $0C
 	smpsCall            ARZ_Call04
-	dc.b	nRst, $06, nRst, $0C, nBb5, $12, nA5, nG5, $06, nF5, nE5, $18
+	dc.b	nRst, $06, $0C, nBb5, $12, nA5, nG5, $06, nF5, nE5, $18
 	dc.b	nCs5, nD5, $30, smpsNoAttack, $18, nRst, $18
 	smpsSetvoice        $01
 	smpsAlterVol        $F8
@@ -276,6 +276,9 @@ ARZ_Loop0A:
 	dc.b	nRst, $2A
 	smpsJump            ARZ_Jump05
 
+	; Unreachable
+	smpsStop
+
 ; PSG2 Data
 ARZ_PSG2:
 	dc.b	nRst, $0C
@@ -358,7 +361,7 @@ ARZ_Voices:
 	smpsVcDecayRate2    $00, $02, $02, $01
 	smpsVcDecayLevel    $02, $00, $00, $05
 	smpsVcReleaseRate   $08, $02, $02, $02
-	smpsVcTotalLevel    $00, $18, $22, $18
+	smpsVcTotalLevel    $80, $18, $22, $18
 
 ;	Voice $02
 ;	$3D
@@ -376,7 +379,7 @@ ARZ_Voices:
 	smpsVcDecayRate2    $00, $00, $00, $01
 	smpsVcDecayLevel    $01, $01, $01, $02
 	smpsVcReleaseRate   $08, $08, $08, $04
-	smpsVcTotalLevel    $02, $02, $02, $1C
+	smpsVcTotalLevel    $82, $82, $82, $1C
 
 ;	Voice $03
 ;	$32
@@ -394,7 +397,7 @@ ARZ_Voices:
 	smpsVcDecayRate2    $02, $02, $02, $02
 	smpsVcDecayLevel    $07, $01, $01, $01
 	smpsVcReleaseRate   $02, $01, $01, $01
-	smpsVcTotalLevel    $00, $26, $2D, $23
+	smpsVcTotalLevel    $80, $26, $2D, $23
 
 ;	Voice $04
 ;	$3A
@@ -430,5 +433,5 @@ ARZ_Voices:
 	smpsVcDecayRate2    $02, $02, $02, $02
 	smpsVcDecayLevel    $07, $01, $01, $01
 	smpsVcReleaseRate   $07, $01, $01, $01
-	smpsVcTotalLevel    $00, $26, $2D, $23
+	smpsVcTotalLevel    $80, $26, $2D, $23
 

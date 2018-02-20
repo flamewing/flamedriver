@@ -1,5 +1,5 @@
 CNZ_Header:
-	smpsHeaderStartSong 2
+	smpsHeaderStartSong 2, 1
 	smpsHeaderVoice     CNZ_Voices
 	smpsHeaderChan      $06, $03
 	smpsHeaderTempo     $01, $48
@@ -265,6 +265,9 @@ CNZ_Jump05:
 	dc.b	nRst, $30
 	smpsJump            CNZ_Jump05
 
+	; Unreachable
+	smpsStop
+
 ; PSG3 Data
 CNZ_PSG3:
 	smpsPSGform         $E7
@@ -371,5 +374,5 @@ CNZ_Voices:
 	smpsVcDecayRate2    $02, $02, $02, $02
 	smpsVcDecayLevel    $0A, $01, $06, $01
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $1E, $00, $1E
+	smpsVcTotalLevel    $80, $1E, $80, $1E
 
