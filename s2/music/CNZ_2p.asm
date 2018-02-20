@@ -110,15 +110,15 @@ CNZ_2p_FM3:
 	dc.b	nRst, $60
 
 CNZ_2p_Loop06:
-	dc.b	nRst, $60, nRst, $3C, nF6, $09, nE6, $03, nF6, $09, nE6, $03
+	dc.b	nRst, $60, $3C, nF6, $09, nE6, $03, nF6, $09, nE6, $03
 	dc.b	nF6, $06, nRst
 	smpsLoop            $00, $02, CNZ_2p_Loop06
 	smpsAlterVol        $04
 	smpsPan             panRight, $00
 
 CNZ_2p_Loop07:
-	dc.b	nRst, $60, nRst, $30, nA5, $06, nRst, nF5, $0C, nG5, $09, nF5
-	dc.b	$03, nD5, $0C, nRst, $60, nRst, $30, nA5, $06, nRst, nF5, $0C
+	dc.b	nRst, $60, $30, nA5, $06, nRst, nF5, $0C, nG5, $09, nF5
+	dc.b	$03, nD5, $0C, nRst, $60, $30, nA5, $06, nRst, nF5, $0C
 	dc.b	nG5, $09, nA5, $03, nRst, $0C
 	smpsLoop            $00, $02, CNZ_2p_Loop07
 	smpsAlterVol        $FC

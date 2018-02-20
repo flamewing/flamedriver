@@ -1,5 +1,5 @@
 HTZ_Header:
-	smpsHeaderStartSong 2
+	smpsHeaderStartSong 2, 1
 	smpsHeaderVoice     HTZ_Voices
 	smpsHeaderChan      $06, $03
 	smpsHeaderTempo     $01, $BE
@@ -329,7 +329,7 @@ HTZ_Voices:
 	smpsVcDecayRate2    $03, $04, $04, $00
 	smpsVcDecayLevel    $02, $02, $02, $02
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $04, $13, $30, $25
+	smpsVcTotalLevel    $84, $13, $30, $25
 
 ;	Voice $01
 ;	$38
@@ -342,12 +342,12 @@ HTZ_Voices:
 	smpsVcCoarseFreq    $02, $01, $0A, $0A
 	smpsVcRateScale     $00, $01, $00, $03
 	smpsVcAttackRate    $0E, $10, $14, $14
-	smpsVcAmpMod        $00, $00, $00, $00
+	smpsVcAmpMod        $01, $00, $00, $00
 	smpsVcDecayRate1    $08, $02, $08, $05
 	smpsVcDecayRate2    $00, $00, $00, $00
 	smpsVcDecayLevel    $01, $00, $00, $09
 	smpsVcReleaseRate   $0A, $09, $09, $09
-	smpsVcTotalLevel    $06, $19, $2C, $2D
+	smpsVcTotalLevel    $86, $19, $2C, $2D
 
 ;	Voice $02
 ;	$0D
@@ -365,7 +365,7 @@ HTZ_Voices:
 	smpsVcDecayRate2    $02, $02, $02, $00
 	smpsVcDecayLevel    $02, $02, $02, $03
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $13, $0B, $06, $28
+	smpsVcTotalLevel    $93, $8B, $86, $28
 
 ;	Voice $03
 ;	$3A
@@ -383,5 +383,5 @@ HTZ_Voices:
 	smpsVcDecayRate2    $00, $00, $00, $00
 	smpsVcDecayLevel    $00, $01, $0F, $01
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $06, $27, $28, $17
+	smpsVcTotalLevel    $86, $27, $28, $17
 

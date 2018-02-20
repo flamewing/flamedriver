@@ -1,5 +1,5 @@
 OOZ_Header:
-	smpsHeaderStartSong 2
+	smpsHeaderStartSong 2, 1
 	smpsHeaderVoice     OOZ_Voices
 	smpsHeaderChan      $06, $03
 	smpsHeaderTempo     $02, $D0
@@ -224,7 +224,7 @@ OOZ_PSG1:
 
 OOZ_Jump02:
 	smpsPSGAlterVol     $03
-	dc.b	nRst, $60, nRst, $60
+	dc.b	nRst, $60, $60
 	smpsPSGvoice        $00
 	smpsPSGAlterVol     $FD
 	smpsCall            OOZ_Call04
@@ -301,7 +301,7 @@ OOZ_Voices:
 	smpsVcDecayRate2    $03, $04, $04, $05
 	smpsVcDecayLevel    $02, $02, $02, $02
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $97, $2C, $23
+	smpsVcTotalLevel    $80, $97, $2C, $23
 
 ;	Voice $01
 ;	$3A
@@ -319,7 +319,7 @@ OOZ_Voices:
 	smpsVcDecayRate2    $00, $00, $00, $00
 	smpsVcDecayLevel    $00, $01, $0F, $01
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $27, $28, $17
+	smpsVcTotalLevel    $80, $27, $28, $17
 
 ;	Voice $02
 ;	$3E
@@ -327,17 +327,17 @@ OOZ_Voices:
 ;	$23, $22, $06, $05, 	$3F, $4F, $2F, $0F, 	$19, $8E, $87, $87
 	smpsVcAlgorithm     $06
 	smpsVcFeedback      $07
-	smpsVcUnusedBits    $00
+	smpsVcUnusedBits    $00, $01, $00, $00, $00
 	smpsVcDetune        $01, $03, $01, $05
 	smpsVcCoarseFreq    $04, $04, $06, $06
 	smpsVcRateScale     $01, $02, $01, $01
 	smpsVcAttackRate    $18, $15, $15, $0E
-	smpsVcAmpMod        $01, $00, $00, $00
+	smpsVcAmpMod        $00, $00, $00, $00
 	smpsVcDecayRate1    $04, $14, $11, $0E
 	smpsVcDecayRate2    $05, $06, $22, $23
 	smpsVcDecayLevel    $00, $02, $04, $03
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $07, $07, $0E, $19
+	smpsVcTotalLevel    $87, $87, $8E, $19
 
 ;	Voice $03
 ;	$36
@@ -355,7 +355,7 @@ OOZ_Voices:
 	smpsVcDecayRate2    $0A, $0A, $00, $00
 	smpsVcDecayLevel    $0F, $0F, $0F, $0F
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $00, $00, $05
+	smpsVcTotalLevel    $80, $80, $80, $05
 
 ;	Voice $04
 ;	$06
@@ -373,7 +373,7 @@ OOZ_Voices:
 	smpsVcDecayRate2    $00, $00, $00, $00
 	smpsVcDecayLevel    $02, $02, $02, $01
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $17, $14, $10
+	smpsVcTotalLevel    $80, $97, $94, $10
 
 ;	Voice $05
 ;	$14
@@ -391,5 +391,5 @@ OOZ_Voices:
 	smpsVcDecayRate2    $00, $00, $02, $03
 	smpsVcDecayLevel    $00, $02, $04, $03
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $33, $10, $0F
+	smpsVcTotalLevel    $80, $33, $90, $0F
 

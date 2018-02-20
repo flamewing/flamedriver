@@ -154,3 +154,22 @@ End_of_level_Voices:
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
 	smpsVcTotalLevel    $1B, $00, $00, $1B
 
+; Unused voice
+;	Voice $04
+;	$3D
+;	$01, $02, $02, $02, 	$10, $50, $50, $50, 	$07, $08, $08, $08
+;	$01, $00, $00, $00, 	$2F, $1F, $1F, $1F, 	$1C, $82, $82, $82
+	smpsVcAlgorithm     $05
+	smpsVcFeedback      $07
+	smpsVcUnusedBits    $00
+	smpsVcDetune        $00, $00, $00, $00
+	smpsVcCoarseFreq    $02, $02, $02, $01
+	smpsVcRateScale     $01, $01, $01, $00
+	smpsVcAttackRate    $10, $10, $10, $10
+	smpsVcAmpMod        $00, $00, $00, $00
+	smpsVcDecayRate1    $08, $08, $08, $07
+	smpsVcDecayRate2    $00, $00, $00, $01
+	smpsVcDecayLevel    $01, $01, $01, $02
+	smpsVcReleaseRate   $0F, $0F, $0F, $0F
+	smpsVcTotalLevel    $82, $82, $82, $1C
+
