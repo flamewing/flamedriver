@@ -1,5 +1,5 @@
 MCZ_2p_Header:
-	smpsHeaderStartSong 2
+	smpsHeaderStartSong 2, 1
 	smpsHeaderVoice     MCZ_2p_Voices
 	smpsHeaderChan      $06, $03
 	smpsHeaderTempo     $01, $EC
@@ -317,7 +317,7 @@ MCZ_2p_Voices:
 	smpsVcDecayRate2    $00, $00, $00, $00
 	smpsVcDecayLevel    $02, $02, $02, $01
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $17, $14, $10
+	smpsVcTotalLevel    $80, $97, $94, $10
 
 ;	Voice $04
 ;	$2C
