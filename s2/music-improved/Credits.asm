@@ -763,7 +763,7 @@ Credits_Call11:
 	dc.b	nD6, $08, nC6, $04, nRst, $18, nRst, $0C, nB5, $04, nRst, $10
 	dc.b	nB5, $04, nRst, $0C, nB5, $0C, nC6, $08, nB5, $04, nRst, $18
 	dc.b	nRst, $0C
-	if 1==1
+	if 1==0
 	; this part of the original credits music (CNZ PSG) sounds buggy (dissonant)
 	dc.b	nA5, $04, nRst, $10, nA5, $04, nRst, $0C, nA5, $0C, nB5, $08
 	dc.b	nA5, $04, nRst, $18, nRst, $0C, nAb5, $04, nRst, $10, nAb5, $04
@@ -974,7 +974,7 @@ Credits_Loop3E:
 	smpsLoop            $00, $0A, Credits_Loop3E
 	dc.b	nRst, $60
 	smpsAlterPitch      $F4
-	smpsAlterVol        $FE
+	smpsPSGAlterVol     $FE
 	smpsPSGvoice        fTone_01
 	smpsCall            Credits_Call28
 	dc.b	nA3, nD4, $06, nG3, $0C, nA3, nA3, nD4, $06, nRst, nD4, nFs3
