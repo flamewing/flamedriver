@@ -734,8 +734,19 @@ smpsVcAlgorithm macro val
 vcAlgorithm set val
 	endm
 
-smpsVcUnusedBits macro val
+smpsVcUnusedBits macro val,d1r1,d1r2,d1r3,d1r4
 vcUnusedBits set val
+	if ("d1r1"<>"")&&("d1r2"<>"")&&("d1r3"<>"")&&("d1r4"<>"")
+vcD1R1Unk set d1r1<<5
+vcD1R2Unk set d1r2<<5
+vcD1R3Unk set d1r3<<5
+vcD1R4Unk set d1r4<<5
+	else
+vcD1R1Unk set 0
+vcD1R2Unk set 0
+vcD1R3Unk set 0
+vcD1R4Unk set 0
+	endif
 	endm
 
 ; Voices - Detune
@@ -866,19 +877,19 @@ vcTL4 set vcTL4&$7F
 	endif
 
 	if SonicDriverVer==2
-		dc.b	(vcDT4<<4)+vcCF4 ,(vcDT2<<4)+vcCF2 ,(vcDT3<<4)+vcCF3 ,(vcDT1<<4)+vcCF1
-		dc.b	(vcRS4<<6)+vcAR4 ,(vcRS2<<6)+vcAR2 ,(vcRS3<<6)+vcAR3 ,(vcRS1<<6)+vcAR1
-		dc.b	vcAM4|vcD1R4     ,vcAM2|vcD1R2     ,vcAM3|vcD1R3     ,vcAM1|vcD1R1
-		dc.b	vcD2R4           ,vcD2R2           ,vcD2R3           ,vcD2R1
-		dc.b	(vcDL4<<4)+vcRR4 ,(vcDL2<<4)+vcRR2 ,(vcDL3<<4)+vcRR3 ,(vcDL1<<4)+vcRR1
-		dc.b	vcTL4|vcTLMask4  ,vcTL2|vcTLMask2  ,vcTL3|vcTLMask3  ,vcTL1|vcTLMask1
+		dc.b	(vcDT4<<4)+vcCF4       ,(vcDT2<<4)+vcCF2       ,(vcDT3<<4)+vcCF3       ,(vcDT1<<4)+vcCF1
+		dc.b	(vcRS4<<6)+vcAR4       ,(vcRS2<<6)+vcAR2       ,(vcRS3<<6)+vcAR3       ,(vcRS1<<6)+vcAR1
+		dc.b	vcAM4|vcD1R4|vcD1R4Unk ,vcAM2|vcD1R2|vcD1R2Unk ,vcAM3|vcD1R3|vcD1R3Unk ,vcAM1|vcD1R1|vcD1R1Unk
+		dc.b	vcD2R4                 ,vcD2R2                 ,vcD2R3                 ,vcD2R1
+		dc.b	(vcDL4<<4)+vcRR4       ,(vcDL2<<4)+vcRR2       ,(vcDL3<<4)+vcRR3       ,(vcDL1<<4)+vcRR1
+		dc.b	vcTL4|vcTLMask4        ,vcTL2|vcTLMask2        ,vcTL3|vcTLMask3        ,vcTL1|vcTLMask1
 	else
-		dc.b	(vcDT4<<4)+vcCF4 ,(vcDT3<<4)+vcCF3 ,(vcDT2<<4)+vcCF2 ,(vcDT1<<4)+vcCF1
-		dc.b	(vcRS4<<6)+vcAR4 ,(vcRS3<<6)+vcAR3 ,(vcRS2<<6)+vcAR2 ,(vcRS1<<6)+vcAR1
-		dc.b	vcAM4|vcD1R4     ,vcAM3|vcD1R3     ,vcAM2|vcD1R2     ,vcAM1|vcD1R1
-		dc.b	vcD2R4           ,vcD2R3           ,vcD2R2           ,vcD2R1
-		dc.b	(vcDL4<<4)+vcRR4 ,(vcDL3<<4)+vcRR3 ,(vcDL2<<4)+vcRR2 ,(vcDL1<<4)+vcRR1
-		dc.b	vcTL4|vcTLMask4  ,vcTL3|vcTLMask3  ,vcTL2|vcTLMask2  ,vcTL1|vcTLMask1
+		dc.b	(vcDT4<<4)+vcCF4       ,(vcDT3<<4)+vcCF3       ,(vcDT2<<4)+vcCF2       ,(vcDT1<<4)+vcCF1
+		dc.b	(vcRS4<<6)+vcAR4       ,(vcRS3<<6)+vcAR3       ,(vcRS2<<6)+vcAR2       ,(vcRS1<<6)+vcAR1
+		dc.b	vcAM4|vcD1R4|vcD1R4Unk ,vcAM3|vcD1R3|vcD1R3Unk ,vcAM2|vcD1R2|vcD1R2Unk ,vcAM1|vcD1R1|vcD1R1Unk
+		dc.b	vcD2R4                 ,vcD2R3                 ,vcD2R2                 ,vcD2R1
+		dc.b	(vcDL4<<4)+vcRR4       ,(vcDL3<<4)+vcRR3       ,(vcDL2<<4)+vcRR2       ,(vcDL1<<4)+vcRR1
+		dc.b	vcTL4|vcTLMask4        ,vcTL3|vcTLMask3        ,vcTL2|vcTLMask2        ,vcTL1|vcTLMask1
 	endif
 	endm
 
