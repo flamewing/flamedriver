@@ -1,5 +1,5 @@
 ARZ_Header:
-	smpsHeaderStartSong 2
+	smpsHeaderStartSong 2, 1
 	smpsHeaderVoice     ARZ_Voices
 	smpsHeaderChan      $06, $03
 	smpsHeaderTempo     $01, $E0
@@ -358,7 +358,7 @@ ARZ_Voices:
 	smpsVcDecayRate2    $00, $02, $02, $01
 	smpsVcDecayLevel    $02, $00, $00, $05
 	smpsVcReleaseRate   $08, $02, $02, $02
-	smpsVcTotalLevel    $00, $18, $22, $18
+	smpsVcTotalLevel    $80, $18, $22, $18
 
 ;	Voice $02
 ;	$3D
@@ -376,7 +376,7 @@ ARZ_Voices:
 	smpsVcDecayRate2    $00, $00, $00, $01
 	smpsVcDecayLevel    $01, $01, $01, $02
 	smpsVcReleaseRate   $08, $08, $08, $04
-	smpsVcTotalLevel    $02, $02, $02, $1C
+	smpsVcTotalLevel    $82, $82, $82, $1C
 
 ;	Voice $03
 ;	$32
@@ -394,7 +394,7 @@ ARZ_Voices:
 	smpsVcDecayRate2    $02, $02, $02, $02
 	smpsVcDecayLevel    $07, $01, $01, $01
 	smpsVcReleaseRate   $02, $01, $01, $01
-	smpsVcTotalLevel    $00, $26, $2D, $23
+	smpsVcTotalLevel    $80, $26, $2D, $23
 
 ;	Voice $04
 ;	$3A
@@ -430,5 +430,5 @@ ARZ_Voices:
 	smpsVcDecayRate2    $02, $02, $02, $02
 	smpsVcDecayLevel    $07, $01, $01, $01
 	smpsVcReleaseRate   $07, $01, $01, $01
-	smpsVcTotalLevel    $00, $26, $2D, $23
+	smpsVcTotalLevel    $80, $26, $2D, $23
 

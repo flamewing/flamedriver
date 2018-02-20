@@ -1,5 +1,5 @@
 MCZ_Header:
-	smpsHeaderStartSong 2
+	smpsHeaderStartSong 2, 1
 	smpsHeaderVoice     MCZ_Voices
 	smpsHeaderChan      $06, $03
 	smpsHeaderTempo     $01, $B6
@@ -378,7 +378,7 @@ MCZ_Voices:
 	smpsVcDecayRate2    $0B, $00, $0B, $00
 	smpsVcDecayLevel    $00, $01, $00, $01
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $1D, $14, $23
+	smpsVcTotalLevel    $80, $1D, $14, $23
 
 ;	Voice $01
 ;	$3A
@@ -396,7 +396,7 @@ MCZ_Voices:
 	smpsVcDecayRate2    $00, $02, $02, $01
 	smpsVcDecayLevel    $02, $00, $00, $05
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $18, $22, $18
+	smpsVcTotalLevel    $80, $18, $22, $18
 
 ;	Voice $02
 ;	$3C
@@ -468,7 +468,7 @@ MCZ_Voices:
 	smpsVcDecayRate2    $08, $07, $07, $07
 	smpsVcDecayLevel    $02, $01, $01, $02
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $14, $32, $17
+	smpsVcTotalLevel    $80, $14, $32, $17
 
 ;	Voice $06
 ;	$3D
@@ -486,5 +486,5 @@ MCZ_Voices:
 	smpsVcDecayRate2    $00, $00, $00, $01
 	smpsVcDecayLevel    $01, $01, $01, $02
 	smpsVcReleaseRate   $0A, $0A, $0A, $00
-	smpsVcTotalLevel    $04, $04, $04, $19
+	smpsVcTotalLevel    $84, $84, $84, $19
 

@@ -1,5 +1,5 @@
 End_Boss_Header:
-	smpsHeaderStartSong 2
+	smpsHeaderStartSong 2, 1
 	smpsHeaderVoice     End_Boss_Voices
 	smpsHeaderChan      $06, $03
 	smpsHeaderTempo     $01, $A9
@@ -274,7 +274,7 @@ End_Boss_Voices:
 	smpsVcDecayRate2    $01, $00, $00, $00
 	smpsVcDecayLevel    $00, $01, $0F, $01
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $27, $28, $17
+	smpsVcTotalLevel    $80, $27, $28, $17
 
 ;	Voice $01
 ;	$3D
@@ -292,7 +292,7 @@ End_Boss_Voices:
 	smpsVcDecayRate2    $03, $03, $03, $00
 	smpsVcDecayLevel    $01, $01, $01, $01
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $60, $00, $00, $1A
+	smpsVcTotalLevel    $60, $80, $80, $1A
 
 ;	Voice $02
 ;	$3D
@@ -310,5 +310,5 @@ End_Boss_Voices:
 	smpsVcDecayRate2    $00, $00, $00, $00
 	smpsVcDecayLevel    $01, $02, $02, $02
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $00, $00, $1E
+	smpsVcTotalLevel    $80, $80, $80, $1E
 

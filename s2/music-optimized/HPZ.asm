@@ -1,5 +1,5 @@
 HPZ_Header:
-	smpsHeaderStartSong 2
+	smpsHeaderStartSong 2, 1
 	smpsHeaderVoice     HPZ_Voices
 	smpsHeaderChan      $06, $03
 	smpsHeaderTempo     $02, $E0

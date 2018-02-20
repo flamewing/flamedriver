@@ -1,5 +1,5 @@
 Credits_Header:
-	smpsHeaderStartSong 2
+	smpsHeaderStartSong 2, 1
 	smpsHeaderVoice     Credits_Voices
 	smpsHeaderChan      $06, $03
 	smpsHeaderTempo     $01, $F0
@@ -1372,7 +1372,7 @@ Credits_Voices:
 	smpsVcDecayRate2    $01, $00, $00, $00
 	smpsVcDecayLevel    $00, $01, $0F, $01
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $27, $28, $17
+	smpsVcTotalLevel    $80, $27, $28, $17
 
 ;	Voice $01
 ;	$08
@@ -1390,7 +1390,7 @@ Credits_Voices:
 	smpsVcDecayRate2    $03, $04, $04, $00
 	smpsVcDecayLevel    $02, $02, $02, $02
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $04, $0E, $30, $25
+	smpsVcTotalLevel    $84, $0E, $30, $25
 
 ;	Voice $02
 ;	$3C
@@ -1408,7 +1408,7 @@ Credits_Voices:
 	smpsVcDecayRate2    $00, $04, $00, $04
 	smpsVcDecayLevel    $00, $01, $00, $01
 	smpsVcReleaseRate   $0D, $00, $0B, $00
-	smpsVcTotalLevel    $00, $0B, $00, $19
+	smpsVcTotalLevel    $80, $0B, $80, $19
 
 ;	Voice $03
 ;	$08
@@ -1426,7 +1426,7 @@ Credits_Voices:
 	smpsVcDecayRate2    $03, $04, $04, $00
 	smpsVcDecayLevel    $02, $02, $02, $02
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $13, $2D, $24
+	smpsVcTotalLevel    $80, $13, $2D, $24
 
 ;	Voice $04
 ;	$3D
@@ -1444,7 +1444,7 @@ Credits_Voices:
 	smpsVcDecayRate2    $00, $00, $00, $00
 	smpsVcDecayLevel    $01, $02, $02, $02
 	smpsVcReleaseRate   $0B, $0B, $0B, $0B
-	smpsVcTotalLevel    $00, $00, $00, $19
+	smpsVcTotalLevel    $80, $80, $80, $19
 
 ;	Voice $05
 ;	$04
@@ -1462,7 +1462,7 @@ Credits_Voices:
 	smpsVcDecayRate2    $0A, $00, $0A, $06
 	smpsVcDecayLevel    $00, $00, $00, $00
 	smpsVcReleaseRate   $0F, $00, $0F, $00
-	smpsVcTotalLevel    $00, $10, $00, $1A
+	smpsVcTotalLevel    $80, $10, $80, $1A
 
 ;	Voice $06
 ;	$35
@@ -1480,7 +1480,7 @@ Credits_Voices:
 	smpsVcDecayRate2    $03, $02, $00, $00
 	smpsVcDecayLevel    $01, $01, $00, $00
 	smpsVcReleaseRate   $06, $05, $06, $00
-	smpsVcTotalLevel    $00, $03, $00, $1E
+	smpsVcTotalLevel    $80, $83, $80, $1E
 
 ;	Voice $07
 ;	$3C
@@ -1498,7 +1498,7 @@ Credits_Voices:
 	smpsVcDecayRate2    $00, $04, $00, $04
 	smpsVcDecayLevel    $00, $01, $00, $01
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $08, $16, $08, $1A
+	smpsVcTotalLevel    $88, $16, $88, $1A
 
 ;	Voice $08
 ;	$20
@@ -1516,7 +1516,7 @@ Credits_Voices:
 	smpsVcDecayRate2    $08, $06, $06, $07
 	smpsVcDecayLevel    $0F, $01, $01, $02
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $0F, $37, $14
+	smpsVcTotalLevel    $80, $0F, $37, $14
 
 ;	Voice $09
 ;	$3B
@@ -1534,7 +1534,7 @@ Credits_Voices:
 	smpsVcDecayRate2    $01, $00, $00, $0F
 	smpsVcDecayLevel    $05, $05, $00, $0F
 	smpsVcReleaseRate   $0C, $05, $05, $03
-	smpsVcTotalLevel    $00, $22, $20, $22
+	smpsVcTotalLevel    $80, $22, $20, $22
 
 ;	Voice $0A
 ;	$3C
@@ -1552,7 +1552,7 @@ Credits_Voices:
 	smpsVcDecayRate2    $00, $04, $00, $04
 	smpsVcDecayLevel    $00, $01, $00, $01
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $14, $04, $1C
+	smpsVcTotalLevel    $80, $14, $84, $1C
 
 ;	Voice $0B
 ;	$3A
@@ -1642,7 +1642,7 @@ Credits_Voices:
 	smpsVcDecayRate2    $00, $00, $00, $01
 	smpsVcDecayLevel    $01, $01, $01, $02
 	smpsVcReleaseRate   $08, $08, $08, $04
-	smpsVcTotalLevel    $02, $02, $02, $1C
+	smpsVcTotalLevel    $82, $82, $82, $1C
 
 ;	Voice $10
 ;	$32
@@ -1660,7 +1660,7 @@ Credits_Voices:
 	smpsVcDecayRate2    $02, $02, $02, $02
 	smpsVcDecayLevel    $07, $01, $01, $01
 	smpsVcReleaseRate   $02, $01, $01, $01
-	smpsVcTotalLevel    $00, $26, $2D, $23
+	smpsVcTotalLevel    $80, $26, $2D, $23
 
 ;	Voice $11
 ;	$3A
@@ -1714,7 +1714,7 @@ Credits_Voices:
 	smpsVcDecayRate2    $08, $07, $07, $07
 	smpsVcDecayLevel    $02, $01, $01, $02
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $14, $32, $17
+	smpsVcTotalLevel    $80, $14, $32, $17
 
 ;	Voice $14
 ;	$3D
@@ -1732,7 +1732,7 @@ Credits_Voices:
 	smpsVcDecayRate2    $00, $00, $00, $01
 	smpsVcDecayLevel    $01, $01, $01, $02
 	smpsVcReleaseRate   $0A, $0A, $0A, $00
-	smpsVcTotalLevel    $04, $04, $04, $19
+	smpsVcTotalLevel    $84, $84, $84, $19
 
 ;	Voice $15
 ;	$24
@@ -1768,7 +1768,7 @@ Credits_Voices:
 	smpsVcDecayRate2    $00, $02, $02, $01
 	smpsVcDecayLevel    $02, $00, $00, $05
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $18, $22, $18
+	smpsVcTotalLevel    $80, $18, $22, $18
 
 ;	Voice $17
 ;	$3A
@@ -1786,7 +1786,7 @@ Credits_Voices:
 	smpsVcDecayRate2    $00, $00, $00, $00
 	smpsVcDecayLevel    $00, $01, $0F, $01
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $16, $4E, $18
+	smpsVcTotalLevel    $80, $16, $4E, $18
 
 ;	Voice $18
 ;	$3A
@@ -1804,7 +1804,7 @@ Credits_Voices:
 	smpsVcDecayRate2    $00, $00, $00, $00
 	smpsVcDecayLevel    $00, $01, $0F, $01
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $20, $28, $17
+	smpsVcTotalLevel    $80, $20, $28, $17
 
 ;	Voice $19
 ;	$20
@@ -1822,7 +1822,7 @@ Credits_Voices:
 	smpsVcDecayRate2    $08, $08, $08, $0F
 	smpsVcDecayLevel    $0B, $0B, $05, $05
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $17, $2B, $14
+	smpsVcTotalLevel    $80, $17, $2B, $14
 
 ;	Voice $1A
 ;	$3A
@@ -1840,7 +1840,7 @@ Credits_Voices:
 	smpsVcDecayRate2    $00, $00, $00, $00
 	smpsVcDecayLevel    $00, $00, $05, $01
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $22, $1E, $22
+	smpsVcTotalLevel    $80, $22, $1E, $22
 
 ;	Voice $1B
 ;	$02
@@ -1858,7 +1858,7 @@ Credits_Voices:
 	smpsVcDecayRate2    $00, $00, $00, $00
 	smpsVcDecayLevel    $05, $00, $02, $0F
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $1D, $2A, $16
+	smpsVcTotalLevel    $80, $1D, $2A, $16
 
 ;	Voice $1C
 ;	$02
@@ -1876,7 +1876,7 @@ Credits_Voices:
 	smpsVcDecayRate2    $05, $01, $04, $01
 	smpsVcDecayLevel    $02, $03, $02, $0F
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $30, $29, $24
+	smpsVcTotalLevel    $80, $30, $29, $24
 
 ;	Voice $1D
 ;	$20
@@ -1894,7 +1894,7 @@ Credits_Voices:
 	smpsVcDecayRate2    $08, $06, $06, $07
 	smpsVcDecayLevel    $0F, $01, $01, $02
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $16, $3A, $1C
+	smpsVcTotalLevel    $80, $16, $3A, $1C
 
 ;	Voice $1E
 ;	$0D
@@ -1912,11 +1912,11 @@ Credits_Voices:
 	smpsVcDecayRate2    $02, $02, $02, $00
 	smpsVcDecayLevel    $02, $02, $02, $03
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $0D, $06, $00, $28
+	smpsVcTotalLevel    $8D, $86, $80, $28
 
 ;	Voice $1F
 ;	$38
-;	$3A, $0A, $11, $02, 	$D4, $14, $50, $0E, 	$05, $08, $02, $08
+;	$3A, $0A, $11, $02, 	$D4, $14, $50, $0E, 	$05, $08, $02, $88
 ;	$00, $00, $00, $00, 	$99, $09, $09, $1A, 	$2D, $2C, $19, $86
 	smpsVcAlgorithm     $00
 	smpsVcFeedback      $07
@@ -1925,12 +1925,12 @@ Credits_Voices:
 	smpsVcCoarseFreq    $02, $01, $0A, $0A
 	smpsVcRateScale     $00, $01, $00, $03
 	smpsVcAttackRate    $0E, $10, $14, $14
-	smpsVcAmpMod        $00, $00, $00, $00
+	smpsVcAmpMod        $01, $00, $00, $00
 	smpsVcDecayRate1    $08, $02, $08, $05
 	smpsVcDecayRate2    $00, $00, $00, $00
 	smpsVcDecayLevel    $01, $00, $00, $09
 	smpsVcReleaseRate   $0A, $09, $09, $09
-	smpsVcTotalLevel    $06, $19, $2C, $2D
+	smpsVcTotalLevel    $86, $19, $2C, $2D
 
 ;	Voice $20
 ;	$0D
@@ -1948,7 +1948,7 @@ Credits_Voices:
 	smpsVcDecayRate2    $02, $02, $02, $00
 	smpsVcDecayLevel    $02, $02, $02, $03
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $13, $0B, $06, $28
+	smpsVcTotalLevel    $93, $8B, $86, $28
 
 ;	Voice $21
 ;	$3A
@@ -2002,7 +2002,7 @@ Credits_Voices:
 	smpsVcDecayRate2    $02, $00, $00, $00
 	smpsVcDecayLevel    $01, $00, $00, $00
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $01, $22, $24, $18
+	smpsVcTotalLevel    $81, $22, $24, $18
 
 ;	Voice $24
 ;	$20
@@ -2020,7 +2020,7 @@ Credits_Voices:
 	smpsVcDecayRate2    $08, $06, $06, $07
 	smpsVcDecayLevel    $0F, $01, $01, $02
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $13, $37, $19
+	smpsVcTotalLevel    $80, $13, $37, $19
 
 ;	Voice $25
 ;	$3D
@@ -2038,5 +2038,5 @@ Credits_Voices:
 	smpsVcDecayRate2    $00, $00, $00, $00
 	smpsVcDecayLevel    $01, $01, $01, $01
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $00, $00, $1A
+	smpsVcTotalLevel    $80, $80, $80, $1A
 
