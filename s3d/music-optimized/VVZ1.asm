@@ -209,11 +209,11 @@ Snd_VVZ1_PSG1:
 	dc.b	nRst, $60
 
 Snd_VVZ1_Jump04:
-	smpsSetvoice        sTone_17
+	smpsPSGvoice        sTone_17
 	dc.b	nF4, $18, nC5, $16, nRst, $32, nRst, $60, nG4, $18, nC5, $16
 	dc.b	nRst, $32, nRst, $60, nRst, $18, nF4, nC5, $16, nRst, $1A, nRst
 	dc.b	$60, nRst, $18, nG4, nC5, $16, nRst, $1A, nRst, $60
-	smpsSetvoice        sTone_11
+	smpsPSGvoice        sTone_11
 	dc.b	nC6, $06, nAb5, nG5, nF5, nC5, nAb4, nF4, nRst, $36, nRst, $60
 	dc.b	nC6, $06, nAb5, nG5, nF5, nEb5, nBb4, nF4, nRst, $36, nRst, $60
 	dc.b	nC6, $06, nAb5, nG5, nF5, nC5, nAb4, nF4, nRst, $36, nRst, $60
