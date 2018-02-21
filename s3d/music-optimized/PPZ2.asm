@@ -152,7 +152,7 @@ Snd_PPZ2_FM3:
 	dc.b	nF4, nG4, nF4, nAb4, $30, nG4, nF4, $60, nG4, nF4, nC5, $30
 	dc.b	nBb4
 	smpsSetvoice        $03
-	dc.b	nAb4, $2A, nRst, $06, $10, nBb4, nC5, nD5, $30, nC5, smpsNoAttack, nC5
+	dc.b	nAb4, $2A, nRst, $06, nAb4, $10, nBb4, nC5, nD5, $30, nC5, smpsNoAttack, nC5
 	dc.b	$60, nAb4, $30, $10, nBb4, nC5, nD5, $30, nEb5, smpsNoAttack, nEb5, $60
 	dc.b	smpsNoAttack, nEb5, nAb4, $30, $10, nBb4, nC5, nD5, $30, nEb5, smpsNoAttack, nEb5
 	dc.b	$60, nF5, smpsNoAttack, nF5, nC5, $06, nC5, nC5, nC5, nRst, nRst, nF5
@@ -182,7 +182,7 @@ Snd_PPZ2_Jump01:
 	dc.b	nC4, nEb4, nC4, nEb4, $30, nEb4, nC4, $60, nEb4, nC4, nAb4, $30
 	dc.b	nF4
 	smpsSetvoice        $03
-	dc.b	nEb4, $24, nRst, $0C, $10, nF4, nG4, nBb4, $30, nAb4, smpsNoAttack, nAb4
+	dc.b	nEb4, $24, nRst, $0C, nEb4, $10, nF4, nG4, nBb4, $30, nAb4, smpsNoAttack, nAb4
 	dc.b	$60, nEb4, $30, $10, nF4, nG4, nBb4, $30, nAb4, smpsNoAttack, nAb4, $60
 	dc.b	smpsNoAttack, nAb4, nEb4, $30, $10, nF4, nG4, nBb4, $30, nB4, smpsNoAttack, nB4
 	dc.b	$60, nCs5, smpsNoAttack, nCs5, nF4, $06, nF4, nF4, nF4, nRst, nRst, nC5
@@ -228,7 +228,7 @@ Snd_PPZ2_Jump04:
 	dc.b	nAb3, nBb3, nAb3, nG3, nEb3
 	smpsPSGvoice        sTone_17
 	smpsAlterPitch      $F4
-	dc.b	nAb4, $2A, nRst, $06, $10, nBb4, nC5, nD5, $30, nC5, smpsNoAttack, nC5
+	dc.b	nAb4, $2A, nRst, $06, nAb4, $10, nBb4, nC5, nD5, $30, nC5, smpsNoAttack, nC5
 	dc.b	$60, nAb4, $30, $10, nBb4, nC5, nD5, $30, nEb5, smpsNoAttack, nEb5, $60
 	dc.b	smpsNoAttack, nEb5, nAb4, $30, $10, nBb4, nC5, nD5, $30, nEb5, smpsNoAttack, nEb5
 	dc.b	$60, nF5, smpsNoAttack, nF5, nC5, $06, nC5, nC5, nC5, nRst, nRst, nF5

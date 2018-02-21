@@ -803,7 +803,7 @@ Snd_GreenGZ2_Call0D:
 	dc.b	$18
 	smpsPSGvoice        sTone_0F
 	smpsPSGAlterVol     $FF
-	dc.b	$0C, nRst, $0C, $0C, nRst, $0C, $0C
+	dc.b	$0C, nRst, (nMaxPSG2-$23)&$FF, nRst, (nMaxPSG2-$23)&$FF, $0C
 	smpsReturn
 
 ; DAC Data

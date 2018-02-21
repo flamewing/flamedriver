@@ -55,7 +55,7 @@ Snd_VVZ1_FM2:
 	dc.b	nRst, $60
 
 Snd_VVZ1_Jump03:
-	dc.b	nF1, $12, nF1, $06, nRst, $0C, $06, nRst, $36, nRst, $0C, nF1
+	dc.b	nF1, $12, nF1, $06, nRst, $0C, nF1, $06, nRst, $36, nRst, $0C, nF1
 	dc.b	nG1, nAb1, nBb1, nF1, nC2, nF2, nF2, $03
 	smpsSetvoice        $06
 	dc.b	nG2, $0F
@@ -70,28 +70,28 @@ Snd_VVZ1_Jump03:
 	smpsFMAlterVol      $FD
 	dc.b	nG3, $0F
 	smpsSetvoice        $01
-	dc.b	nEb3, $12, nG2, $0C, nRst, $18, $06, nAb2, nBb2, $0C, smpsNoAttack, $09
+	dc.b	nEb3, $12, nG2, $0C, nRst, $18, nG2, $06, nAb2, nBb2, $0C, smpsNoAttack, $09
 	dc.b	nA2, $02, nG2, nF2, nE2, $03, nD2, nC2, nBb1, $18, nG2, nEb2
-	dc.b	nF1, $12, nF1, $06, nRst, $0C, $06, nRst, $36, nRst, $0C, nF1
+	dc.b	nF1, $12, nF1, $06, nRst, $0C, nF1, $06, nRst, $36, nRst, $0C, nF1
 	dc.b	$18, nG1, $0C, nAb1, nF1, nG1, nAb1, nF1, $12, nEb2, nF1, $06
 	dc.b	nRst, $36, nEb2, $03
 	smpsSetvoice        $06
 	dc.b	nF2, $15
 	smpsSetvoice        $01
-	dc.b	nEb2, $18, nBb1, nG1, nF1, $12, nF1, $06, nRst, $0C, $06, nRst
+	dc.b	nEb2, $18, nBb1, nG1, nF1, $12, nF1, $06, nRst, $0C, nF1, $06, nRst
 	dc.b	$36, nRst, $0C, nF1, $18, nG1, $0C, nAb1, nF1, nG1, nAb1, nEb1
 	dc.b	$12, nBb1, $06, nRst, $0C, nAb2, $03
 	smpsSetvoice        $06
 	dc.b	nBb2, $21
 	smpsSetvoice        $01
 	dc.b	nAb2, $18, nG2, nEb2, nG1, $06, nAb1, nBb1, nAb1, nF1, nEb1, nD1
-	dc.b	nG1, nF1, $12, nF1, $06, nRst, $0C, $06, nRst, $36, nRst, $0C
+	dc.b	nG1, nF1, $12, nF1, $06, nRst, $0C, nF1, $06, nRst, $36, nRst, $0C
 	dc.b	nF1, $18, nG1, $0C, nAb1, nF1, nG1, nAb1, nF1, $12, nEb2, nF1
 	dc.b	$06, nRst, $36, nEb2, $03
 	smpsSetvoice        $06
 	dc.b	nF2, $15
 	smpsSetvoice        $01
-	dc.b	nEb2, $18, nBb1, nG1, nF1, $12, nF1, $06, nRst, $0C, $06, nRst
+	dc.b	nEb2, $18, nBb1, nG1, nF1, $12, nF1, $06, nRst, $0C, nF1, $06, nRst
 	dc.b	$36, nRst, $0C, nF1, $18, nG1, $0C, nAb1, nF1, nG1, nAb1, nEb1
 	dc.b	$12, nBb1, $06, nRst, $0C, nAb2, $03
 	smpsSetvoice        $06

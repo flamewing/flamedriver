@@ -174,21 +174,21 @@ Snd_GeneGZ2_Jump01:
 	dc.b	nBb4, nG4, nFs4
 	smpsSetvoice        $05
 	smpsFMAlterVol      $02
-	dc.b	nG4, $60, nG4, nAb4, nF4, nG4, $06, nG4, nRst, $0C, $06, nG4
-	dc.b	nRst, $0C, $12, nG4, $06, nRst, $0C, $06, nG4, nRst, nAb4, nRst
-	dc.b	$0C, $12, $06, nRst, $18, $06, nAb4, nAb4, nRst, nBb4, nBb4, nRst
-	dc.b	$0C, $06, nBb4, nRst, $0C, $12, nBb4, $06, nRst, $0C, $06, nBb4
-	dc.b	nRst, nBb4, nBb4, nRst, nBb4, $12, $06, nRst, $18, $06, nBb4, nBb4
-	dc.b	nRst, nG4, $06, nG4, nRst, $0C, $06, nG4, nRst, $0C, $12, nG4
-	dc.b	$06, nRst, $0C, $06, nG4, nRst, nG4, nRst, $0C, $12, $06, nRst
-	dc.b	$18, nRst, nAb4, $06, nAb4, nRst, $0C, $06, nAb4, nRst, $0C, $12
-	dc.b	nAb4, $06, nRst, $0C, $06, nAb4, nF4, nF4, nRst, $0C, $06, nF4
-	dc.b	nRst, $0C, $12, nF4, $06, nF4, nRst, $0C, $06, nG4, $06, nG4
-	dc.b	nRst, $0C, $06, nG4, nRst, $0C, $12, nG4, $06, nRst, $0C, $06
-	dc.b	nG4, nRst, nAb4, nRst, $0C, $12, $06, nRst, $18, $06, nAb4, nAb4
-	dc.b	nRst, nBb4, nBb4, nRst, $0C, $06, nBb4, nRst, $0C, $12, nBb4, $06
-	dc.b	nRst, $0C, $06, nBb4, nRst, nBb4, nBb4, nRst, nBb4, $12, $06, nRst
-	dc.b	$18, $06, nBb4, nBb4, nRst, nC4, $30, nC4, smpsNoAttack, nC4, $60, nC4
+	dc.b	nG4, $60, nG4, nAb4, nF4, nG4, $06, nG4, nRst, $0C, nG4, $06, nG4
+	dc.b	nRst, $0C, nG4, $12, nG4, $06, nRst, $0C, nG4, $06, nG4, nRst, nAb4, nRst
+	dc.b	$0C, nAb4, $12, $06, nRst, $18, nAb4, $06, nAb4, nAb4, nRst, nBb4, nBb4, nRst
+	dc.b	$0C, nBb4, $06, nBb4, nRst, $0C, nBb4, $12, nBb4, $06, nRst, $0C, nBb4, $06, nBb4
+	dc.b	nRst, nBb4, nBb4, nRst, nBb4, $12, $06, nRst, $18, nBb4, $06, nBb4, nBb4
+	dc.b	nRst, nG4, $06, nG4, nRst, $0C, nG4 $06, nG4, nRst, $0C, nG4 $12, nG4
+	dc.b	$06, nRst, $0C, nG4, $06, nG4, nRst, nG4, nRst, $0C, nG4, $12, $06, nRst
+	dc.b	$18, nRst, nAb4, $06, nAb4, nRst, $0C, nAb4, $06, nAb4, nRst, $0C, nAb4, $12
+	dc.b	nAb4, $06, nRst, $0C, nAb4, $06, nAb4, nF4, nF4, nRst, $0C, nF4, $06, nF4
+	dc.b	nRst, $0C, nF4, $12, $06, nF4, nRst, $0C, nF4, $06, nG4, $06, nG4
+	dc.b	nRst, $0C, nG4, $06, nG4, nRst, $0C, nG4, $12, $06, nRst, $0C, nG4, $06
+	dc.b	nG4, nRst, nAb4, nRst, $0C, nAb4, $12, $06, nRst, $18, nAb4, $06, nAb4, nAb4
+	dc.b	nRst, nBb4, nBb4, nRst, $0C, nBb4, $06, nBb4, nRst, $0C, nBb4, $12, $06
+	dc.b	nRst, $0C, nBb4, $06, nBb4, nRst, nBb4, nBb4, nRst, nBb4, $12, $06, nRst
+	dc.b	$18, nBb4, $06, nBb4, nBb4, nRst, nC4, $30, nC4, smpsNoAttack, nC4, $60, nC4
 	dc.b	$30, nC4, smpsNoAttack, nC4, $48, nRst, $18
 	smpsFMAlterVol      $FE
 	smpsJump            Snd_GeneGZ2_Jump01
@@ -211,21 +211,21 @@ Snd_GeneGZ2_Jump00:
 	dc.b	nC4, nC4
 	smpsSetvoice        $05
 	smpsFMAlterVol      $02
-	dc.b	nC4, $60, nBb3, nEb4, nBb3, nC4, $06, nC4, nRst, $0C, $06, nC4
-	dc.b	nRst, $0C, $12, nC4, $06, nRst, $0C, $06, nC4, nRst, nC4, nRst
-	dc.b	$0C, $12, $06, nRst, $18, $06, nC4, nC4, nRst, nEb4, nEb4, nRst
-	dc.b	$0C, $06, nEb4, nRst, $0C, $12, nEb4, $06, nRst, $0C, $06, nEb4
-	dc.b	nRst, nF4, nF4, nRst, nF4, $12, $06, nRst, $18, $06, nF4, nF4
-	dc.b	nRst, nC4, $06, nC4, nRst, $0C, $06, nC4, nRst, $0C, $12, nC4
-	dc.b	$06, nRst, $0C, $06, nC4, nRst, nBb3, nRst, $0C, $12, $06, nRst
-	dc.b	$18, nRst, nEb4, $06, nEb4, nRst, $0C, $06, nEb4, nRst, $0C, $12
-	dc.b	nEb4, $06, nRst, $0C, $06, nEb4, nBb3, nBb3, nRst, $0C, $06, nBb3
-	dc.b	nRst, $0C, $12, nBb3, $06, nBb3, nRst, $0C, $06, nC4, $06, nC4
-	dc.b	nRst, $0C, $06, nC4, nRst, $0C, $12, nC4, $06, nRst, $0C, $06
-	dc.b	nC4, nRst, nC4, nRst, $0C, $12, $06, nRst, $18, $06, nC4, nC4
-	dc.b	nRst, nEb4, nEb4, nRst, $0C, $06, nEb4, nRst, $0C, $12, nEb4, $06
-	dc.b	nRst, $0C, $06, nEb4, nRst, nF4, nF4, nRst, nF4, $12, $06, nRst
-	dc.b	$18, $06, nF4, nF4, nRst, nG3, $30, nG3, smpsNoAttack, nG3, $60, nG3
+	dc.b	nC4, $60, nBb3, nEb4, nBb3, nC4, $06, nC4, nRst, $0C, nC4, $06, nC4
+	dc.b	nRst, $0C, nC4, $12, $06, nRst, $0C, nC4, $06, nC4, nRst, nC4, nRst
+	dc.b	$0C, nC4, $12, $06, nRst, $18, nC4, $06, nC4, nC4, nRst, nEb4, nEb4, nRst
+	dc.b	$0C, nEb4, $06, nEb4, nRst, $0C, nEb4, $12, $06, nRst, $0C, nEb4, $06, nEb4
+	dc.b	nRst, nF4, nF4, nRst, nF4, $12, $06, nRst, $18, nF4, $06, nF4, nF4
+	dc.b	nRst, nC4, $06, nC4, nRst, $0C, nC4, $06, nC4, nRst, $0C, nC4, $12
+	dc.b	$06, nRst, $0C, nC4, $06, nC4, nRst, nBb3, nRst, $0C, nBb3, $12, $06, nRst
+	dc.b	$18, nRst, nEb4, $06, nEb4, nRst, $0C, nEb4, $06, nEb4, nRst, $0C, nEb4, $12
+	dc.b	$06, nRst, $0C, nEb4, $06, nEb4, nBb3, nBb3, nRst, $0C, nBb3, $06, nBb3
+	dc.b	nRst, $0C, nBb3, $12, nBb3, $06, nBb3, nRst, $0C, nBb3, $06, nC4, $06, nC4
+	dc.b	nRst, $0C, nC4, $06, nC4, nRst, $0C, nC4, $12, $06, nRst, $0C, nC4, $06
+	dc.b	nC4, nRst, nC4, nRst, $0C, nC4, $12, $06, nRst, $18, nC4, $06, nC4, nC4
+	dc.b	nRst, nEb4, nEb4, nRst, $0C, nEb4, $06, nEb4, nRst, $0C, nEb4, $12, $06
+	dc.b	nRst, $0C, nEb4, $06, nEb4, nRst, nF4, nF4, nRst, nF4, $12, $06, nRst
+	dc.b	$18, nF4, $06, nF4, nF4, nRst, nG3, $30, nG3, smpsNoAttack, nG3, $60, nG3
 	dc.b	$30, nG3, smpsNoAttack, nG3, $48, nRst, $18
 	smpsFMAlterVol      $FE
 	smpsJump            Snd_GeneGZ2_Jump00
@@ -271,11 +271,11 @@ Snd_GeneGZ2_Loop16:
 	dc.b	nC4, $60, nD4, nEb4, nF4, $30, nBb4, $24, nA4, $06, nAb4
 	smpsAlterPitch      $0C
 	smpsPSGvoice        sTone_1D
-	dc.b	nC4, $06, nRst, $12, $06, nEb4, nG4, nEb4, nC5, $0C, nG4, $06
-	dc.b	nEb4, $0C, nC4, $06, nG4, $0C, nC4, $06, nRst, $12, $06, nEb4
+	dc.b	nC4, $06, nRst, $12, nC4, $06, nEb4, nG4, nEb4, nC5, $0C, nG4, $06
+	dc.b	nEb4, $0C, nC4, $06, nG4, $0C, nC4, $06, nRst, $12, nC4, $06, nEb4
 	dc.b	nAb4, nEb4, nC5, $0C, nAb4, $06, nEb4, $0C, nC4, $06, nAb4, $0C
-	dc.b	nC4, $06, nRst, $12, $06, nEb4, nG4, nEb4, nBb4, $0C, nG4, $06
-	dc.b	nEb4, $0C, nBb3, $06, nG4, $0C, nF4, $06, nRst, $12, $06, nBb3
+	dc.b	nC4, $06, nRst, $12, nC4, $06, nEb4, nG4, nEb4, nBb4, $0C, nG4, $06
+	dc.b	nEb4, $0C, nBb3, $06, nG4, $0C, nF4, $06, nRst, $12, nF4, $06, nBb3
 	dc.b	nD4, nF4, nD5, $0C, nBb4, $06, nF4, $0C, nD4, $06, nBb3, nD4
 	dc.b	nRst, nRst, nC4, nRst, nC4, nEb4, nG4, nEb4, nC5, $0C, nG4, $06
 	dc.b	nEb4, $0C, nC4, $06, nG4, $0C, nRst, $06, nRst, nC4, nRst, nC4
