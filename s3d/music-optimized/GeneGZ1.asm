@@ -179,11 +179,11 @@ Snd_GeneGZ1_Loop0B:
 	smpsLoop            $00, $02, Snd_GeneGZ1_Loop0B
 
 Snd_GeneGZ1_Loop0C:
-	dc.b	nG4, $06, nG4, nRst, $0C, $06, nG4, nRst, $0C, nF4, $06, nRst
+	dc.b	nG4, $06, nG4, nRst, $0C, nG4, $06, nG4, nRst, $0C, nF4, $06, nRst
 	dc.b	$0C, nG4, $06, nRst, $0C, nG4, $06, nRst, nRst, nG4, nRst, $0C
 	dc.b	nF4, nRst, $06, nG4, nRst, $0C, nG4, $06, nRst, nBb4, nG4, nRst
 	dc.b	$0C, nRst, nA4, $06, nA4, nRst, nA4, nRst, nA4, nG4, $12, nA4
-	dc.b	$06, nRst, $0C, $06, nA4, nRst, nA4, nRst, nA4, nBb4, $12
+	dc.b	$06, nRst, $0C, nA4, $06, nA4, nRst, nA4, nRst, nA4, nBb4, $12
 	smpsSetvoice        $04
 	dc.b	nA4, $06, nC6, nF5, nBb5, nA5, nF5, nC5, nBb4, nA4
 	smpsSetvoice        $02
@@ -203,11 +203,11 @@ Snd_GeneGZ1_Loop0D:
 	smpsFMAlterVol      $03
 	smpsFMAlterVol      $FA
 	smpsAlterPitch      $0C
-	dc.b	nG4, $06, nG4, nRst, $0C, $06, nG4, nRst, $0C, $12, nG4, $06
-	dc.b	nRst, $0C, $06, nG4, nRst, nAb4, nRst, $0C, $12, $06, nRst, $18
-	dc.b	$06, nAb4, nAb4, nRst, nBb4, nBb4, nRst, $0C, $06, nBb4, nRst, $0C
-	dc.b	$12, nBb4, $06, nRst, $0C, $06, nBb4, nRst, nBb4, nBb4, nRst, nBb4
-	dc.b	$12, $06, nRst, $18, $06, nBb4, nBb4, nRst
+	dc.b	nG4, $06, nG4, nRst, $0C, nG4, $06, nG4, nRst, $0C, nG4, $12, nG4, $06
+	dc.b	nRst, $0C, nG4, $06, nG4, nRst, nAb4, nRst, $0C, nAb4, $12, $06, nRst, $18
+	dc.b	nAb4, $06, nAb4, nAb4, nRst, nBb4, nBb4, nRst, $0C, nBb4 $06, nBb4, nRst, $0C
+	dc.b	nBb4, $12, nBb4, $06, nRst, $0C, nBb4, $06, nBb4, nRst, nBb4, nBb4, nRst, nBb4
+	dc.b	$12, $06, nRst, $18, nBb4, $06, nBb4, nBb4, nRst
 	smpsAlterPitch      $F4
 	dc.b	nG4, $60, nG4, nAb4, nF4, nG4, $30, nC4, nAb4, $60, nBb4, $30
 	dc.b	nBb4, nBb4, $60, nC4, $30, nC4, smpsNoAttack, nC4, $60, nC4, $30, nC4
@@ -238,7 +238,7 @@ Snd_GeneGZ1_Loop06:
 	dc.b	$60, nRst, $18, nC3, nC3, $12, nC3, $06, nRst, $0C, nC3, smpsNoAttack
 	dc.b	nC3, $18, nRst
 	smpsSetvoice        $04
-	dc.b	nC5, $06, nC5, nG4, nG4, nRst, $18, $06, nG4, nC4, nC4
+	dc.b	nC5, $06, nC5, nG4, nG4, nRst, $18, nG4, $06, nG4, nC4, nC4
 	smpsSetvoice        $02
 	dc.b	nC3, $18, $12, nC3, $06, nRst, $0C, nC3, smpsNoAttack, nC3, $60, nRst
 	dc.b	$18, nC3, nC3, $12, nC3, $06, nRst, $0C, nC3, smpsNoAttack, nC3, $60
@@ -248,11 +248,11 @@ Snd_GeneGZ1_Loop07:
 	smpsLoop            $00, $02, Snd_GeneGZ1_Loop07
 
 Snd_GeneGZ1_Loop08:
-	dc.b	nC4, $06, nC4, nRst, $0C, $06, nC4, nRst, $0C, $06, nRst, $0C
-	dc.b	$06, nRst, $0C, nC4, $06, nRst, nRst, nC4, nRst, $0C, nC4, nRst
+	dc.b	nC4, $06, nC4, nRst, $0C, nC4, $06, nC4, nRst, $0C, nC4, $06, nRst, $0C
+	dc.b	nC4, $06, nRst, $0C, nC4, $06, nRst, nRst, nC4, nRst, $0C, nC4, nRst
 	dc.b	$06, nC4, nRst, $0C, nC4, $06, nRst, nC4, nC4, nRst, $0C, nRst
 	dc.b	nF4, $06, nF4, nRst, nF4, nRst, nF4, nF4, $12, nF4, $06, nRst
-	dc.b	$0C, $06, nF4, nRst, nF4, nRst, nF4, nF4, $12, $06, nRst, $06
+	dc.b	$0C, nF4, $06, nF4, nRst, nF4, nRst, nF4, nF4, $12, $06, nRst, $06
 	smpsSetvoice        $04
 	dc.b	nC6, nF5, nBb5, nA5, nF5, nC5, nBb4
 	smpsSetvoice        $02
@@ -271,11 +271,11 @@ Snd_GeneGZ1_Loop09:
 	smpsFMAlterVol      $03
 	smpsFMAlterVol      $FA
 	smpsAlterPitch      $0C
-	dc.b	nC4, $06, nC4, nRst, $0C, $06, nC4, nRst, $0C, $12, nC4, $06
-	dc.b	nRst, $0C, $06, nC4, nRst, nC4, nRst, $0C, $12, $06, nRst, $18
-	dc.b	$06, nC4, nC4, nRst, nEb4, nEb4, nRst, $0C, $06, nEb4, nRst, $0C
-	dc.b	$12, nEb4, $06, nRst, $0C, $06, nEb4, nRst, nF4, nF4, nRst, nF4
-	dc.b	$12, $06, nRst, $18, $06, nF4, nF4, nRst
+	dc.b	nC4, $06, nC4, nRst, $0C, nC4, $06, nC4, nRst, $0C, nC4, $12, nC4, $06
+	dc.b	nRst, $0C, nC4, $06, nC4, nRst, nC4, nRst, $0C, nC4, $12, $06, nRst, $18
+	dc.b	nC4, $06, nC4, nC4, nRst, nEb4, nEb4, nRst, $0C, nEb4, $06, nEb4, nRst, $0C
+	dc.b	nEb4, $12, nEb4, $06, nRst, $0C, nEb4, $06, nEb4, nRst, nF4, nF4, nRst, nF4
+	dc.b	$12, $06, nRst, $18, nF4, $06, nF4, nF4, nRst
 	smpsAlterPitch      $F4
 	dc.b	nC4, $60, nBb3, nEb4, nBb3, nC4, $30, nC4, nC4, $60, nEb4, $30
 	dc.b	nEb4, nF4, $60, nG3, $30, nG3, smpsNoAttack, nG3, $60, nG3, $30, nG3
@@ -337,11 +337,11 @@ Snd_GeneGZ1_Loop1C:
 	dc.b	nC4, $60, nD4, nEb4, nF4, $30, nBb4, $24, nA4, $06, nAb4
 	smpsAlterPitch      $0C
 	smpsPSGvoice        sTone_1D
-	dc.b	nC4, $06, nRst, $12, $06, nEb4, nG4, nEb4, nC5, $0C, nG4, $06
-	dc.b	nEb4, $0C, nC4, $06, nG4, $0C, nC4, $06, nRst, $12, $06, nEb4
+	dc.b	nC4, $06, nRst, $12, nC4, $06, nEb4, nG4, nEb4, nC5, $0C, nG4, $06
+	dc.b	nEb4, $0C, nC4, $06, nG4, $0C, nC4, $06, nRst, $12, nC4, $06, nEb4
 	dc.b	nAb4, nEb4, nC5, $0C, nAb4, $06, nEb4, $0C, nC4, $06, nAb4, $0C
-	dc.b	nC4, $06, nRst, $12, $06, nEb4, nG4, nEb4, nBb4, $0C, nG4, $06
-	dc.b	nEb4, $0C, nBb3, $06, nG4, $0C, nF4, $06, nRst, $12, $06, nBb3
+	dc.b	nC4, $06, nRst, $12, nC4, $06, nEb4, nG4, nEb4, nBb4, $0C, nG4, $06
+	dc.b	nEb4, $0C, nBb3, $06, nG4, $0C, nF4, $06, nRst, $12, nF4, $06, nBb3
 	dc.b	nD4, nF4, nD5, $0C, nBb4, $06, nF4, $0C, nD4, $06, nBb3, nD4
 	dc.b	nRst, nRst, nC4, nRst, nC4, nEb4, nG4, nEb4, nC5, $0C, nG4, $06
 	dc.b	nEb4, $0C, nC4, $06, nG4, $0C, nRst, $06, nRst, nC4, nRst, nC4

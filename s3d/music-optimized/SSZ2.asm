@@ -378,14 +378,14 @@ Snd_SSZ2_Call03:
 
 Snd_SSZ2_Loop08:
 	smpsPSGvoice        sTone_0F
-	dc.b	$0C, $08, $04
+	dc.b	(nMaxPSG2-$23)&$FF, $0C, $08, $04
 	smpsLoop            $00, $03, Snd_SSZ2_Loop08
 	smpsReturn
 
 Snd_SSZ2_Call04:
 	smpsPSGvoice        sTone_12
 	smpsPSGAlterVol     $FF
-	dc.b	$0C, nRst, $08, $0C, nRst, $10
+	dc.b	$0C, nRst, $08, (nMaxPSG2-$23)&$FF, $0C, nRst, $10, (nMaxPSG2-$23)&$FF
 	smpsPSGAlterVol     $01
 
 Snd_SSZ2_Loop07:
@@ -400,7 +400,7 @@ Snd_SSZ2_Call05:
 	smpsLoop            $00, $02, Snd_SSZ2_Call05
 	smpsPSGvoice        sTone_12
 	smpsPSGAlterVol     $FF
-	dc.b	$0C, nRst, $0C, $0C, nRst, $0C
+	dc.b	$0C, nRst, $0C, (nMaxPSG2-$23)&$FF, $0C, nRst, $0C, (nMaxPSG2-$23)&$FF
 	smpsPSGAlterVol     $01
 	smpsReturn
 

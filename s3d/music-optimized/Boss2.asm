@@ -61,7 +61,7 @@ Snd_Boss2_Loop14:
 	dc.b	nC4, $12, nF4, nFs4, $0C, nEb4, $48, nD4, $18, nRst, nC4, nC4
 	dc.b	$12, nG4, nFs4, $0C, nEb4, $48, nRst, $0C, nD4, $06, nEb4, nG4
 	dc.b	$60, nBb4, $10, nAb4, nG4, nF4, nEb4, nCs4, nC4, $30, nBb3, $12
-	dc.b	nAb3, nG3, $0C, smpsNoAttack, $2E, nRst, $0E, $0C, nAb3, nBb3, nC4, $30
+	dc.b	nAb3, nG3, $0C, smpsNoAttack, $2E, nRst, $0E, nG3, $0C, nAb3, nBb3, nC4, $30
 	dc.b	nBb3, $12, nAb3, nG3, $0C, smpsNoAttack, $60, nC3, $06, nRst, nA2, nRst
 	dc.b	nBb2, $0C, nB2, $06, nC3, nRst, nC3, nA2, nRst, nBb2, $0C, nB2
 	dc.b	nC3, $06, nRst, nA2, nRst, nBb2, $0C, nB2, $06, nC3, nRst, nC3
@@ -88,7 +88,7 @@ Snd_Boss2_Loop0B:
 	dc.b	nC2, $0C, nA1, nBb1, nB1, $06, nC2, $0C, $06, nA1, $0C, nBb1
 	dc.b	nB1
 	smpsLoop            $00, $03, Snd_Boss2_Loop0B
-	dc.b	nC2, $0C, nA1, nBb1, nB1, $06, nC2, $06, nRst, $06, $06, nA1
+	dc.b	nC2, $0C, nA1, nBb1, nB1, $06, nC2, $06, nRst, $06, nC2, $06, nA1
 	dc.b	$0C, nBb1, nB1
 	smpsLoop            $01, $02, Snd_Boss2_Loop0B
 
@@ -96,7 +96,7 @@ Snd_Boss2_Loop0C:
 	dc.b	nC2, $0C, nA1, nBb1, nB1, $06, nC2, $0C, $06, nA1, $0C, nBb1
 	dc.b	nB1
 	smpsLoop            $00, $03, Snd_Boss2_Loop0C
-	dc.b	nC2, $0C, nA1, nBb1, nB1, $06, nC2, $06, nRst, $06, $06, nA1
+	dc.b	nC2, $0C, nA1, nBb1, nB1, $06, nC2, $06, nRst, $06, nC2, $06, nA1
 	dc.b	$0C, nBb1, nB1
 	smpsLoop            $01, $02, Snd_Boss2_Loop0C
 
@@ -104,7 +104,7 @@ Snd_Boss2_Loop0D:
 	dc.b	nC2, $0C, nA1, nBb1, nB1, $06, nC2, $0C, $06, nA1, $0C, nBb1
 	dc.b	nB1
 	smpsLoop            $00, $03, Snd_Boss2_Loop0D
-	dc.b	nC2, $0C, nA1, nBb1, nB1, $06, nC2, $06, nRst, $06, $06, nA1
+	dc.b	nC2, $0C, nA1, nBb1, nB1, $06, nC2, $06, nRst, $06, nC2, $06, nA1
 	dc.b	$0C, nBb1, nB1
 	smpsLoop            $01, $02, Snd_Boss2_Loop0D
 
@@ -114,18 +114,18 @@ Snd_Boss2_Loop0E:
 	smpsLoop            $00, $02, Snd_Boss2_Loop0E
 
 Snd_Boss2_Loop0F:
-	dc.b	nC2, $0C, nA1, nBb1, nB1, $06, nC2, $06, nRst, $06, $06, nA1
+	dc.b	nC2, $0C, nA1, nBb1, nB1, $06, nC2, $06, nRst, $06, nC2, $06, nA1
 	dc.b	$0C, nBb1, nB1
 	smpsLoop            $00, $02, Snd_Boss2_Loop0F
 	smpsLoop            $01, $02, Snd_Boss2_Loop0E
 
 Snd_Boss2_Loop10:
-	dc.b	nC2, $0C, nA1, nBb1, nB1, $06, nC2, $06, nRst, $06, $06, nA1
+	dc.b	nC2, $0C, nA1, nBb1, nB1, $06, nC2, $06, nRst, $06, nC2, $06, nA1
 	dc.b	$0C, nBb1, nB1
 	smpsLoop            $00, $02, Snd_Boss2_Loop10
 
 Snd_Boss2_Loop11:
-	dc.b	nC2, $0C, nA1, nBb1, nB1, $06, nC2, $06, nRst, $06, $06, nA1
+	dc.b	nC2, $0C, nA1, nBb1, nB1, $06, nC2, $06, nRst, $06, nC2, $06, nA1
 	dc.b	$0C, nBb1, nB1
 	smpsLoop            $00, $04, Snd_Boss2_Loop11
 
@@ -133,7 +133,7 @@ Snd_Boss2_Loop12:
 	dc.b	nC2, $0C, nA1, nBb1, nB1, $06, nC2, $0C, $06, nA1, $0C, nBb1
 	dc.b	nB1
 	smpsLoop            $00, $03, Snd_Boss2_Loop12
-	dc.b	nC2, $0C, nA1, nBb1, nB1, $06, nC2, $06, nRst, $06, $06, nA1
+	dc.b	nC2, $0C, nA1, nBb1, nB1, $06, nC2, $06, nRst, $06, nC2, $06, nA1
 	dc.b	$0C, nBb1, nB1
 	smpsLoop            $01, $02, Snd_Boss2_Loop12
 	smpsJump            Snd_Boss2_Loop0C
