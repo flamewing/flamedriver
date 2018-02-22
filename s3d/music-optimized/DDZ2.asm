@@ -235,7 +235,7 @@ Snd_DDZ2_Jump03:
 	dc.b	$30, nG4, nF5, nE5, nC4, nG4, nEb4, $12, nEb4, $06, nRst, $0C
 	dc.b	nEb4, $06, nRst, $0C, nD4, $06, nRst, $0C, nD4, $18, nRst, $60, nF4, $60
 	dc.b	smpsNoAttack, nF4, nG4, smpsNoAttack, nG4, nF4, smpsNoAttack, nF4, nG4, smpsNoAttack, nG4, nCs5
-	dc.b	$12, nCs5, $06, nRst, $0C, nCs5 $3C, nEb5, $12, nEb5, $06, nRst, $0C
+	dc.b	$12, nCs5, $06, nRst, $0C, nCs5, $3C, nEb5, $12, nEb5, $06, nRst, $0C
 	dc.b	nEb5, nEb5, $18, nCs5, nC5, $12, nC5, $06, nRst, $0C, nC5, $24, nG5
 	dc.b	$18, nF5, $0C, nG5, nAb5, $48, nCs5, $12, $06, nRst, $06, nC5
 	dc.b	$12, nCs5, $30, $12, $06, nRst, $06, nC5, $12, nCs5, $30, nEb5

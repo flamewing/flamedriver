@@ -637,7 +637,7 @@ Snd_GreenGZ1_Call13:
 	dc.b	nRst, $0C
 	smpsPSGvoice        sTone_0F
 	smpsPSGAlterVol     $01
-	dc.b	$06
+	dc.b	(nMaxPSG2-$23)&$FF, $06
 	smpsPSGAlterVol     $02
 	dc.b	$06
 	smpsPSGAlterVol     $FF
@@ -765,7 +765,7 @@ Snd_GreenGZ1_Call17:
 	dc.b	nRst, $0C
 	smpsPSGvoice        sTone_0F
 	smpsPSGAlterVol     $01
-	dc.b	$06
+	dc.b	(nMaxPSG2-$23)&$FF, $06
 	smpsPSGAlterVol     $02
 	dc.b	$06
 	smpsPSGvoice        sTone_12
@@ -795,7 +795,7 @@ Snd_GreenGZ1_Call18:
 	dc.b	nRst, $0C
 	smpsPSGvoice        sTone_12
 	smpsPSGAlterVol     $02
-	dc.b	$0C
+	dc.b	(nMaxPSG2-$23)&$FF, $0C
 	smpsPSGAlterVol     $FF
 	dc.b	$0C
 	smpsPSGAlterVol     $FF

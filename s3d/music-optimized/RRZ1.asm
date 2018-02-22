@@ -104,7 +104,7 @@ Snd_RRZ1_Loop09:
 Snd_RRZ1_Loop0A:
 	dc.b	nAb1, $0C, $08, $04, $08, nAb2, $04, nRst, $08, nAb1, $34, nAb1
 	dc.b	$18, nAb1, nEb1, nAb1, nFs1, $0C, $08, $04, $08, nFs2, $04, nRst
-	dc.b	$08, nFs1, $34, $3C, nRst, $0C, nFs1 $04, nRst, $04, nFs2, nG1, nRst
+	dc.b	$08, nFs1, $34, $3C, nRst, $0C, nFs1, $04, nRst, $04, nFs2, nG1, nRst
 	dc.b	nG2
 	smpsLoop            $00, $02, Snd_RRZ1_Loop0A
 	dc.b	nC1, $08, $04, nC1, nRst, $08, nC1, $0C, nD1, $08, nEb1, $04, nRst
@@ -184,7 +184,7 @@ Snd_RRZ1_Loop07:
 	dc.b	$08, nG3, $04, $24, $0C, nF3, nEb3, nD3, nC4, $48, $08, $04
 	dc.b	$08, $04, nRst, $08, nD4, $04, $22, nRst, $1A, nD4, $08, $04, nRst
 	dc.b	$08, nD4, $04, nRst, $08, nEb4, $04, $2E, nRst, $0E, nEb4, $08, $04, nRst
-	dc.b	nEb4, $08, $04, nRst, $08, nF4, $04, $24, nBb4, $30, nG4, $60, nC4
+	dc.b	$08, nEb4, $04, nRst, $08, nF4, $04, $24, nBb4, $30, nG4, $60, nC4
 	dc.b	$18, nC4, nEb4, $18, nD4
 	smpsFMAlterVol      $0C
 	smpsSetvoice        $02
@@ -282,7 +282,7 @@ Snd_RRZ1_Loop12:
 	dc.b	nC4, $04, nBb3, $08, nC4, $04, nRst, $08, nC4, $04, nG3, nBb3, nC4, nG4
 	dc.b	$08, $10
 	smpsLoop            $00, $03, Snd_RRZ1_Loop12
-	dc.b	nC4, $08, $04, nBb3, $08, nC4, $04, nRst, $08, nC4, $04, nBb3, $08
+	dc.b	$08, nC4, $04, nBb3, $08, nC4, $04, nRst, $08, nC4, $04, nBb3, $08
 	dc.b	nC4, $04, nRst, $08, nC4, $04, nG3, nBb3, nC4, nEb4, $08, $04, nD4
 	dc.b	$08, nBb3, $04, nC4, $08, $04, nBb3, $08, nC4, $04, nRst, $08
 	dc.b	nC4, $04, nBb3, $08, nC4, $04, nG4, nF4, nG4, nF4, nEb4, nF4, nEb4
@@ -369,7 +369,7 @@ Snd_RRZ1_Loop17:
 	dc.b	$04, nBb3, $08, nC4, $04, nRst, $08, nC4, $04, nBb3, $08, nC4, $04
 	dc.b	nRst, $08, nC4, $04, nG3, nBb3, nC4, nG4, $08, $10, nC4, $08, $04
 	dc.b	nBb3, $08, nC4, $04, nRst, $08, nC4, $04, nBb3, $08, nC4, $04, nRst
-	dc.b	nC4, $08, $04, nG3, nBb3, nC4, nEb4, $08, $04, nD4, $08, nBb3, $04
+	dc.b	$08, nC4, $04, nG3, nBb3, nC4, nEb4, $08, $04, nD4, $08, nBb3, $04
 	dc.b	nC4, $08, $04, nBb3, $08, nC4, $04, nRst, $08, nC4, $04, nBb3, $08
 	dc.b	nC4, $04, nG4, nF4, nG4, nF4, nEb4, nF4, nEb4, nD4, nEb4, nD4
 	dc.b	nC4, nBb3

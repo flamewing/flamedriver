@@ -669,7 +669,7 @@ Snd_Menu_Loop08:
 
 Snd_Menu_Call01:
 	smpsFMAlterVol      $FD, $D3
-	dc.b	$06
+	dc.b	nMaxPSG1, $06
 	smpsFMAlterVol      $03, $D3
 	dc.b	$03, nMaxPSG1
 

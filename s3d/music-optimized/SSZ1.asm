@@ -366,7 +366,7 @@ Snd_SSZ1_Loop0D:
 
 Snd_SSZ1_Call10:
 	smpsPSGvoice        sTone_12
-	dc.b	$18
+	dc.b	(nMaxPSG2-$23)&$FF, $18
 	smpsPSGvoice        sTone_0F
 	dc.b	$10, $08
 	smpsPSGAlterVol     $01
@@ -394,7 +394,7 @@ Snd_SSZ1_Call12:
 
 Snd_SSZ1_Call13:
 	smpsPSGvoice        sTone_12
-	dc.b	$18
+	dc.b	(nMaxPSG2-$23)&$FF, $18
 	smpsPSGvoice        sTone_0F
 	dc.b	$10
 	smpsPSGvoice        sTone_12
