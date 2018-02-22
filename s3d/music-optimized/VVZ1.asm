@@ -20,11 +20,12 @@ Snd_VVZ1_FM1:
 	smpsPan             panCenter, $00
 	smpsSetvoice        $00
 	dc.b	nRst, $60
-
-Snd_VVZ1_Jump00:
 	smpsAlterPitch      $F4
 	smpsSetvoice        $02
-	dc.b	$30, nF4, nC5, nF5, nG5, nBb4, nEb5, $60, nC6, $30, nF4, nC5
+	dc.b	nRst, $30
+
+Snd_VVZ1_Jump00:
+	dc.b	nF4, nC5, nF5, nG5, nBb4, nEb5, $60, nC6, $30, nF4, nC5
 	dc.b	nF5, nEb5, nBb4, nBb5, $60
 	smpsAlterPitch      $0C
 	smpsSetvoice        $00
@@ -45,6 +46,9 @@ Snd_VVZ1_Jump00:
 	dc.b	nG4, nAb4, $24, nF4, $18, nBb4, $0C, nAb4, nG4, nAb4, $24, nF4
 	dc.b	$18, nBb4, $0C, nAb4, nG4, nAb4, $24, nG4, nEb4, $18, nF4, $60
 	dc.b	smpsNoAttack, nF4
+	smpsAlterPitch      $F4
+	smpsSetvoice        $02
+	dc.b	nF4, $30
 	smpsJump            Snd_VVZ1_Jump00
 
 ; FM2 Data
@@ -200,6 +204,9 @@ Snd_VVZ1_FM5:
 	dc.b	nRst, $0B
 	smpsAlterNote       $01
 	dc.b	nRst, $60
+	smpsAlterPitch      $F4
+	smpsSetvoice        $02
+	dc.b	nRst, $30
 	smpsJump            Snd_VVZ1_Jump00
 
 ; PSG1 Data

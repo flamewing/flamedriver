@@ -205,7 +205,7 @@ Snd_GeneGZ1_Loop0D:
 	smpsAlterPitch      $0C
 	dc.b	nG4, $06, nG4, nRst, $0C, nG4, $06, nG4, nRst, $0C, nG4, $12, nG4, $06
 	dc.b	nRst, $0C, nG4, $06, nG4, nRst, nAb4, nRst, $0C, nAb4, $12, $06, nRst, $18
-	dc.b	nAb4, $06, nAb4, nAb4, nRst, nBb4, nBb4, nRst, $0C, nBb4 $06, nBb4, nRst, $0C
+	dc.b	nAb4, $06, nAb4, nAb4, nRst, nBb4, nBb4, nRst, $0C, nBb4, $06, nBb4, nRst, $0C
 	dc.b	nBb4, $12, nBb4, $06, nRst, $0C, nBb4, $06, nBb4, nRst, nBb4, nBb4, nRst, nBb4
 	dc.b	$12, $06, nRst, $18, nBb4, $06, nBb4, nBb4, nRst
 	smpsAlterPitch      $F4

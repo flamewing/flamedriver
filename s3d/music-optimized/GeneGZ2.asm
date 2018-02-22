@@ -179,7 +179,7 @@ Snd_GeneGZ2_Jump01:
 	dc.b	$0C, nAb4, $12, $06, nRst, $18, nAb4, $06, nAb4, nAb4, nRst, nBb4, nBb4, nRst
 	dc.b	$0C, nBb4, $06, nBb4, nRst, $0C, nBb4, $12, nBb4, $06, nRst, $0C, nBb4, $06, nBb4
 	dc.b	nRst, nBb4, nBb4, nRst, nBb4, $12, $06, nRst, $18, nBb4, $06, nBb4, nBb4
-	dc.b	nRst, nG4, $06, nG4, nRst, $0C, nG4 $06, nG4, nRst, $0C, nG4 $12, nG4
+	dc.b	nRst, nG4, $06, nG4, nRst, $0C, nG4, $06, nG4, nRst, $0C, nG4, $12, nG4
 	dc.b	$06, nRst, $0C, nG4, $06, nG4, nRst, nG4, nRst, $0C, nG4, $12, $06, nRst
 	dc.b	$18, nRst, nAb4, $06, nAb4, nRst, $0C, nAb4, $06, nAb4, nRst, $0C, nAb4, $12
 	dc.b	nAb4, $06, nRst, $0C, nAb4, $06, nAb4, nF4, nF4, nRst, $0C, nF4, $06, nF4

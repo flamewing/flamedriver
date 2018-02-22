@@ -385,12 +385,12 @@ Snd_SSZ2_Loop08:
 Snd_SSZ2_Call04:
 	smpsPSGvoice        sTone_12
 	smpsPSGAlterVol     $FF
-	dc.b	$0C, nRst, $08, (nMaxPSG2-$23)&$FF, $0C, nRst, $10, (nMaxPSG2-$23)&$FF
+	dc.b	$0C, nRst, $08, (nMaxPSG2-$23)&$FF, $0C, nRst, $10
 	smpsPSGAlterVol     $01
 
 Snd_SSZ2_Loop07:
 	smpsPSGvoice        sTone_0F
-	dc.b	$0C, $08, $04
+	dc.b	(nMaxPSG2-$23)&$FF, $0C, $08, $04
 	smpsLoop            $00, $02, Snd_SSZ2_Loop07
 	smpsReturn
 
@@ -400,17 +400,17 @@ Snd_SSZ2_Call05:
 	smpsLoop            $00, $02, Snd_SSZ2_Call05
 	smpsPSGvoice        sTone_12
 	smpsPSGAlterVol     $FF
-	dc.b	$0C, nRst, $0C, (nMaxPSG2-$23)&$FF, $0C, nRst, $0C, (nMaxPSG2-$23)&$FF
+	dc.b	$0C, nRst, $0C, (nMaxPSG2-$23)&$FF, $0C, nRst, $0C
 	smpsPSGAlterVol     $01
 	smpsReturn
 
 Snd_SSZ2_Call06:
 	smpsPSGvoice        sTone_12
 	smpsPSGAlterVol     $FF
-	dc.b	$0C, nRst
+	dc.b	(nMaxPSG2-$23)&$FF, $0C, nRst
 	smpsPSGAlterVol     $01
 	smpsPSGvoice        sTone_0F
-	dc.b	$08
+	dc.b	(nMaxPSG2-$23)&$FF, $08
 	smpsPSGvoice        sTone_12
 	dc.b	$10
 	smpsPSGvoice        sTone_0F

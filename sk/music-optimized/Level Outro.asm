@@ -71,7 +71,7 @@ Snd_Results_Jump01:
 ; FM5 Data
 Snd_Results_FM5:
 	smpsAlterNote       $FD
-	smpsPSGvoice        sTone_03
+	;smpsPSGvoice        sTone_03	; Does nothing. S3K's driver just ignores it.
 	dc.b	nRst, $01
 	smpsSetvoice        $01
 	smpsJump            Snd_Results_Jump00
