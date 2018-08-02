@@ -1,5 +1,5 @@
 Sound_75_Header:
-	smpsHeaderStartSong 3
+	smpsHeaderStartSong 3, 1
 	smpsHeaderVoice     Sound_75_Voices
 	smpsHeaderTempoSFX  $01
 	smpsHeaderChanSFX   $01
@@ -30,5 +30,5 @@ Sound_75_Voices:
 	smpsVcDecayRate2    $04, $03, $03, $02
 	smpsVcDecayLevel    $02, $03, $06, $07
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $0E, $28, $31
+	smpsVcTotalLevel    $80, $0E, $28, $31
 
