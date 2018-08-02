@@ -775,7 +775,7 @@ vcAR4 set op4
 ; were the Amplitude Modulation.
 ; According to several docs, however, it's actually the high bit.
 smpsVcAmpMod macro op1,op2,op3,op4
-	if SMPS2ASMVer==0
+	if SourceSMPS2ASM==0
 vcAM1 set op1<<5
 vcAM2 set op2<<5
 vcAM3 set op3<<5
