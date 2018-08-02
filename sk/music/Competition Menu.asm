@@ -1,5 +1,5 @@
 Snd_2PMenu_Header:
-	smpsHeaderStartSong 3
+	smpsHeaderStartSong 3, 1
 	smpsHeaderVoice     Snd_2PMenu_Voices
 	smpsHeaderChan      $06, $03
 	smpsHeaderTempo     $01, $4A
@@ -395,7 +395,7 @@ Snd_2PMenu_Voices:
 	smpsVcDecayRate2    $08, $06, $06, $07
 	smpsVcDecayLevel    $00, $01, $01, $02
 	smpsVcReleaseRate   $0F, $00, $00, $00
-	smpsVcTotalLevel    $04, $10, $37, $19
+	smpsVcTotalLevel    $84, $10, $37, $19
 
 ;	Voice $01
 ;	$05
@@ -413,7 +413,7 @@ Snd_2PMenu_Voices:
 	smpsVcDecayRate2    $00, $00, $00, $00
 	smpsVcDecayLevel    $00, $00, $00, $01
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $10, $10, $10, $0C
+	smpsVcTotalLevel    $90, $90, $90, $0C
 
 ;	Voice $02
 ;	$2E
@@ -431,7 +431,7 @@ Snd_2PMenu_Voices:
 	smpsVcDecayRate2    $06, $09, $0B, $08
 	smpsVcDecayLevel    $00, $00, $00, $00
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $10, $10, $10, $18
+	smpsVcTotalLevel    $90, $90, $90, $18
 
 ;	Voice $03
 ;	$2C
@@ -449,7 +449,7 @@ Snd_2PMenu_Voices:
 	smpsVcDecayRate2    $03, $00, $03, $00
 	smpsVcDecayLevel    $0A, $00, $08, $00
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $0B, $11, $0B, $16
+	smpsVcTotalLevel    $8B, $11, $8B, $16
 
 ;	Voice $04
 ;	$03
@@ -467,7 +467,7 @@ Snd_2PMenu_Voices:
 	smpsVcDecayRate2    $05, $00, $00, $00
 	smpsVcDecayLevel    $07, $00, $03, $03
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $02, $1D, $20, $81
+	smpsVcTotalLevel    $82, $1D, $20, $81
 
 ;	Voice $05
 ;	$04
@@ -485,7 +485,7 @@ Snd_2PMenu_Voices:
 	smpsVcDecayRate2    $00, $00, $00, $00
 	smpsVcDecayLevel    $00, $04, $0F, $00
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $08, $20, $10, $20
+	smpsVcTotalLevel    $88, $20, $90, $20
 
 ;	Voice $06
 ;	$00
@@ -503,7 +503,7 @@ Snd_2PMenu_Voices:
 	smpsVcDecayRate2    $0C, $00, $00, $00
 	smpsVcDecayLevel    $01, $00, $00, $00
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $08, $00, $3D, $00
+	smpsVcTotalLevel    $88, $00, $3D, $00
 
 ;	Voice $07
 ;	$00
