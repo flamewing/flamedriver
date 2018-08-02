@@ -116,3 +116,4 @@ Snd_Results_PSG3:
 	dc.b	nMaxPSG2, $11, nRst, $01, nMaxPSG2, $05, nRst, $0D, nMaxPSG2, $05, nRst, $0D
 	dc.b	nMaxPSG2, $11, nRst, $01, nMaxPSG2, $5F, nRst, $01
 	smpsStop
+
