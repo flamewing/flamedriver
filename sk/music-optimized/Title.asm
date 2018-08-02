@@ -1,5 +1,5 @@
 Snd_Title_Header:
-	smpsHeaderStartSong 3
+	smpsHeaderStartSong 3, 1
 	smpsHeaderVoice     Snd_Title_Voices
 	smpsHeaderChan      $06, $03
 	smpsHeaderTempo     $01, $00
@@ -298,7 +298,7 @@ Snd_Title_Voices:
 	smpsVcDecayRate2    $00, $00, $00, $06
 	smpsVcDecayLevel    $04, $03, $04, $05
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $00, $00, $17
+	smpsVcTotalLevel    $80, $80, $80, $17
 
 ;	Voice $01
 ;	$2D
@@ -316,7 +316,7 @@ Snd_Title_Voices:
 	smpsVcDecayRate2    $00, $00, $00, $00
 	smpsVcDecayLevel    $0F, $0F, $0F, $0F
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $00, $00, $0C
+	smpsVcTotalLevel    $80, $80, $80, $0C
 
 ;	Voice $02
 ;	$0A
@@ -352,7 +352,7 @@ Snd_Title_Voices:
 	smpsVcDecayRate2    $00, $00, $00, $00
 	smpsVcDecayLevel    $0C, $01, $0F, $0F
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $05, $2C, $15, $15
+	smpsVcTotalLevel    $85, $2C, $15, $15
 
 ;	Voice $04
 ;	$3D
@@ -370,7 +370,7 @@ Snd_Title_Voices:
 	smpsVcDecayRate2    $00, $00, $00, $00
 	smpsVcDecayLevel    $0F, $01, $00, $00
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $06, $06, $06, $22
+	smpsVcTotalLevel    $86, $86, $86, $22
 
 ;	Voice $05
 ;	$3D
@@ -388,5 +388,5 @@ Snd_Title_Voices:
 	smpsVcDecayRate2    $00, $00, $00, $00
 	smpsVcDecayLevel    $04, $04, $04, $01
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $0E, $0E, $0E, $10
+	smpsVcTotalLevel    $8E, $8E, $8E, $10
 
