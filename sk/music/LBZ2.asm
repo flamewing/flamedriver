@@ -1,5 +1,5 @@
 Snd_LBZ2_Header:
-	smpsHeaderStartSong 3
+	smpsHeaderStartSong 3, 1
 	smpsHeaderVoice     Snd_LBZ_Voices
 	smpsHeaderChan      $06, $03
 	smpsHeaderTempo     $01, $2F
@@ -381,7 +381,7 @@ Snd_LBZ_Voices:
 	smpsVcDecayRate2    $06, $04, $0B, $08
 	smpsVcDecayLevel    $01, $01, $01, $01
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $2B, $1A, $2A
+	smpsVcTotalLevel    $80, $2B, $1A, $2A
 
 ;	Voice $01
 ;	$3D
@@ -399,7 +399,7 @@ Snd_LBZ_Voices:
 	smpsVcDecayRate2    $00, $00, $01, $00
 	smpsVcDecayLevel    $01, $01, $01, $00
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $07, $08, $08, $1F
+	smpsVcTotalLevel    $87, $88, $88, $1F
 
 ;	Voice $02
 ;	$3A
@@ -417,7 +417,7 @@ Snd_LBZ_Voices:
 	smpsVcDecayRate2    $00, $00, $01, $03
 	smpsVcDecayLevel    $0F, $0F, $00, $01
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $04, $1B, $25, $23
+	smpsVcTotalLevel    $84, $1B, $25, $23
 
 ;	Voice $03
 ;	$3A
@@ -435,7 +435,7 @@ Snd_LBZ_Voices:
 	smpsVcDecayRate2    $07, $00, $00, $00
 	smpsVcDecayLevel    $00, $01, $0F, $01
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $02, $17, $28, $18
+	smpsVcTotalLevel    $82, $17, $28, $18
 
 ; Unused voice
 ;	Voice $04
@@ -454,5 +454,5 @@ Snd_LBZ_Voices:
 	smpsVcDecayRate2    $02, $06, $0F, $06
 	smpsVcDecayLevel    $02, $04, $02, $01
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $0E, $0E, $0F
+	smpsVcTotalLevel    $80, $0E, $0E, $0F
 
