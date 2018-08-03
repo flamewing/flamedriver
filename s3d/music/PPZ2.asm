@@ -196,6 +196,9 @@ Snd_PPZ2_FM5:
 	smpsAlterNote       $01
 	smpsJump            Snd_PPZ2_Jump00
 
+; Unreachable
+	smpsStop
+
 ; PSG1 Data
 Snd_PPZ2_PSG1:
 	smpsModSet          $03, $01, $01, $03
@@ -250,6 +253,58 @@ Snd_PPZ2_PSG3:
 Snd_PPZ2_Jump03:
 	smpsCall            Snd_PPZ2_Call00
 	smpsJump            Snd_PPZ2_Jump03
+
+; Unreachable
+Snd_PPZ2_CallUnk00:
+	smpsPSGvoice        sTone_0F
+	dc.b	(nMaxPSG2-$23)&$FF, $06, (nMaxPSG2-$23)&$FF
+	smpsPSGvoice        sTone_12
+	dc.b	$0C
+	smpsLoop            $00, $10, Snd_PPZ2_CallUnk00
+	smpsReturn
+
+; Unreachable
+Snd_PPZ2_CallUnk01:
+	smpsPSGvoice        sTone_0F
+	dc.b	(nMaxPSG2-$23)&$FF, $06, (nMaxPSG2-$23)&$FF
+	smpsPSGvoice        sTone_12
+	dc.b	(nMaxPSG2-$23)&$FF
+	smpsPSGvoice        sTone_0F
+	dc.b	(nMaxPSG2-$23)&$FF
+	smpsLoop            $00, $10, Snd_PPZ2_CallUnk01
+	smpsReturn
+
+; Unreachable
+Snd_PPZ2_CallUnk02:
+	smpsPSGvoice        sTone_0F
+	dc.b	(nMaxPSG2-$23)&$FF, $06, nRst, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF
+	smpsPSGvoice        sTone_12
+	dc.b	(nMaxPSG2-$23)&$FF, $0C
+	smpsPSGvoice        sTone_0F
+	dc.b	(nMaxPSG2-$23)&$FF, $06, (nMaxPSG2-$23)&$FF
+	smpsPSGvoice        sTone_0F
+	dc.b	(nMaxPSG2-$23)&$FF, $06, nRst, (nMaxPSG2-$23)&$FF, nRst
+	smpsPSGvoice        sTone_12
+	dc.b	(nMaxPSG2-$23)&$FF, $0C
+	smpsPSGvoice        sTone_0F
+	dc.b	$06, $06
+	smpsLoop            $00, $04, Snd_PPZ2_CallUnk02
+	smpsReturn
+
+; Unreachable
+Snd_PPZ2_CallUnk03:
+	smpsPSGvoice        sTone_0F
+	dc.b	(nMaxPSG2-$23)&$FF, $06, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF
+	smpsPSGvoice        sTone_12
+	dc.b	(nMaxPSG2-$23)&$FF, $0C
+	smpsPSGvoice        sTone_0F
+	dc.b	(nMaxPSG2-$23)&$FF, $06, (nMaxPSG2-$23)&$FF
+	smpsPSGvoice        sTone_12
+	dc.b	(nMaxPSG2-$23)&$FF, $06
+	smpsPSGvoice        sTone_0F
+	dc.b	(nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF
+	smpsLoop            $00, $07, Snd_PPZ2_CallUnk03
+	smpsReturn
 
 Snd_PPZ2_Call00:
 	smpsPSGvoice        sTone_0F

@@ -45,6 +45,9 @@ Snd_FinalFight_Loop0C:
 	dc.b	nRst, $60
 	smpsJump            Snd_FinalFight_Loop0A
 
+; Unreachable
+	smpsStop
+
 ; FM2 Data
 Snd_FinalFight_FM2:
 	smpsSetvoice        $03
@@ -93,6 +96,9 @@ Snd_FinalFight_Loop08:
 	smpsCall            Snd_FinalFight_Call03
 	smpsAlterPitch      $04
 	smpsJump            Snd_FinalFight_Loop08
+
+; Unreachable
+	smpsStop
 
 Snd_FinalFight_Call03:
 	smpsPan             panCenter, $00
@@ -218,6 +224,9 @@ Snd_FinalFight_Loop06:
 	smpsAlterPitch      $04
 	smpsJump            Snd_FinalFight_Loop06
 
+; Unreachable
+	smpsStop
+
 ; FM4 Data
 Snd_FinalFight_FM4:
 	smpsAlterNote       $04
@@ -247,6 +256,9 @@ Snd_FinalFight_Loop04:
 	smpsCall            Snd_FinalFight_Call01
 	smpsJump            Snd_FinalFight_Loop03
 
+; Unreachable
+	smpsStop
+
 Snd_FinalFight_Call01:
 	dc.b	nA2, $0C, nA3, $06, nA2, $0C, nA3, $06, nA2, $12, nA2, $06
 	dc.b	nA3, $0C, nF3, nG3, nA2, $0C, nA3, $06, nA2, $0C, nA3, $06
@@ -264,6 +276,9 @@ Snd_FinalFight_FM5:
 	smpsAlterNote       $F8
 	smpsPan             panRight, $00
 	smpsJump            Snd_FinalFight_Jump00
+
+; Unreachable
+	smpsStop
 
 ; PSG1 Data
 Snd_FinalFight_PSG1:
@@ -296,12 +311,18 @@ Snd_FinalFight_Jump02:
 	smpsPSGAlterVol     $F3
 	smpsJump            Snd_FinalFight_Jump02
 
+; Unreachable
+	smpsStop
+
 ; PSG2 Data
 Snd_FinalFight_PSG2:
 	smpsModSet          $24, $01, $01, $05
 	smpsAlterNote       $FE
 	dc.b	nRst, $08
 	smpsJump            Snd_FinalFight_Jump01
+
+; Unreachable
+	smpsStop
 
 ; PSG3 Data
 Snd_FinalFight_PSG3:
@@ -326,6 +347,9 @@ Snd_FinalFight_Loop0E:
 	smpsCall            Snd_FinalFight_Call05
 	dc.b	nRst, $60
 	smpsJump            Snd_FinalFight_Loop0E
+
+; Unreachable
+	smpsStop
 
 Snd_FinalFight_Call05:
 	smpsPSGvoice        sTone_01
@@ -388,6 +412,9 @@ Snd_FinalFight_Loop01:
 	smpsPan             panCenter, $00
 	dc.b	dSnareS3, dSnareS3, dSnareS3, dSnareS3, dSnareS3, dSnareS3, dSnareS3
 	smpsJump            Snd_FinalFight_Loop01
+
+; Unreachable
+	smpsStop
 
 Snd_FinalFight_Call00:
 	dc.b	dIntroKick, $06, dIntroKick, dIntroKick, dIntroKick, dSnareS3
@@ -471,4 +498,42 @@ Snd_FinalFight_Voices:
 	smpsVcDecayLevel    $0F, $04, $0F, $04
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
 	smpsVcTotalLevel    $08, $19, $08, $19
+
+; Unused voice
+;	Voice $04
+;	$04
+;	$12, $22, $23, $13, 	$1F, $1D, $1F, $1D, 	$00, $00, $00, $00
+;	$09, $03, $09, $03, 	$0F, $0F, $0F, $0F, 	$0D, $90, $0D, $90
+	smpsVcAlgorithm     $04
+	smpsVcFeedback      $00
+	smpsVcUnusedBits    $00
+	smpsVcDetune        $01, $02, $02, $01
+	smpsVcCoarseFreq    $03, $03, $02, $02
+	smpsVcRateScale     $00, $00, $00, $00
+	smpsVcAttackRate    $1D, $1F, $1D, $1F
+	smpsVcAmpMod        $00, $00, $00, $00
+	smpsVcDecayRate1    $00, $00, $00, $00
+	smpsVcDecayRate2    $03, $09, $03, $09
+	smpsVcDecayLevel    $00, $00, $00, $00
+	smpsVcReleaseRate   $0F, $0F, $0F, $0F
+	smpsVcTotalLevel    $10, $0D, $10, $0D
+
+; Unused voice
+;	Voice $05
+;	$35
+;	$00, $01, $11, $21, 	$13, $1F, $1F, $1F, 	$0E, $00, $00, $00
+;	$00, $02, $02, $02, 	$4F, $0F, $0F, $0F, 	$12, $88, $88, $88
+	smpsVcAlgorithm     $05
+	smpsVcFeedback      $06
+	smpsVcUnusedBits    $00
+	smpsVcDetune        $02, $01, $00, $00
+	smpsVcCoarseFreq    $01, $01, $01, $00
+	smpsVcRateScale     $00, $00, $00, $00
+	smpsVcAttackRate    $1F, $1F, $1F, $13
+	smpsVcAmpMod        $00, $00, $00, $00
+	smpsVcDecayRate1    $00, $00, $00, $0E
+	smpsVcDecayRate2    $02, $02, $02, $00
+	smpsVcDecayLevel    $00, $00, $00, $04
+	smpsVcReleaseRate   $0F, $0F, $0F, $0F
+	smpsVcTotalLevel    $08, $08, $08, $12
 

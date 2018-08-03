@@ -237,6 +237,9 @@ Snd_GeneGZ2_FM5:
 	smpsAlterNote       $01
 	smpsJump            Snd_GeneGZ2_FM1
 
+; Unreachable
+	smpsStop
+
 ; PSG1 Data
 Snd_GeneGZ2_PSG1:
 	smpsModSet          $03, $01, $01, $03
@@ -313,6 +316,58 @@ Snd_GeneGZ2_Loop12:
 	smpsCall            Snd_GeneGZ2_Call00
 	smpsLoop            $00, $3C, Snd_GeneGZ2_Loop12
 	smpsJump            Snd_GeneGZ2_Loop12
+
+; Unreachable
+Snd_GeneGZ2_CallUnk00:
+	smpsPSGvoice        sTone_0F
+	dc.b	(nMaxPSG2-$23)&$FF, $06, (nMaxPSG2-$23)&$FF
+	smpsPSGvoice        sTone_12
+	dc.b	$0C
+	smpsLoop            $00, $10, Snd_GeneGZ2_CallUnk00
+	smpsReturn
+
+; Unreachable
+Snd_GeneGZ2_CallUnk01:
+	smpsPSGvoice        sTone_0F
+	dc.b	(nMaxPSG2-$23)&$FF, $06, (nMaxPSG2-$23)&$FF
+	smpsPSGvoice        sTone_12
+	dc.b	(nMaxPSG2-$23)&$FF
+	smpsPSGvoice        sTone_0F
+	dc.b	(nMaxPSG2-$23)&$FF
+	smpsLoop            $00, $10, Snd_GeneGZ2_CallUnk01
+	smpsReturn
+
+; Unreachable
+Snd_GeneGZ2_CallUnk02:
+	smpsPSGvoice        sTone_0F
+	dc.b	(nMaxPSG2-$23)&$FF, $06, nRst, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF
+	smpsPSGvoice        sTone_12
+	dc.b	(nMaxPSG2-$23)&$FF, $0C
+	smpsPSGvoice        sTone_0F
+	dc.b	(nMaxPSG2-$23)&$FF, $06, (nMaxPSG2-$23)&$FF
+	smpsPSGvoice        sTone_0F
+	dc.b	(nMaxPSG2-$23)&$FF, $06, nRst, (nMaxPSG2-$23)&$FF, nRst
+	smpsPSGvoice        sTone_12
+	dc.b	(nMaxPSG2-$23)&$FF, $0C
+	smpsPSGvoice        sTone_0F
+	dc.b	$06, $06
+	smpsLoop            $00, $04, Snd_GeneGZ2_CallUnk02
+	smpsReturn
+
+; Unreachable
+Snd_GeneGZ2_CallUnk03:
+	smpsPSGvoice        sTone_0F
+	dc.b	(nMaxPSG2-$23)&$FF, $06, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF
+	smpsPSGvoice        sTone_12
+	dc.b	(nMaxPSG2-$23)&$FF, $0C
+	smpsPSGvoice        sTone_0F
+	dc.b	(nMaxPSG2-$23)&$FF, $06, (nMaxPSG2-$23)&$FF
+	smpsPSGvoice        sTone_12
+	dc.b	(nMaxPSG2-$23)&$FF, $06
+	smpsPSGvoice        sTone_0F
+	dc.b	(nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF
+	smpsLoop            $00, $07, Snd_GeneGZ2_CallUnk03
+	smpsReturn
 
 Snd_GeneGZ2_Call00:
 	smpsPSGvoice        sTone_0F

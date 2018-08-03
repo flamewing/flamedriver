@@ -53,6 +53,9 @@ Snd_Boss1_Jump04:
 	dc.b	nG0, nG0, nAb0, nBb0
 	smpsJump            Snd_Boss1_Jump04
 
+; Unreachable
+	smpsStop
+
 ; FM2 Data
 Snd_Boss1_FM2:
 	smpsSetvoice        $03
@@ -75,6 +78,9 @@ Snd_Boss1_Jump03:
 	dc.b	smpsNoAttack, nD5, $07, nC5, $06, nBb4, $18, nB4
 	smpsJump            Snd_Boss1_Jump03
 
+; Unreachable
+	smpsStop
+
 ; FM3 Data
 Snd_Boss1_FM3:
 	smpsSetvoice        $03
@@ -89,6 +95,9 @@ Snd_Boss1_FM3:
 	smpsModSet          $03, $01, $01, $03
 	dc.b	nRst, $07
 	smpsJump            Snd_Boss1_Jump03
+
+; Unreachable
+	smpsStop
 
 ; FM4 Data
 Snd_Boss1_FM4:
@@ -123,6 +132,9 @@ Snd_Boss1_Jump02:
 	dc.b	nEb4, $0C, nE4, $12, nC4, nE4, $0C, nF4, $30, nG4, $18, nG4
 	smpsJump            Snd_Boss1_Jump02
 
+; Unreachable
+	smpsStop
+
 ; FM5 Data
 Snd_Boss1_FM5:
 	smpsSetvoice        $06
@@ -152,6 +164,9 @@ Snd_Boss1_Jump01:
 	dc.b	$09, nC4, nD4, $06, nD4, $0C, nC4, $06, nD4, nEb4, $12, nC4
 	dc.b	nEb4, $0C, nE4, $12, nC4, nE4, $0C, nF4, $30, nG4, $18, nG4
 	smpsJump            Snd_Boss1_Jump01
+
+; Unreachable
+	smpsStop
 
 ; PSG1 Data
 Snd_Boss1_PSG1:
@@ -191,6 +206,9 @@ Snd_Boss1_Jump06:
 	smpsPSGAlterVol     $02
 	smpsJump            Snd_Boss1_Jump06
 
+; Unreachable
+	smpsStop
+
 ; PSG2 Data
 Snd_Boss1_PSG2:
 	dc.b	nRst, $30, nRst
@@ -228,6 +246,9 @@ Snd_Boss1_Jump05:
 	smpsPSGAlterVol     $FE
 	smpsPSGAlterVol     $02
 	smpsJump            Snd_Boss1_Jump05
+
+; Unreachable
+	smpsStop
 
 ; PSG3 Data
 Snd_Boss1_PSG3:
@@ -271,6 +292,9 @@ Snd_Boss1_Jump00:
 	dc.b	$03, dKickS3, dSnareS3, $06, dKickS3, $03, dKickS3, dKickS3, $06, dKickS3, $03, dKickS3
 	dc.b	dSnareS3, dSnareS3, dSnareS3, dSnareS3
 	smpsJump            Snd_Boss1_Jump00
+
+; Unreachable
+	smpsStop
 
 Snd_Boss1_Voices:
 ;	Voice $00

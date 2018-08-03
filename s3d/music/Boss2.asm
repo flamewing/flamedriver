@@ -197,6 +197,9 @@ Snd_Boss2_FM5:
 	smpsAlterNote       $01
 	smpsJump            Snd_Boss2_Jump01
 
+; Unreachable
+	smpsStop
+
 ; PSG1 Data
 Snd_Boss2_PSG1:
 	smpsModSet          $03, $01, $01, $03
@@ -317,6 +320,58 @@ Snd_Boss2_PSG3:
 Snd_Boss2_Jump03:
 	smpsCall            Snd_Boss2_Call00
 	smpsJump            Snd_Boss2_Jump03
+
+; Unreachable
+Snd_Boss2_CallUnk00:
+	smpsPSGvoice        sTone_0F
+	dc.b	(nMaxPSG2-$23)&$FF, $06, (nMaxPSG2-$23)&$FF
+	smpsPSGvoice        sTone_12
+	dc.b	$0C
+	smpsLoop            $00, $10, Snd_PPZ2_CallUnk00
+	smpsReturn
+
+; Unreachable
+Snd_Boss2_CallUnk01:
+	smpsPSGvoice        sTone_0F
+	dc.b	(nMaxPSG2-$23)&$FF, $06, (nMaxPSG2-$23)&$FF
+	smpsPSGvoice        sTone_12
+	dc.b	(nMaxPSG2-$23)&$FF
+	smpsPSGvoice        sTone_0F
+	dc.b	(nMaxPSG2-$23)&$FF
+	smpsLoop            $00, $10, Snd_Boss2_CallUnk01
+	smpsReturn
+
+; Unreachable
+Snd_Boss2_CallUnk02:
+	smpsPSGvoice        sTone_0F
+	dc.b	(nMaxPSG2-$23)&$FF, $06, nRst, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF
+	smpsPSGvoice        sTone_12
+	dc.b	(nMaxPSG2-$23)&$FF, $0C
+	smpsPSGvoice        sTone_0F
+	dc.b	(nMaxPSG2-$23)&$FF, $06, (nMaxPSG2-$23)&$FF
+	smpsPSGvoice        sTone_0F
+	dc.b	(nMaxPSG2-$23)&$FF, $06, nRst, (nMaxPSG2-$23)&$FF, nRst
+	smpsPSGvoice        sTone_12
+	dc.b	(nMaxPSG2-$23)&$FF, $0C
+	smpsPSGvoice        sTone_0F
+	dc.b	$06, $06
+	smpsLoop            $00, $04, Snd_Boss2_CallUnk02
+	smpsReturn
+
+; Unreachable
+Snd_Boss2_CallUnk03:
+	smpsPSGvoice        sTone_0F
+	dc.b	(nMaxPSG2-$23)&$FF, $06, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF
+	smpsPSGvoice        sTone_12
+	dc.b	(nMaxPSG2-$23)&$FF, $0C
+	smpsPSGvoice        sTone_0F
+	dc.b	(nMaxPSG2-$23)&$FF, $06, (nMaxPSG2-$23)&$FF
+	smpsPSGvoice        sTone_12
+	dc.b	(nMaxPSG2-$23)&$FF, $06
+	smpsPSGvoice        sTone_0F
+	dc.b	(nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF
+	smpsLoop            $00, $07, Snd_Boss2_CallUnk03
+	smpsReturn
 
 Snd_Boss2_Call00:
 	smpsPSGvoice        sTone_0F
@@ -457,4 +512,23 @@ Snd_Boss2_Voices:
 	smpsVcDecayLevel    $03, $03, $05, $05
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
 	smpsVcTotalLevel    $00, $22, $26, $19
+
+; Unused voice
+;	Voice $05
+;	$16
+;	$7A, $74, $3C, $31, 	$1F, $1F, $1F, $1F, 	$0A, $08, $0C, $0A
+;	$07, $0A, $07, $05, 	$2F, $AF, $AF, $5F, 	$14, $85, $8A, $80
+	smpsVcAlgorithm     $06
+	smpsVcFeedback      $02
+	smpsVcUnusedBits    $00
+	smpsVcDetune        $03, $03, $07, $07
+	smpsVcCoarseFreq    $01, $0C, $04, $0A
+	smpsVcRateScale     $00, $00, $00, $00
+	smpsVcAttackRate    $1F, $1F, $1F, $1F
+	smpsVcAmpMod        $00, $00, $00, $00
+	smpsVcDecayRate1    $0A, $0C, $08, $0A
+	smpsVcDecayRate2    $05, $07, $0A, $07
+	smpsVcDecayLevel    $05, $0A, $0A, $02
+	smpsVcReleaseRate   $0F, $0F, $0F, $0F
+	smpsVcTotalLevel    $80, $8A, $85, $14
 

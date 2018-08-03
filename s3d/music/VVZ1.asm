@@ -202,6 +202,9 @@ Snd_VVZ1_FM5:
 	dc.b	nRst, $60
 	smpsJump            Snd_VVZ1_Jump00
 
+; Unreachable
+	smpsStop
+
 ; PSG1 Data
 Snd_VVZ1_PSG1:
 	smpsModSet          $01, $01, $01, $04

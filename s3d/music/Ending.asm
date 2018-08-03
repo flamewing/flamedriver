@@ -49,6 +49,21 @@ Snd_Ending_Call00:
 	dc.b	nC1, smpsNoAttack, nC1, nC2, smpsNoAttack, nC2, nC1, nC2
 	smpsReturn
 
+; Unreachable
+Snd_Ending_CallUnk00:
+	dc.b	nB0, $06, nRst, nB0, nRst, nB1, smpsNoAttack, nB1, nB0, nB1, nB0, nB1, nB0, smpsNoAttack, nB0, nB1, smpsNoAttack, nB1, nB0, nB1
+	smpsReturn
+
+; Unreachable
+Snd_Ending_CallUnk01:
+	dc.b	nAb0, $06, nRst, nAb0, nRst, nAb1, smpsNoAttack, nAb1, nAb0, nAb1, nAb0, nAb1, nAb0, smpsNoAttack, nAb0, nAb1, smpsNoAttack, nAb1, nAb0, nAb1
+	smpsReturn
+
+; Unreachable
+Snd_Ending_CallUnk02:
+	dc.b	nG0, $06, nRst, nG0, nRst, nG1, smpsNoAttack, nG1, nG0, nG1, nG0, nG1, nG0, smpsNoAttack, nG0, nG1, smpsNoAttack, nG1, nG0, nG1 
+	smpsReturn
+
 ; FM2 Data
 Snd_Ending_FM2:
 	smpsPan             panLeft, $00
@@ -171,6 +186,9 @@ Snd_Ending_FM4:
 	smpsSetvoice        $01
 	smpsPan             panCenter, $00
 	smpsJump            Snd_Ending_Jump00
+
+; Unreachable
+	smpsStop
 
 ; FM5 Data
 Snd_Ending_FM5:

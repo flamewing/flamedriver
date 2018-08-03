@@ -232,6 +232,9 @@ Snd_RRZ2_FM5:
 	smpsAlterNote       $01
 	smpsJump            Snd_RRZ2_FM1
 
+; Unreachable
+	smpsStop
+
 ; PSG1 Data
 Snd_RRZ2_PSG1:
 	smpsModSet          $01, $01, $01, $04
@@ -349,6 +352,9 @@ Snd_RRZ2_Jump03:
 	smpsCall            Snd_RRZ2_Call00
 	smpsJump            Snd_RRZ2_Jump03
 
+; Unreachable
+	smpsStop
+
 Snd_RRZ2_Call00:
 	smpsPSGvoice        sTone_0F
 	dc.b	(nMaxPSG2-$23)&$FF, $04, nRst, nRst, (nMaxPSG2-$23)&$FF, nRst, (nMaxPSG2-$23)&$FF
@@ -366,6 +372,45 @@ Snd_RRZ2_Call01:
 	dc.b	(nMaxPSG2-$23)&$FF, $0C
 	smpsPSGvoice        sTone_0F
 	dc.b	(nMaxPSG2-$23)&$FF, $04, nRst, nRst
+	smpsReturn
+
+; Unreachable
+Snd_RRZ2_CallUnk00:
+	smpsPSGvoice        sTone_0F
+	dc.b	(nMaxPSG2-$23)&$FF, $06, nRst, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF
+	smpsPSGvoice        sTone_04
+	dc.b	(nMaxPSG2-$23)&$FF, $0C
+	smpsPSGvoice        sTone_0F
+	dc.b	(nMaxPSG2-$23)&$FF, $06, (nMaxPSG2-$23)&$FF
+	smpsPSGvoice        sTone_0F
+	dc.b	(nMaxPSG2-$23)&$FF, $06, nRst, (nMaxPSG2-$23)&$FF, nRst
+	smpsPSGvoice        sTone_04
+	dc.b	(nMaxPSG2-$23)&$FF, $0C
+	smpsPSGvoice        sTone_0F
+	dc.b	$06, $06
+	smpsLoop            $00, $04, Snd_RRZ1_CallUnk00
+	smpsReturn
+
+; Unreachable
+Snd_RRZ2_CallUnk01:
+	smpsPSGvoice        sTone_0F
+	dc.b	(nMaxPSG2-$23)&$FF, $06, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF
+	smpsPSGvoice        sTone_04
+	dc.b	(nMaxPSG2-$23)&$FF, $0C
+	smpsPSGvoice        sTone_0F
+	dc.b	(nMaxPSG2-$23)&$FF, $06, (nMaxPSG2-$23)&$FF
+	smpsPSGvoice        sTone_04
+	dc.b	(nMaxPSG2-$23)&$FF, $06
+	smpsPSGvoice        sTone_0F
+	dc.b	(nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF
+	smpsLoop            $00, $07, Snd_RRZ1_CallUnk01
+	smpsReturn
+
+; Unreachable
+Snd_RRZ2_CallUnk02:
+	smpsPSGvoice        sTone_0F
+	dc.b	(nMaxPSG2-$23)&$FF, $06, nRst, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF, nRst, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF
+	smpsLoop            $00, $04, Snd_RRZ2_CallUnk02
 	smpsReturn
 
 ; DAC Data
