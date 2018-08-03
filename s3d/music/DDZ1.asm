@@ -250,6 +250,9 @@ Snd_DDZ1_FM5:
 	smpsAlterNote       $01
 	smpsJump            Snd_DDZ1_Jump00
 
+; Unreachable
+	smpsStop
+
 ; PSG1 Data
 Snd_DDZ1_PSG1:
 	smpsModSet          $03, $01, $01, $03
@@ -618,4 +621,23 @@ Snd_DDZ1_Voices:
 	smpsVcDecayLevel    $0F, $08, $09, $0F
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
 	smpsVcTotalLevel    $00, $23, $39, $29
+
+; Unused voice
+;	Voice $06
+;	$16
+;	$79, $71, $32, $33, 	$1F, $1F, $1F, $1F, 	$0A, $08, $0C, $0A
+;	$07, $0A, $07, $05, 	$2F, $AF, $AF, $5F, 	$24, $80, $82, $80
+	smpsVcAlgorithm     $06
+	smpsVcFeedback      $02
+	smpsVcUnusedBits    $00
+	smpsVcDetune        $03, $03, $07, $07
+	smpsVcCoarseFreq    $03, $02, $01, $09
+	smpsVcRateScale     $00, $00, $00, $00
+	smpsVcAttackRate    $1F, $1F, $1F, $1F
+	smpsVcAmpMod        $00, $00, $00, $00
+	smpsVcDecayRate1    $0A, $0C, $08, $0A
+	smpsVcDecayRate2    $05, $07, $0A, $07
+	smpsVcDecayLevel    $05, $0A, $0A, $02
+	smpsVcReleaseRate   $0F, $0F, $0F, $0F
+	smpsVcTotalLevel    $80, $82, $80, $24
 

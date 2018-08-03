@@ -764,6 +764,22 @@ Snd_GreenGZ2_Call0B:
 	smpsLoop            $00, $04, Snd_GreenGZ2_Call0B
 	smpsReturn
 
+; Unreachable
+Snd_GreenGZ2_CallUnk:
+	smpsPSGvoice        sTone_0F
+	smpsPSGAlterVol     $01
+	dc.b	$06
+	smpsPSGAlterVol     $01
+	dc.b	$06
+	smpsPSGvoice        sTone_12
+	smpsPSGAlterVol     $FE
+	dc.b	$0C
+	smpsLoop            $00, $03, Snd_GreenGZ2_CallUnk
+	smpsPSGvoice        sTone_0F
+	dc.b	$0C
+	dc.b	$0C
+	smpsReturn
+
 Snd_GreenGZ2_Call0C:
 	smpsPSGvoice        sTone_0F
 	smpsPSGAlterVol     $01

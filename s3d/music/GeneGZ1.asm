@@ -291,6 +291,9 @@ Snd_GeneGZ1_FM5:
 	smpsAlterNote       $01
 	smpsJump            Snd_GeneGZ1_FM1
 
+; Unreachable
+	smpsStop
+
 ; PSG1 Data
 Snd_GeneGZ1_PSG1:
 	smpsModSet          $03, $01, $01, $03
@@ -381,10 +384,58 @@ Snd_GeneGZ1_Loop19:
 	smpsLoop            $00, $3C, Snd_GeneGZ1_Loop19
 	smpsJump            Snd_GeneGZ1_Loop19
 
+; Unreachable
+Snd_GeneGZ1_CallUnk00:
+	smpsPSGvoice        sTone_0F
+	dc.b	(nMaxPSG2-$23)&$FF, $06, (nMaxPSG2-$23)&$FF
+	smpsPSGvoice        sTone_12
+	dc.b	$0C
+	smpsLoop            $00, $10, Snd_GeneGZ1_CallUnk00
+	smpsReturn
+
 Snd_GeneGZ1_Call00:
 	smpsPSGvoice        sTone_0F
 	dc.b	(nMaxPSG2-$23)&$FF, $06, nRst, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF, nRst, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF
 	smpsLoop            $00, $04, Snd_GeneGZ1_Call00
+	smpsReturn
+
+; Unreachable
+Snd_GeneGZ1_CallUnk01:
+	smpsPSGvoice        sTone_0F
+	dc.b	(nMaxPSG2-$23)&$FF, $06, nRst, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF
+	smpsPSGvoice        sTone_12
+	dc.b	(nMaxPSG2-$23)&$FF, $0C
+	smpsPSGvoice        sTone_0F
+	dc.b	(nMaxPSG2-$23)&$FF, $06, (nMaxPSG2-$23)&$FF
+	smpsPSGvoice        sTone_0F
+	dc.b	(nMaxPSG2-$23)&$FF, $06, nRst, (nMaxPSG2-$23)&$FF, nRst
+	smpsPSGvoice        sTone_12
+	dc.b	(nMaxPSG2-$23)&$FF, $0C
+	smpsPSGvoice        sTone_0F
+	dc.b	$06, $06
+	smpsLoop            $00, $04, Snd_GeneGZ1_CallUnk01
+	smpsReturn
+
+; Unreachable
+Snd_GeneGZ1_CallUnk02:
+	smpsPSGvoice        sTone_0F
+	dc.b	(nMaxPSG2-$23)&$FF, $06, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF
+	smpsPSGvoice        sTone_12
+	dc.b	(nMaxPSG2-$23)&$FF, $0C
+	smpsPSGvoice        sTone_0F
+	dc.b	(nMaxPSG2-$23)&$FF, $06, (nMaxPSG2-$23)&$FF
+	smpsPSGvoice        sTone_12
+	dc.b	(nMaxPSG2-$23)&$FF, $06
+	smpsPSGvoice        sTone_0F
+	dc.b	(nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF
+	smpsLoop            $00, $07, Snd_GeneGZ1_CallUnk02
+	smpsReturn
+
+; Unreachable
+Snd_GeneGZ1_CallUnk03:
+	smpsPSGvoice        sTone_0F
+	dc.b	(nMaxPSG2-$23)&$FF, $06, nRst, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF, nRst, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF
+	smpsLoop            $00, $04, Snd_GeneGZ1_CallUnk03
 	smpsReturn
 
 ; DAC Data
