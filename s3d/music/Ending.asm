@@ -425,3 +425,22 @@ Snd_Ending_Voices:
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
 	smpsVcTotalLevel    $00, $27, $28, $17
 
+; Unused voice
+;	Voice $06
+;	$3D
+;	$01, $01, $01, $01, 	$10, $50, $50, $50, 	$07, $08, $08, $08
+;	$01, $00, $00, $00, 	$20, $1A, $1A, $1A, 	$19, $84, $84, $84
+	smpsVcAlgorithm     $05
+	smpsVcFeedback      $07
+	smpsVcUnusedBits    $00
+	smpsVcDetune        $00, $00, $00, $00
+	smpsVcCoarseFreq    $01, $01, $01, $01
+	smpsVcRateScale     $01, $01, $01, $00
+	smpsVcAttackRate    $10, $10, $10, $10
+	smpsVcAmpMod        $00, $00, $00, $00
+	smpsVcDecayRate1    $08, $08, $08, $07
+	smpsVcDecayRate2    $00, $00, $00, $01
+	smpsVcDecayLevel    $01, $01, $01, $02
+	smpsVcReleaseRate   $0A, $0A, $0A, $00
+	smpsVcTotalLevel    $04, $04, $04, $19
+
