@@ -2,204 +2,223 @@ Snd_VVZ1_Header:
 	smpsHeaderStartSong 3
 	smpsHeaderVoice     Snd_VVZ1_Voices
 	smpsHeaderChan      $06, $03
-	smpsHeaderTempo     $01, $29
+	smpsHeaderTempo     $01, $1D
 
 	smpsHeaderDAC       Snd_VVZ1_DAC
-	smpsHeaderFM        Snd_VVZ1_FM1,	$00, $14
+	smpsHeaderFM        Snd_VVZ1_FM1,	$00, $18
 	smpsHeaderFM        Snd_VVZ1_FM2,	$0C, $0F
-	smpsHeaderFM        Snd_VVZ1_FM3,	$00, $14
-	smpsHeaderFM        Snd_VVZ1_FM4,	$00, $14
-	smpsHeaderFM        Snd_VVZ1_FM5,	$00, $18
+	smpsHeaderFM        Snd_VVZ1_FM3,	$F4, $10
+	smpsHeaderFM        Snd_VVZ1_FM4,	$F4, $10
+	smpsHeaderFM        Snd_VVZ1_FM5,	$00, $1C
 	smpsHeaderPSG       Snd_VVZ1_PSG1,	$E8, $02, $00, $00
 	smpsHeaderPSG       Snd_VVZ1_PSG2,	$E8, $04, $00, $00
-	smpsHeaderPSG       Snd_VVZ1_PSG3,	$23, $03, $00, $00
+	smpsHeaderPSG       Snd_VVZ1_PSG3,	$23, $02, $00, $00
 
 ; FM1 Data
 Snd_VVZ1_FM1:
-	smpsModSet          $03, $01, $01, $05
-	smpsPan             panCenter, $00
-	smpsSetvoice        $00
-	dc.b	nRst, $60
+	smpsModSet          $0C, $01, $09, $07
 
 Snd_VVZ1_Jump00:
-	smpsAlterPitch      $F4
-	smpsSetvoice        $02
-	dc.b	$30, nF4, nC5, nF5, nG5, nBb4, nEb5, $60, nC6, $30, nF4, nC5
-	dc.b	nF5, nEb5, nBb4, nBb5, $60
-	smpsAlterPitch      $0C
-	smpsSetvoice        $00
+	smpsPan             panCenter, $00
+	smpsSetvoice        $01
+	dc.b	nRst, $30
+
+Snd_VVZ1_Jump03:
+	dc.b	nRst, $60, nRst, nRst, nRst
+
+Snd_VVZ1_Loop06:
+	smpsCall            Snd_VVZ1_Call0A
+	dc.b	nG3, $24, nF3, nEb3, $18, smpsNoAttack, $0C, nF3, $18, nEb3, nBb2, nB2
+	dc.b	$0C
+	smpsCall            Snd_VVZ1_Call0A
+	dc.b	nG3, $24, nC4, $3C, smpsNoAttack, $60
+	smpsLoop            $00, $02, Snd_VVZ1_Loop06
+
+Snd_VVZ1_Loop07:
+	dc.b	nAb4, $24, nF4, $18, nBb4, $0C, nAb4, nG4
+	smpsLoop            $00, $05, Snd_VVZ1_Loop07
+	dc.b	nAb4, $24, nG4, $18, nAb4, $0C, nG4, $18, nAb4, $60, smpsNoAttack, nF4
+
+Snd_VVZ1_Loop08:
+	dc.b	nAb4, $24, nF4, $18, nBb4, $0C, nAb4, nG4
+	smpsLoop            $00, $05, Snd_VVZ1_Loop08
+	dc.b	nAb4, $24, nG4, nEb4, $18, nF4, $60, smpsNoAttack, nF4
+	smpsJump            Snd_VVZ1_Jump03
+
+Snd_VVZ1_Call0A:
 	dc.b	nC3, $24, nF3, nC4, $18, smpsNoAttack, $0C, nBb3, $18, nAb3, nG3, $0C
-	dc.b	nF3, nAb3, nG3, $24, nF3, nEb3, $18, smpsNoAttack, $0C, nF3, $18, nEb3
-	dc.b	nBb2, nB2, $0C, nC3, $24, nF3, nC4, $18, smpsNoAttack, $0C, nBb3, $18
-	dc.b	nAb3, nBb3, $0C, nAb3, nF3, nG3, $24, nC4, $3C, smpsNoAttack, $60, nC3
-	dc.b	$24, nF3, nC4, $18, smpsNoAttack, $0C, nBb3, $18, nAb3, nBb3, $0C, nAb3
-	dc.b	nF3, nG3, $24, nEb3, nC3, $18, smpsNoAttack, $0C, nG3, $18, nF3, nEb3
-	dc.b	$0C, nBb2, nB2, nC3, $24, nF3, nC4, $18, smpsNoAttack, $0C, nBb3, $18
-	dc.b	nAb3, nG3, $0C, nAb3, nF3, nG3, $24, nC4, $3C, smpsNoAttack, $60, nAb4
-	dc.b	$24, nF4, $18, nBb4, $0C, nAb4, nG4, nAb4, $24, nEb4, $18, nBb4
-	dc.b	$0C, nAb4, nG4, nAb4, $24, nEb4, $18, nBb4, $0C, nAb4, nG4, nAb4
-	dc.b	$24, nF4, $18, nBb4, $0C, nAb4, nG4, nAb4, $24, nF4, $18, nBb4
-	dc.b	$0C, nAb4, nG4, nAb4, $24, nG4, $18, nAb4, $0C, nG4, $18, $60
-	dc.b	nF4, nAb4, $24, nF4, $18, nBb4, $0C, nAb4, nG4, nAb4, $24, nEb4
-	dc.b	$18, nBb4, $0C, nAb4, nG4, nAb4, $24, nEb4, $18, nBb4, $0C, nAb4
-	dc.b	nG4, nAb4, $24, nF4, $18, nBb4, $0C, nAb4, nG4, nAb4, $24, nF4
-	dc.b	$18, nBb4, $0C, nAb4, nG4, nAb4, $24, nG4, nEb4, $18, nF4, $60
-	dc.b	smpsNoAttack, nF4
-	smpsJump            Snd_VVZ1_Jump00
+	dc.b	nF3, nAb3
+	smpsReturn
 
 ; FM2 Data
 Snd_VVZ1_FM2:
 	smpsPan             panCenter, $00
 	smpsModSet          $01, $01, $01, $02
-	smpsSetvoice        $01
-	dc.b	nRst, $60
+	smpsSetvoice        $00
+	smpsPan             panCenter, $00
+	smpsModSet          $07, $01, $03, $05
+	dc.b	nRst, $30
 
-Snd_VVZ1_Jump03:
-	dc.b	nF1, $12, nF1, $06, nRst, $0C, $06, nRst, $36, nRst, $0C, nF1
-	dc.b	nG1, nAb1, nBb1, nF1, nC2, nF2, nF2, $03
-	smpsSetvoice        $06
-	dc.b	nG2, $0F
-	smpsSetvoice        $01
-	dc.b	nEb2, $12, nBb1, $0C, nRst, nG1, nEb2, nBb2, smpsNoAttack, nBb2, $18, nAb2
-	dc.b	nG2, nEb2, $06, nBb2, nEb3, $0C, nF1, $12, nF2, nF1, $0C, nRst
-	dc.b	$30, nRst, $0C, nF2, $06, nC2, nEb2, nF2, $12, nAb2, $0C, nEb2
-	dc.b	nC3, nF3
-	smpsSetvoice        $06
-	smpsFMAlterVol      $03
-	dc.b	nF3, $03
-	smpsFMAlterVol      $FD
-	dc.b	nG3, $0F
-	smpsSetvoice        $01
-	dc.b	nEb3, $12, nG2, $0C, nRst, $18, $06, nAb2, nBb2, $0C, smpsNoAttack, $09
-	dc.b	nA2, $02, nG2, nF2, nE2, $03, nD2, nC2, nBb1, $18, nG2, nEb2
-	dc.b	nF1, $12, nF1, $06, nRst, $0C, $06, nRst, $36, nRst, $0C, nF1
-	dc.b	$18, nG1, $0C, nAb1, nF1, nG1, nAb1, nF1, $12, nEb2, nF1, $06
-	dc.b	nRst, $36, nEb2, $03
-	smpsSetvoice        $06
-	dc.b	nF2, $15
-	smpsSetvoice        $01
-	dc.b	nEb2, $18, nBb1, nG1, nF1, $12, nF1, $06, nRst, $0C, $06, nRst
-	dc.b	$36, nRst, $0C, nF1, $18, nG1, $0C, nAb1, nF1, nG1, nAb1, nEb1
-	dc.b	$12, nBb1, $06, nRst, $0C, nAb2, $03
-	smpsSetvoice        $06
-	dc.b	nBb2, $21
-	smpsSetvoice        $01
-	dc.b	nAb2, $18, nG2, nEb2, nG1, $06, nAb1, nBb1, nAb1, nF1, nEb1, nD1
-	dc.b	nG1, nF1, $12, nF1, $06, nRst, $0C, $06, nRst, $36, nRst, $0C
-	dc.b	nF1, $18, nG1, $0C, nAb1, nF1, nG1, nAb1, nF1, $12, nEb2, nF1
-	dc.b	$06, nRst, $36, nEb2, $03
-	smpsSetvoice        $06
-	dc.b	nF2, $15
-	smpsSetvoice        $01
-	dc.b	nEb2, $18, nBb1, nG1, nF1, $12, nF1, $06, nRst, $0C, $06, nRst
-	dc.b	$36, nRst, $0C, nF1, $18, nG1, $0C, nAb1, nF1, nG1, nAb1, nEb1
-	dc.b	$12, nBb1, $06, nRst, $0C, nAb2, $03
-	smpsSetvoice        $06
-	dc.b	nBb2, $21
-	smpsSetvoice        $01
-	dc.b	nAb2, $18, nG2, nEb2, nBb1, nG1, nCs2, $12, nAb1, $06, nRst, $0C
-	dc.b	nCs2, $3C, nRst, $0C, nAb2, nG2, nF2, nEb2, nG1, nBb1, nEb2, nC2
-	dc.b	$12, nG2, $06, nRst, $0C, nC3, $30, nBb2, $06, nC3, nC3, $06
-	smpsSetvoice        $06
-	dc.b	nCs3, $12
-	smpsSetvoice        $01
-	dc.b	nBb2, $18, nAb2, $06, nBb2, $12, nF2, $06, nEb2, nCs2, $0C, $12
-	dc.b	nAb1, $06, nRst, $0C, nCs2, $30, nC2, $06, nCs2, nEb2, $12, nBb1
-	dc.b	$06, nRst, $0C, nEb2, nBb2, nG1, nBb1, nEb2, nC2, $12, nG2, $06
-	dc.b	nRst, $0C, nC3, $2E, nRst, $0E, nAb2, $0C, nAb2, nF2, nF2, nCs2
-	dc.b	nCs2, nF2, nF1, nCs1, $12, nAb1, nEb2, $15, nEb2, $03
-	smpsSetvoice        $06
-	dc.b	nF2, $24
-	smpsSetvoice        $01
-	dc.b	nRst, $0C, nEb1, nBb1, nG2, nAb2, $03
-	smpsSetvoice        $06
-	dc.b	nBb2, $09
-	smpsSetvoice        $01
-	dc.b	nAb2, $0C, nG2, nEb2, nC1, $12, nG1, nC2, $24, nF2, $03
-	smpsSetvoice        $06
-	dc.b	nG2, $09
-	smpsSetvoice        $01
-	dc.b	nF2, $06, nEb2, nCs2, $0C, nRst, nCs2, nBb1, nAb1, nAb1, nF2, nF2
-	dc.b	nCs1, $12, nAb1, nD2, $03
-	smpsSetvoice        $06
-	dc.b	nEb2, $15
-	smpsSetvoice        $01
-	dc.b	nF2, $24, nRst, $0C, nEb1, nBb1, nG2, nBb2, nAb2, nG2, nEb2, nF1
-	dc.b	$12, nC2, nF2, $3C, nF1, $60
-	smpsJump            Snd_VVZ1_Jump03
+Snd_VVZ1_Loop04:
+	smpsCall            Snd_VVZ1_Call07
+	smpsLoop            $00, $05, Snd_VVZ1_Loop04
+	smpsCall            Snd_VVZ1_Call08
+	smpsCall            Snd_VVZ1_Call09
+	smpsCall            Snd_VVZ1_Call08
+	dc.b	nAb2, nAb3, nG2, $0C, nAb2, nG2, $06, nG3, nFs2, $0C, nG2, nAb2
+	dc.b	$06, nG2, nD2, nEb2, nF2, nF3, nE2, $0C, nF2, nF2, $06, nF3
+	dc.b	nEb2, $0C, nEb3, nD2, $06, nEb2, nEb2, nEb3
+	smpsCall            Snd_VVZ1_Call08
+	smpsCall            Snd_VVZ1_Call09
+	smpsCall            Snd_VVZ1_Call08
+
+Snd_VVZ1_Loop05:
+	dc.b	nF1, nF2, nF1, $0C, nF1, nF1, $06, nF2, nF1, $0C, nF1, nF1
+	dc.b	$06, nF2, nF1, nF2
+	smpsLoop            $00, $02, Snd_VVZ1_Loop05
+	smpsJump            Snd_VVZ1_Loop04
+
+Snd_VVZ1_Call07:
+	dc.b	nF2, $0C, nC2, nEb2, nC2, $06, nF2, $0C, $06, nC2, $0C, nEb2
+	dc.b	nC2, nF2, nC2, nEb2, $06, nE2, $0C, nF2, nF2, $06, nC2, $0C
+	dc.b	nF2, nE2, nEb2, nBb1, nCs2, nD2, $06, nEb2, $0C, $06, nBb1, $0C
+	dc.b	nCs2, nD2, nEb2, nBb1, nCs2, $06, nD2, $0C, nEb2, nEb2, $06, nBb1
+	dc.b	$0C, nEb2, nE2
+	smpsReturn
+
+Snd_VVZ1_Call08:
+	dc.b	nCs2, $06, nCs3, nC2, $0C, nCs2, nCs2, $06, nCs3, nC2, $0C, nCs2
+	dc.b	nCs2, $06, nCs3, nCs2, nD2, nEb2, nEb3, nD2, $0C, nEb2, nEb2, $06
+	dc.b	nEb3, nD2, $0C, nEb2, nEb2, $06, nEb3, nEb2, nCs2
+	smpsReturn
+
+Snd_VVZ1_Call09:
+	dc.b	nC2, nC3, nB1, $0C, nC2, nC2, $06, nC3, nB1, $0C, nC2, nC2
+	dc.b	$06, nB1, nC2, nEb2, nCs2, nCs3, nC2, $0C, nCs2, nCs2, $06, nCs3
+	dc.b	nC2, $0C, nCs2, nCs2, $06, nAb1, nB1, nC2
+	smpsReturn
 
 ; FM3 Data
 Snd_VVZ1_FM3:
 	smpsPan             panRight, $00
-	smpsModSet          $01, $01, $01, $06
-	smpsSetvoice        $05
-	dc.b	nF2, $60
+	smpsSetvoice        $02
+	smpsAlterPitch      $FB
+	smpsModSet          $01, $01, $0A, $B7
+	dc.b	nC3, $30
+	smpsAlterPitch      $05
 
 Snd_VVZ1_Jump02:
-	smpsModSet          $01, $01, $01, $06
+	smpsSetvoice        $02
+	smpsModSet          $01, $01, $02, $06
+	dc.b	nF3, $60, smpsNoAttack, $30
+	smpsModSet          $01, $01, $0A, $B7
+	smpsAlterPitch      $FB
+	dc.b	nC3
+	smpsAlterPitch      $05
+	smpsModSet          $01, $01, $02, $06
+	dc.b	nEb3, $60, smpsNoAttack, $30
+	smpsAlterPitch      $FB
+	smpsModSet          $01, $01, $0C, $BF
+	dc.b	nC3, $30
+	smpsAlterPitch      $05
+
+Snd_VVZ1_Loop03:
+	smpsModSet          $01, $01, $02, $06
+	dc.b	nF3, $60, smpsNoAttack, $30
+	smpsAlterPitch      $FB
+	smpsModSet          $01, $01, $0C, $BF
+	dc.b	nC3
+	smpsAlterPitch      $05
+	smpsModSet          $01, $01, $02, $06
+	dc.b	nEb3, $60, smpsNoAttack, $30
+	smpsAlterPitch      $FB
+	smpsModSet          $01, $01, $0C, $BF
+	dc.b	nC3
+	smpsAlterPitch      $05
+	smpsLoop            $00, $04, Snd_VVZ1_Loop03
 	smpsAlterPitch      $F4
-	smpsSetvoice        $05
-	dc.b	smpsNoAttack, nF3, $60, smpsNoAttack, nF3, $30, nF3, nEb3, $60, smpsNoAttack, $30, nEb3
-	dc.b	nF3, $60, smpsNoAttack, $30, nF3, nEb3, $60, smpsNoAttack, $30, nEb3, nF3, $60
-	dc.b	smpsNoAttack, $30, nF3, nEb3, $60, smpsNoAttack, $30, nEb3, nF3, $60, smpsNoAttack, $30
-	dc.b	nF3, nEb3, $60, smpsNoAttack, $30, nEb3, nF3, $60, smpsNoAttack, $30, nF3, nEb3
-	dc.b	$60, smpsNoAttack, $30, nEb3, nF3, $60, smpsNoAttack, $30, nF3, nEb3, $60, smpsNoAttack
-	dc.b	$30, nEb3
+	smpsFMAlterVol      $03
+	smpsSetvoice        $03
+	smpsModSet          $01, $01, $02, $06
+	dc.b	nAb5, $0C, nAb5, nAb5, nAb5, nAb5, nAb5, nAb5, nAb5, nBb5, nBb5, nBb5
+	dc.b	nBb5, nBb5, nBb5, nBb5, nBb5, nG5, nG5, nG5, nG5, nG5, nG5, nG5
+	dc.b	nG5, nAb5, nAb5, nAb5, nAb5, nAb5, nAb5, nAb5, nAb5, nAb5, nAb5, nAb5
+	dc.b	nAb5, nAb5, nAb5, nAb5, nAb5, nBb5, nBb5, nBb5, nBb5, nBb5, nBb5, nBb5
+	dc.b	nBb5, nC6, nC6, nC6, nBb5, nBb5, nBb5, nBb5, nBb5, nAb5, nAb5, nAb5
+	dc.b	nAb5, nAb5, nAb5, nAb5, nAb5, nAb5, nAb5, nAb5, nAb5, nAb5, nAb5, nAb5
+	dc.b	nAb5, nBb5, nBb5, nBb5, nBb5, nBb5, nBb5, nBb5, nBb5, nG5, nG5, nG5
+	dc.b	nG5, nG5, nG5, nG5, nG5, nAb5, nAb5, nAb5, nAb5, nAb5, nAb5, nAb5
+	dc.b	nAb5, nAb5, nAb5, nAb5, nAb5, nAb5, nAb5, nAb5, nAb5, nBb5, nBb5, nBb5
+	dc.b	nBb5, nBb5, nBb5, nBb5, nBb5, nAb5, nAb5, nAb5, nAb5, nAb5, nAb5, nAb5
+	dc.b	nAb5, nAb5, nAb5, nAb5, nAb5, nAb5, nAb5, nAb5, nAb5
+	smpsFMAlterVol      $FD
 	smpsAlterPitch      $0C
-	smpsSetvoice        $04
-	smpsFMAlterVol      $02
-	dc.b	nRst, $0C, nAb4, nAb4, nAb4, nAb4, nAb4, nAb4, nAb4, nBb4, nBb4, nBb4
-	dc.b	nBb4, nBb4, nBb4, nBb4, nBb4, nG4, nG4, nG4, nG4, nG4, nG4, nG4
-	dc.b	nG4, nAb4, nAb4, nAb4, nAb4, nAb4, nAb4, nAb4, nAb4, nAb4, nAb4, nAb4
-	dc.b	nAb4, nAb4, nAb4, nAb4, nAb4, nBb4, nBb4, nBb4, nBb4, nBb4, nBb4, nBb4
-	dc.b	nBb4, nC5, nC5, nC5, nBb4, nBb4, nBb4, nBb4, nBb4, nAb4, nAb4, nAb4
-	dc.b	nAb4, nAb4, nAb4, nAb4, nAb4, nAb4, nAb4, nAb4, nAb4, nAb4, nAb4, nAb4
-	dc.b	nAb4, nBb4, nBb4, nBb4, nBb4, nBb4, nBb4, nBb4, nBb4, nG4, nG4, nG4
-	dc.b	nG4, nG4, nG4, nG4, nG4, nAb4, nAb4, nAb4, nAb4, nAb4, nAb4, nAb4
-	dc.b	nAb4, nAb4, nAb4, nAb4, nAb4, nAb4, nAb4, nAb4, nAb4, nBb4, nBb4, nBb4
-	dc.b	nBb4, nBb4, nBb4, nBb4, nBb4, nAb4, nAb4, nAb4, nAb4, nAb4, nAb4, nAb4
-	dc.b	nAb4, nAb4, nAb4, nAb4, nAb4, nAb4, nAb4, nAb4, nAb4
-	smpsFMAlterVol      $FE
 	smpsJump            Snd_VVZ1_Jump02
 
 ; FM4 Data
 Snd_VVZ1_FM4:
 	smpsPan             panLeft, $00
 	smpsModSet          $01, $01, $01, $05
-	smpsSetvoice        $05
-	dc.b	nC3, $60
+	smpsSetvoice        $02
+	smpsAlterPitch      $FB
+	smpsModSet          $01, $01, $08, $B7
+	dc.b	nG2, $30
+	smpsAlterPitch      $05
 
 Snd_VVZ1_Jump01:
-	smpsModSet          $01, $01, $01, $05
-	smpsSetvoice        $05
-	dc.b	smpsNoAttack, nC3, $60, smpsNoAttack, nC3, $30, nC3, nBb2, $60, smpsNoAttack, $30, nBb2
-	dc.b	nC3, $60, smpsNoAttack, $30, nC3, nBb2, $60, smpsNoAttack, $30, nBb2, nC3, $60
-	dc.b	smpsNoAttack, $30, nC3, nBb2, $60, smpsNoAttack, $30, nBb2, nC3, $60, smpsNoAttack, $30
-	dc.b	nC3, nBb2, $60, smpsNoAttack, $30, nBb2, nC3, $60, smpsNoAttack, $30, nC3, nBb2
-	dc.b	$60, smpsNoAttack, $30, nBb2, nC3, $60, smpsNoAttack, $30, nC3, nBb2, $60, smpsNoAttack
-	dc.b	$30, nBb2
-	smpsSetvoice        $04
-	smpsFMAlterVol      $02
-	dc.b	nRst, $0C, nCs4, nCs4, nCs4, nCs4, nCs4, nCs4, nCs4, nEb4, nEb4, nEb4
-	dc.b	nEb4, nEb4, nEb4, nEb4, nEb4, nC4, nC4, nC4, nEb4, nEb4, nEb4, nEb4
-	dc.b	nEb4, nF4, nF4, nF4, nCs4, nCs4, nCs4, nCs4, nCs4, nCs4, nCs4, nCs4
-	dc.b	nCs4, nCs4, nCs4, nCs4, nCs4, nEb4, nEb4, nEb4, nEb4, nEb4, nEb4, nEb4
-	dc.b	nEb4, nG4, nG4, nG4, nEb4, nEb4, nEb4, nEb4, nEb4, nF4, nF4, nF4
-	dc.b	nC4, nC4, nC4, nC4, nC4, nCs4, nCs4, nCs4, nCs4, nCs4, nCs4, nCs4
-	dc.b	nCs4, nEb4, nEb4, nEb4, nEb4, nEb4, nEb4, nEb4, nEb4, nC4, nC4, nC4
-	dc.b	nEb4, nEb4, nEb4, nEb4, nEb4, nF4, nF4, nF4, nCs4, nCs4, nCs4, nCs4
-	dc.b	nCs4, nCs4, nCs4, nCs4, nCs4, nCs4, nCs4, nCs4, nCs4, nEb4, nEb4, nEb4
-	dc.b	nEb4, nEb4, nEb4, nEb4, nEb4, nF4, nF4, nF4, nC4, nC4, nC4, nC4
-	dc.b	nC4, nF4, nF4, nF4, nC4, nC4, nC4, nC4, nC4
-	smpsFMAlterVol      $FE
+	smpsSetvoice        $02
+	smpsModSet          $01, $01, $02, $06
+	dc.b	nC3, $60, smpsNoAttack, $30
+	smpsModSet          $01, $01, $08, $B7
+	smpsAlterPitch      $FB
+	dc.b	nG2
+	smpsAlterPitch      $05
+	smpsModSet          $01, $01, $02, $06
+	dc.b	nBb2, $60, smpsNoAttack, $30
+	smpsAlterPitch      $FB
+	smpsModSet          $01, $01, $08, $BF
+	dc.b	nG2, $30
+	smpsAlterPitch      $05
+
+Snd_VVZ1_Loop02:
+	smpsModSet          $01, $01, $02, $06
+	dc.b	nC3, $60, smpsNoAttack, $30
+	smpsAlterPitch      $FB
+	smpsModSet          $01, $01, $08, $BF
+	dc.b	nG2
+	smpsModSet          $01, $01, $02, $06
+	smpsAlterPitch      $05
+	dc.b	nBb2, $60, smpsNoAttack, $30
+	smpsAlterPitch      $FB
+	smpsModSet          $01, $01, $08, $BF
+	dc.b	nBb2
+	smpsAlterPitch      $05
+	smpsModSet          $01, $01, $02, $06
+	smpsLoop            $00, $04, Snd_VVZ1_Loop02
+	smpsAlterPitch      $F4
+	smpsFMAlterVol      $03
+	smpsSetvoice        $03
+	smpsModSet          $01, $01, $02, $06
+	dc.b	nCs5, $0C, nCs5, nCs5, nCs5, nCs5, nCs5, nCs5, nCs5, nEb5, nEb5, nEb5
+	dc.b	nEb5, nEb5, nEb5, nEb5, nEb5, nC5, nC5, nC5, nEb5, nEb5, nEb5, nEb5
+	dc.b	nEb5, nF5, nF5, nF5, nCs5, nCs5, nCs5, nCs5, nCs5, nCs5, nCs5, nCs5
+	dc.b	nCs5, nCs5, nCs5, nCs5, nCs5, nEb5, nEb5, nEb5, nEb5, nEb5, nEb5, nEb5
+	dc.b	nEb5, nAb5, nAb5, nAb5, nG5, nG5, nG5, nG5, nG5, nF5, nF5, nF5
+	dc.b	nC5, nC5, nC5, nC5, nC5, nCs5, nCs5, nCs5, nCs5, nCs5, nCs5, nCs5
+	dc.b	nCs5, nEb5, nEb5, nEb5, nEb5, nEb5, nEb5, nEb5, nEb5, nC5, nC5, nC5
+	dc.b	nEb5, nEb5, nEb5, nEb5, nEb5, nF5, nF5, nF5, nCs5, nCs5, nCs5, nCs5
+	dc.b	nCs5, nCs5, nCs5, nCs5, nCs5, nCs5, nCs5, nCs5, nCs5, nEb5, nEb5, nBb5
+	dc.b	nBb5, nBb5, nBb5, nBb5, nBb5, nF5, nF5, nF5, nC5, nC5, nC5, nC5
+	dc.b	nC5, nF5, nF5, nF5, nC5, nC5, nC5, nC5, nC5
+	smpsFMAlterVol      $FD
+	smpsAlterPitch      $0C
 	smpsJump            Snd_VVZ1_Jump01
 
 ; FM5 Data
 Snd_VVZ1_FM5:
-	smpsModSet          $01, $01, $01, $07
+	smpsModSet          $01, $01, $01, $08
 	dc.b	nRst, $0B
 	smpsAlterNote       $01
-	dc.b	nRst, $60
 	smpsJump            Snd_VVZ1_Jump00
 
 ; Unreachable
@@ -209,63 +228,91 @@ Snd_VVZ1_FM5:
 Snd_VVZ1_PSG1:
 	smpsModSet          $01, $01, $01, $04
 	smpsPSGvoice        sTone_11
-	dc.b	nRst, $60
+	smpsAlterPitch      $FB
+	smpsModSet          $01, $01, $F9, $A7
+	dc.b	nC3, $30
+	smpsAlterPitch      $05
 
 Snd_VVZ1_Jump04:
-	smpsSetvoice        sTone_17
-	dc.b	nF4, $18, nC5, $16, nRst, $32, nRst, $60, nG4, $18, nC5, $16
-	dc.b	nRst, $32, nRst, $60, nRst, $18, nF4, nC5, $16, nRst, $1A, nRst
-	dc.b	$60, nRst, $18, nG4, nC5, $16, nRst, $1A, nRst, $60
-	smpsSetvoice        sTone_11
-	dc.b	nC6, $06, nAb5, nG5, nF5, nC5, nAb4, nF4, nRst, $36, nRst, $60
-	dc.b	nC6, $06, nAb5, nG5, nF5, nEb5, nBb4, nF4, nRst, $36, nRst, $60
-	dc.b	nC6, $06, nAb5, nG5, nF5, nC5, nAb4, nF4, nRst, $36, nRst, $60
-	dc.b	nC6, $06, nAb5, nG5, nF5, nEb5, nBb4, nF4, nRst, $36
-	smpsPSGvoice        sTone_17
-	dc.b	nG4, $18, nC5, $16, nRst, $32
 	smpsPSGvoice        sTone_11
-	dc.b	nC6, $06, nAb5, nG5, nF5, nC5, nAb4, nF4, nRst, $36, nRst, $60
-	dc.b	nC6, $06, nAb5, nG5, nF5, nEb5, nBb4, nF4, nRst, $36, nRst, $60
-	dc.b	nC6, $06, nAb5, nG5, nF5, nC5, nAb4, nF4, nRst, $36, nRst, $60
-	dc.b	nC6, $06, nAb5, nG5, nF5, nEb5, nBb4, nF4, nRst, $36
-	smpsPSGvoice        sTone_17
-	dc.b	nG4, $18, nC5, $16, nRst, $32
-	smpsPSGvoice        sTone_17
+	smpsModSet          $0F, $01, $01, $06
+	dc.b	nF3, $60, smpsNoAttack, $30
+	smpsModSet          $01, $01, $FB, $A7
+	smpsAlterPitch      $F7
+	dc.b	nC3
+	smpsAlterPitch      $09
+	smpsModSet          $0F, $01, $01, $06
+	dc.b	nEb3, $60, smpsNoAttack, $30
+	smpsAlterPitch      $FB
+	smpsModSet          $01, $01, $F9, $A7
+	dc.b	nC3, $30
+	smpsAlterPitch      $05
+
+Snd_VVZ1_Loop0B:
+	smpsPSGvoice        sTone_11
+	smpsModSet          $0F, $01, $01, $06
+	dc.b	nF3, $60, smpsNoAttack, $30
+	smpsAlterPitch      $F7
+	smpsModSet          $01, $01, $FB, $A7
+	dc.b	nC3
+	smpsAlterPitch      $09
+	smpsModSet          $0F, $01, $01, $06
+	dc.b	nEb3, $60, smpsNoAttack, $30
+	smpsAlterPitch      $FB
+	smpsModSet          $01, $01, $F9, $A7
+	dc.b	nC3
+	smpsAlterPitch      $05
+	smpsModSet          $0F, $01, $01, $06
+	dc.b	nF3, $60, smpsNoAttack, $30
+	smpsAlterPitch      $F7
+	smpsModSet          $01, $01, $FB, $A7
+	dc.b	nC3
+	smpsAlterPitch      $09
+	smpsModSet          $0F, $01, $01, $06
+	dc.b	nEb3, $6C
+	smpsAlterPitch      $0C
+	smpsPSGvoice        sTone_26
+	dc.b	nG4, $18, nC5, $3C
+	smpsAlterPitch      $F4
+	smpsLoop            $00, $02, Snd_VVZ1_Loop0B
+	smpsAlterPitch      $0C
+	smpsPSGvoice        sTone_26
+	smpsModSet          $0F, $01, $01, $06
 	dc.b	nAb3, $0C, nC4, nF4, nC4, nF4, nAb4, nC5, nAb4, nBb4, nG4, nEb4
 	dc.b	nG4, nEb4, nBb3, nG3, nBb3, nG3, nEb4, nG4, nBb3, nEb4, nG4, nAb4
 	dc.b	nBb4, nAb4, nF4, nCs4, nF4, nCs4, nAb3, nC4, nCs4, nAb3, nCs4, nF4
 	dc.b	nCs4, nF4, nAb4, nCs5, nAb4, nBb4, nG4, nEb4, nG4, nEb4, nBb3, nEb4
-	dc.b	nE4, nG4, nEb4, nG4, nBb3, nEb4, nG4, nAb4, nBb4, nAb4, nF4, nCs4
+	dc.b	nE4, nF4, nEb4, nG4, nBb3, nEb4, nG4, nAb4, nBb4, nAb4, nF4, nCs4
 	dc.b	nF4, nCs4, nAb3, nC4, nCs4, nAb3, nCs4, nF4, nCs4, nF4, nAb4, nCs5
 	dc.b	nAb4, nBb4, nG4, nEb4, nG4, nEb4, nBb3, nG3, nBb3, nG3, nBb3, nEb4
-	dc.b	nBb3, nEb4, nG4, nG4, nBb4, nAb4, nF4, nCs4, nF4, nCs4, nAb3, nC4
+	dc.b	nBb3, nEb4, nG4, nAb4, nBb4, nAb4, nF4, nCs4, nF4, nCs4, nAb3, nC4
 	dc.b	nCs4, nAb3, nCs4, nF4, nCs4, nF4, nAb4, nCs5, nAb4, nBb4, nG4, nEb4
 	dc.b	nG4, nEb4, nBb3, nEb4, nE4, nF4, nEb4, nC4, nAb4, nF4, nEb4, nG4
 	dc.b	nEb4, nF4, nEb4, nC4, nAb4, nF4, nEb4, nG4, nEb4
+	smpsAlterPitch      $F4
 	smpsJump            Snd_VVZ1_Jump04
 
 ; PSG2 Data
 Snd_VVZ1_PSG2:
 	smpsAlterNote       $FE
-	dc.b	nRst, $0D, nRst, $60
-	smpsPSGvoice        sTone_11
+	dc.b	nRst, $0D, nRst, $30
 	smpsJump            Snd_VVZ1_Jump04
 
 ; PSG3 Data
 Snd_VVZ1_PSG3:
 	smpsPSGform         $E7
-	dc.b	nRst, $60
+	dc.b	nRst, $30
 
-Snd_VVZ1_Loop02:
-	smpsCall            Snd_VVZ1_Call00
-	smpsLoop            $00, $14, Snd_VVZ1_Loop02
+Snd_VVZ1_Loop09:
+	smpsCall            Snd_VVZ1_Call0B
+	smpsLoop            $00, $14, Snd_VVZ1_Loop09
 
-Snd_VVZ1_Loop03:
-	smpsCall            Snd_VVZ1_Call01
-	smpsLoop            $00, $10, Snd_VVZ1_Loop03
-	smpsJump            Snd_VVZ1_Loop02
+Snd_VVZ1_Loop0A:
+	smpsCall            Snd_VVZ1_Call0C
+	smpsLoop            $00, $10, Snd_VVZ1_Loop0A
+	smpsJump            Snd_VVZ1_Loop09
 
-Snd_VVZ1_Call00:
+Snd_VVZ1_Call0B:
 	smpsPSGvoice        sTone_0F
 	dc.b	(nMaxPSG2-$23)&$FF, $06, $06, $06, $06
 	smpsPSGvoice        sTone_12
@@ -280,7 +327,7 @@ Snd_VVZ1_Call00:
 	dc.b	$0C
 	smpsReturn
 
-Snd_VVZ1_Call01:
+Snd_VVZ1_Call0C:
 	smpsPSGvoice        sTone_0F
 	dc.b	(nMaxPSG2-$23)&$FF, $06, $06
 	smpsPSGvoice        sTone_12
@@ -297,92 +344,121 @@ Snd_VVZ1_Call01:
 
 ; DAC Data
 Snd_VVZ1_DAC:
-	dc.b	nRst, $60
+	dc.b	nRst, $30
 
 Snd_VVZ1_Loop00:
-	dc.b	dKickS3, $06, nRst, nRst, dKickS3, nRst, nRst, dKickS3, nRst, nRst, $30, nRst
-	dc.b	$60
-	smpsLoop            $00, $03, Snd_VVZ1_Loop00
-	dc.b	dKickS3, $06, nRst, nRst, dKickS3, nRst, nRst, dKickS3, nRst, nRst, $30, nRst
-	dc.b	$06, dTightSnare, nRst, dMidpitchSnare, dMidpitchSnare, nRst, nRst, dLooseSnare, dLooseSnare, nRst, nRst, dLooseSnare
-	dc.b	dLooserSnare, dLooserSnare, dLooserSnare, nRst, dCrashCymbal, $06, nRst, nRst, dKickS3, nRst, nRst, dKickS3
-	dc.b	nRst, nRst, $30, nRst, $60
+	smpsCall            Snd_VVZ1_Call00
+	smpsCall            Snd_VVZ1_Call01
+	smpsCall            Snd_VVZ1_Call00
+	smpsCall            Snd_VVZ1_Call02
+	smpsLoop            $00, $05, Snd_VVZ1_Loop00
 
 Snd_VVZ1_Loop01:
-	dc.b	dKickS3, $06, nRst, nRst, dKickS3, nRst, nRst, dKickS3, nRst, nRst, $30, nRst
-	dc.b	$60
+	smpsCall            Snd_VVZ1_Call03
+	smpsCall            Snd_VVZ1_Call04
+	smpsCall            Snd_VVZ1_Call03
+	smpsCall            Snd_VVZ1_Call05
+	smpsCall            Snd_VVZ1_Call03
+	smpsCall            Snd_VVZ1_Call04
+	smpsCall            Snd_VVZ1_Call06
 	smpsLoop            $00, $02, Snd_VVZ1_Loop01
-	dc.b	dKickS3, $06, nRst, nRst, dKickS3, nRst, nRst, dKickS3, nRst, nRst, $30, nRst
-	dc.b	$30, nRst, $06, dElectricHighTom, dElectricHighTom, dElectricHighTom, dElectricMidTom, dElectricLowTom, dElectricFloorTom, dElectricFloorTom, dCrashCymbal, $06
-	dc.b	nRst, nRst, dKickS3, nRst, nRst, dKickS3, nRst, nRst, $30, nRst, $30, nRst
-	dc.b	$0C, dKickS3, dSnareS3, $02, $0A, nRst, $0C, dKickS3, $06, nRst, nRst, dKickS3
-	dc.b	nRst, nRst, dKickS3, nRst, nRst, $30, nRst, $30, nRst, $0C, dKickS3, $06
-	dc.b	dKickS3, dSnareS3, $02, $0A, nRst, $0C, dCrashCymbal, $06, nRst, nRst, dKickS3, nRst
-	dc.b	nRst, dKickS3, nRst, nRst, $30, nRst, $30, nRst, $0C, dKickS3, dSnareS3, $02
-	dc.b	$0A, nRst, $0C, dKickS3, $06, nRst, nRst, dKickS3, nRst, nRst, dKickS3, nRst
-	dc.b	nRst, $30, dKickS3, $18, dKickS3, dKickS3, $06, dElectricMidTom, nRst, dElectricMidTom, nRst, dElectricLowTom
-	dc.b	nRst, dElectricFloorTom, dCrashCymbal, $06, nRst, nRst, dKickS3, nRst, nRst, dKickS3, nRst, nRst
-	dc.b	nRst, dKickS3, dKickS3, dSnareS3, $02, dSnareS3, $16, dKickS3, $06, nRst, nRst, dKickS3
-	dc.b	nRst, nRst, dKickS3, nRst, nRst, nRst, nRst, nRst, dSnareS3, $02, dSnareS3, $16
-	dc.b	dKickS3, $06, nRst, nRst, dKickS3, nRst, nRst, dSnareS3, nRst, nRst, nRst, dKickS3
-	dc.b	dKickS3, dSnareS3, $02, dSnareS3, $16, dKickS3, $06, nRst, nRst, dKickS3, dSnareS3, nRst
-	dc.b	dKickS3, nRst, nRst, nRst, dKickS3, nRst, dSnareS3, $02, dSnareS3, $16, dKickS3, $06
-	dc.b	nRst, nRst, dKickS3, nRst, nRst, dKickS3, nRst, nRst, nRst, dKickS3, dKickS3, dSnareS3
-	dc.b	$02, dSnareS3, $16, dKickS3, $06, nRst, nRst, dKickS3, nRst, nRst, dKickS3, nRst
-	dc.b	nRst, nRst, nRst, nRst, dSnareS3, $02, dSnareS3, $16, dKickS3, $06, nRst, nRst
-	dc.b	dKickS3, nRst, nRst, dSnareS3, nRst, nRst, nRst, dKickS3, dKickS3, dSnareS3, $02, dSnareS3
-	dc.b	$16, dKickS3, $06, nRst, nRst, dKickS3, dSnareS3, nRst, dKickS3, nRst, nRst, nRst
-	dc.b	dKickS3, nRst, dSnareS3, $02, dSnareS3, $16, dCrashCymbal, $06, nRst, nRst, dKickS3, nRst
-	dc.b	nRst, dKickS3, nRst, nRst, nRst, dKickS3, dKickS3, dSnareS3, $02, dSnareS3, $16, dKickS3
-	dc.b	$06, nRst, nRst, dKickS3, nRst, nRst, dKickS3, nRst, nRst, nRst, nRst, nRst
-	dc.b	dSnareS3, $02, dSnareS3, $16, dKickS3, $06, nRst, nRst, dKickS3, nRst, nRst, dSnareS3
-	dc.b	nRst, nRst, nRst, dKickS3, dKickS3, dSnareS3, $02, dSnareS3, $16, dKickS3, $06, nRst
-	dc.b	nRst, dKickS3, dSnareS3, nRst, dKickS3, nRst, nRst, nRst, dKickS3, nRst, dSnareS3, $02
-	dc.b	dSnareS3, $16, dKickS3, $06, nRst, nRst, dKickS3, nRst, nRst, dKickS3, nRst, nRst
-	dc.b	nRst, dKickS3, dKickS3, dSnareS3, $02, dSnareS3, $16, dKickS3, $06, nRst, nRst, dKickS3
-	dc.b	nRst, nRst, dKickS3, nRst, nRst, nRst, nRst, nRst, dSnareS3, $02, dSnareS3, $16
-	dc.b	dKickS3, $06, nRst, nRst, dKickS3, nRst, nRst, dKickS3, nRst, nRst, nRst, dElectricHighTom
-	dc.b	dElectricHighTom, dElectricMidTom, dElectricMidTom, dElectricLowTom, dElectricLowTom, dElectricLowTom, dElectricLowTom, dElectricFloorTom, dElectricFloorTom, dCrashCymbal, $48
 	smpsJump            Snd_VVZ1_Loop00
+
+Snd_VVZ1_Call00:
+	dc.b	dElectricHighTom, $06, dElectricMidTom, dElectricLowTom, $0C, dElectricLowTom, dElectricMidTom, $06, dElectricLowTom, dElectricFloorTom, $0C, dElectricFloorTom
+	dc.b	dKickS3, $06, dKickS3, dKickS3, dSnareS3
+	smpsReturn
+
+Snd_VVZ1_Call01:
+	dc.b	dElectricHighTom, dElectricMidTom, dElectricLowTom, $0C, dElectricLowTom, dElectricMidTom, $06, dElectricLowTom, dElectricFloorTom, $0C, dElectricFloorTom, dSnareS3
+	dc.b	$06, dSnareS3, $0C, $06
+	smpsReturn
+
+Snd_VVZ1_Call02:
+	dc.b	dElectricHighTom, dElectricMidTom, dElectricLowTom, $0C, dElectricLowTom, dElectricMidTom, $06, dElectricLowTom, dElectricFloorTom, $0C, dElectricFloorTom, dSnareS3
+	dc.b	$06, dSnareS3, dSnareS3, dSnareS3
+	smpsReturn
+
+Snd_VVZ1_Call03:
+	dc.b	dKickS3, $06, dKickS3, dKickS3, dKickS3, dKickS3, $0C, dSnareS3, $06, $0C, dSnareS3, dSnareS3
+	dc.b	$06
+	smpsReturn
+
+Snd_VVZ1_Call04:
+	dc.b	dElectricHighTom, $06, dElectricMidTom, dElectricLowTom, $0C
+	smpsReturn
+
+Snd_VVZ1_Call05:
+	dc.b	dElectricMidTom, $06, dElectricLowTom, dElectricFloorTom, $0C
+	smpsReturn
+
+Snd_VVZ1_Call06:
+	dc.b	dKickS3, $06, dKickS3, dKickS3, dKickS3, dKickS3, $0C, dElectricHighTom, $06, dElectricMidTom, $0C, dElectricLowTom
+	dc.b	dElectricFloorTom, $06, dSnareS3, dSnareS3, dSnareS3, dSnareS3, dKickS3, dKickS3, dSnareS3, $0C, dKickS3, dKickS3
+	dc.b	$06, dSnareS3, $0C, dSnareS3, dSnareS3, $06, dElectricHighTom, $04, dElectricHighTom, dElectricHighTom, dElectricMidTom, $06
+	dc.b	dElectricLowTom, dKickS3, dKickS3, dSnareS3, $0C, dKickS3, dSnareS3, $06, $0C, dSnareS3, dSnareS3, $06
+	dc.b	dElectricMidTom, $04, dElectricMidTom, dElectricMidTom, dElectricLowTom, $06, dElectricFloorTom, dKickS3, dKickS3, dKickS3, dKickS3, dKickS3
+	dc.b	$0C, dSnareS3, $06, $0C, dSnareS3, dSnareS3, $06, dElectricHighTom, $04, dElectricMidTom, dElectricLowTom, dElectricFloorTom
+	dc.b	$06, dElectricFloorTom, dSnareS3, $04, dSnareS3, dSnareS3, dElectricHighTom, $06, dElectricHighTom, dElectricMidTom, dElectricLowTom, dSnareS3
+	dc.b	$04, dSnareS3, dSnareS3, dElectricMidTom, $06, dElectricMidTom, dElectricLowTom, dElectricFloorTom, dSnareS3, $0C, $06, dSnareS3
+	smpsReturn
 
 Snd_VVZ1_Voices:
 ;	Voice $00
-;	$3C
-;	$71, $71, $11, $11, 	$17, $1E, $19, $1E, 	$04, $01, $07, $01
-;	$00, $00, $00, $00, 	$F7, $F8, $F7, $F8, 	$1E, $80, $09, $80
-	smpsVcAlgorithm     $04
-	smpsVcFeedback      $07
+;	$08
+;	$0A, $70, $30, $00, 	$1F, $1F, $5F, $5F, 	$12, $0E, $0A, $0A
+;	$00, $04, $04, $03, 	$2F, $2F, $2F, $2F, 	$24, $2D, $13, $80
+	smpsVcAlgorithm     $00
+	smpsVcFeedback      $01
 	smpsVcUnusedBits    $00
-	smpsVcDetune        $01, $01, $07, $07
-	smpsVcCoarseFreq    $01, $01, $01, $01
-	smpsVcRateScale     $00, $00, $00, $00
-	smpsVcAttackRate    $1E, $19, $1E, $17
+	smpsVcDetune        $00, $03, $07, $00
+	smpsVcCoarseFreq    $00, $00, $00, $0A
+	smpsVcRateScale     $01, $01, $00, $00
+	smpsVcAttackRate    $1F, $1F, $1F, $1F
 	smpsVcAmpMod        $00, $00, $00, $00
-	smpsVcDecayRate1    $01, $07, $01, $04
-	smpsVcDecayRate2    $00, $00, $00, $00
-	smpsVcDecayLevel    $0F, $0F, $0F, $0F
-	smpsVcReleaseRate   $08, $07, $08, $07
-	smpsVcTotalLevel    $00, $09, $00, $1E
+	smpsVcDecayRate1    $0A, $0A, $0E, $12
+	smpsVcDecayRate2    $03, $04, $04, $00
+	smpsVcDecayLevel    $02, $02, $02, $02
+	smpsVcReleaseRate   $0F, $0F, $0F, $0F
+	smpsVcTotalLevel    $00, $13, $2D, $24
 
 ;	Voice $01
-;	$3C
-;	$01, $00, $00, $00, 	$1F, $1F, $15, $1F, 	$11, $0D, $12, $05
-;	$07, $04, $09, $02, 	$55, $3A, $25, $1A, 	$1A, $80, $07, $80
-	smpsVcAlgorithm     $04
+;	$3D
+;	$06, $21, $51, $06, 	$12, $14, $14, $0F, 	$0A, $06, $06, $06
+;	$00, $00, $00, $00, 	$2B, $2B, $2B, $1B, 	$19, $80, $80, $80
+	smpsVcAlgorithm     $05
+	smpsVcFeedback      $07
+	smpsVcUnusedBits    $00
+	smpsVcDetune        $00, $05, $02, $00
+	smpsVcCoarseFreq    $06, $01, $01, $06
+	smpsVcRateScale     $00, $00, $00, $00
+	smpsVcAttackRate    $0F, $14, $14, $12
+	smpsVcAmpMod        $00, $00, $00, $00
+	smpsVcDecayRate1    $06, $06, $06, $0A
+	smpsVcDecayRate2    $00, $00, $00, $00
+	smpsVcDecayLevel    $01, $02, $02, $02
+	smpsVcReleaseRate   $0B, $0B, $0B, $0B
+	smpsVcTotalLevel    $00, $00, $00, $19
+
+;	Voice $02
+;	$3E
+;	$07, $01, $02, $0A, 	$1F, $1F, $1F, $1F, 	$03, $06, $00, $00
+;	$08, $06, $07, $0C, 	$15, $0A, $0A, $0A, 	$20, $85, $86, $88
+	smpsVcAlgorithm     $06
 	smpsVcFeedback      $07
 	smpsVcUnusedBits    $00
 	smpsVcDetune        $00, $00, $00, $00
-	smpsVcCoarseFreq    $00, $00, $00, $01
+	smpsVcCoarseFreq    $0A, $02, $01, $07
 	smpsVcRateScale     $00, $00, $00, $00
-	smpsVcAttackRate    $1F, $15, $1F, $1F
+	smpsVcAttackRate    $1F, $1F, $1F, $1F
 	smpsVcAmpMod        $00, $00, $00, $00
-	smpsVcDecayRate1    $05, $12, $0D, $11
-	smpsVcDecayRate2    $02, $09, $04, $07
-	smpsVcDecayLevel    $01, $02, $03, $05
-	smpsVcReleaseRate   $0A, $05, $0A, $05
-	smpsVcTotalLevel    $00, $07, $00, $1A
+	smpsVcDecayRate1    $00, $00, $06, $03
+	smpsVcDecayRate2    $0C, $07, $06, $08
+	smpsVcDecayLevel    $00, $00, $00, $01
+	smpsVcReleaseRate   $0A, $0A, $0A, $05
+	smpsVcTotalLevel    $08, $06, $05, $20
 
-;	Voice $02
+;	Voice $03
 ;	$16
 ;	$7A, $74, $3C, $31, 	$1F, $1F, $1F, $1F, 	$0A, $08, $0C, $0A
 ;	$07, $0A, $07, $05, 	$2F, $AF, $AF, $5F, 	$14, $85, $8A, $80
@@ -400,46 +476,11 @@ Snd_VVZ1_Voices:
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
 	smpsVcTotalLevel    $00, $0A, $05, $14
 
-;	Voice $03
-;	$3C
-;	$64, $64, $22, $24, 	$1F, $0C, $19, $0C, 	$05, $04, $05, $04
-;	$05, $05, $05, $05, 	$4F, $4F, $4F, $4F, 	$20, $80, $2A, $80
-	smpsVcAlgorithm     $04
-	smpsVcFeedback      $07
-	smpsVcUnusedBits    $00
-	smpsVcDetune        $02, $02, $06, $06
-	smpsVcCoarseFreq    $04, $02, $04, $04
-	smpsVcRateScale     $00, $00, $00, $00
-	smpsVcAttackRate    $0C, $19, $0C, $1F
-	smpsVcAmpMod        $00, $00, $00, $00
-	smpsVcDecayRate1    $04, $05, $04, $05
-	smpsVcDecayRate2    $05, $05, $05, $05
-	smpsVcDecayLevel    $04, $04, $04, $04
-	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $2A, $00, $20
-
+; Unused voice
 ;	Voice $04
 ;	$3C
-;	$0F, $32, $72, $02, 	$5E, $5E, $5E, $9E, 	$0F, $08, $07, $07
-;	$05, $05, $05, $05, 	$DF, $DF, $DF, $DF, 	$41, $80, $1B, $80
-	smpsVcAlgorithm     $04
-	smpsVcFeedback      $07
-	smpsVcUnusedBits    $00
-	smpsVcDetune        $00, $07, $03, $00
-	smpsVcCoarseFreq    $02, $02, $02, $0F
-	smpsVcRateScale     $02, $01, $01, $01
-	smpsVcAttackRate    $1E, $1E, $1E, $1E
-	smpsVcAmpMod        $00, $00, $00, $00
-	smpsVcDecayRate1    $07, $07, $08, $0F
-	smpsVcDecayRate2    $05, $05, $05, $05
-	smpsVcDecayLevel    $0D, $0D, $0D, $0D
-	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $1B, $00, $41
-
-;	Voice $05
-;	$3C
 ;	$71, $71, $11, $11, 	$17, $1E, $19, $1E, 	$04, $01, $07, $01
-;	$00, $00, $00, $00, 	$F7, $F8, $F7, $F8, 	$1E, $80, $0A, $80
+;	$00, $00, $00, $00, 	$F7, $F8, $F7, $F8, 	$1E, $80, $14, $80
 	smpsVcAlgorithm     $04
 	smpsVcFeedback      $07
 	smpsVcUnusedBits    $00
@@ -452,23 +493,100 @@ Snd_VVZ1_Voices:
 	smpsVcDecayRate2    $00, $00, $00, $00
 	smpsVcDecayLevel    $0F, $0F, $0F, $0F
 	smpsVcReleaseRate   $08, $07, $08, $07
-	smpsVcTotalLevel    $00, $0A, $00, $1E
+	smpsVcTotalLevel    $00, $14, $00, $1E
 
-;	Voice $06
-;	$3C
-;	$01, $00, $00, $00, 	$0C, $1F, $0E, $1F, 	$11, $0D, $12, $05
-;	$07, $04, $09, $02, 	$55, $3A, $25, $1A, 	$1A, $84, $07, $84
-	smpsVcAlgorithm     $04
+; Unused voice
+;	Voice $05
+;	$3A
+;	$01, $07, $01, $01, 	$8E, $8E, $8D, $53, 	$0E, $0E, $0E, $03
+;	$00, $00, $00, $07, 	$1F, $FF, $1F, $0F, 	$18, $28, $27, $80
+	smpsVcAlgorithm     $02
 	smpsVcFeedback      $07
 	smpsVcUnusedBits    $00
 	smpsVcDetune        $00, $00, $00, $00
-	smpsVcCoarseFreq    $00, $00, $00, $01
-	smpsVcRateScale     $00, $00, $00, $00
-	smpsVcAttackRate    $1F, $0E, $1F, $0C
+	smpsVcCoarseFreq    $01, $01, $07, $01
+	smpsVcRateScale     $01, $02, $02, $02
+	smpsVcAttackRate    $13, $0D, $0E, $0E
 	smpsVcAmpMod        $00, $00, $00, $00
-	smpsVcDecayRate1    $05, $12, $0D, $11
-	smpsVcDecayRate2    $02, $09, $04, $07
-	smpsVcDecayLevel    $01, $02, $03, $05
-	smpsVcReleaseRate   $0A, $05, $0A, $05
-	smpsVcTotalLevel    $04, $07, $04, $1A
+	smpsVcDecayRate1    $03, $0E, $0E, $0E
+	smpsVcDecayRate2    $07, $00, $00, $00
+	smpsVcDecayLevel    $00, $01, $0F, $01
+	smpsVcReleaseRate   $0F, $0F, $0F, $0F
+	smpsVcTotalLevel    $00, $27, $28, $18
+
+; Unused voice
+;	Voice $06
+;	$3A
+;	$06, $06, $06, $06, 	$8E, $8E, $8D, $53, 	$0E, $0E, $0E, $03
+;	$00, $00, $00, $06, 	$1F, $FF, $1F, $0F, 	$17, $28, $27, $80
+	smpsVcAlgorithm     $02
+	smpsVcFeedback      $07
+	smpsVcUnusedBits    $00
+	smpsVcDetune        $00, $00, $00, $00
+	smpsVcCoarseFreq    $06, $06, $06, $06
+	smpsVcRateScale     $01, $02, $02, $02
+	smpsVcAttackRate    $13, $0D, $0E, $0E
+	smpsVcAmpMod        $00, $00, $00, $00
+	smpsVcDecayRate1    $03, $0E, $0E, $0E
+	smpsVcDecayRate2    $06, $00, $00, $00
+	smpsVcDecayLevel    $00, $01, $0F, $01
+	smpsVcReleaseRate   $0F, $0F, $0F, $0F
+	smpsVcTotalLevel    $00, $27, $28, $17
+
+; Unused voice
+;	Voice $07
+;	$35
+;	$06, $06, $13, $00, 	$1F, $1D, $18, $19, 	$00, $09, $06, $0D
+;	$00, $00, $02, $03, 	$00, $06, $15, $16, 	$1E, $80, $83, $80
+	smpsVcAlgorithm     $05
+	smpsVcFeedback      $06
+	smpsVcUnusedBits    $00
+	smpsVcDetune        $00, $01, $00, $00
+	smpsVcCoarseFreq    $00, $03, $06, $06
+	smpsVcRateScale     $00, $00, $00, $00
+	smpsVcAttackRate    $19, $18, $1D, $1F
+	smpsVcAmpMod        $00, $00, $00, $00
+	smpsVcDecayRate1    $0D, $06, $09, $00
+	smpsVcDecayRate2    $03, $02, $00, $00
+	smpsVcDecayLevel    $01, $01, $00, $00
+	smpsVcReleaseRate   $06, $05, $06, $00
+	smpsVcTotalLevel    $00, $03, $00, $1E
+
+; Unused voice
+;	Voice $08
+;	$3D
+;	$01, $21, $50, $01, 	$12, $14, $14, $0F, 	$0A, $05, $05, $05
+;	$00, $00, $00, $00, 	$26, $28, $28, $18, 	$19, $80, $80, $80
+	smpsVcAlgorithm     $05
+	smpsVcFeedback      $07
+	smpsVcUnusedBits    $00
+	smpsVcDetune        $00, $05, $02, $00
+	smpsVcCoarseFreq    $01, $00, $01, $01
+	smpsVcRateScale     $00, $00, $00, $00
+	smpsVcAttackRate    $0F, $14, $14, $12
+	smpsVcAmpMod        $00, $00, $00, $00
+	smpsVcDecayRate1    $05, $05, $05, $0A
+	smpsVcDecayRate2    $00, $00, $00, $00
+	smpsVcDecayLevel    $01, $02, $02, $02
+	smpsVcReleaseRate   $08, $08, $08, $06
+	smpsVcTotalLevel    $00, $00, $00, $19
+
+; Unused voice
+;	Voice $09
+;	$04
+;	$57, $02, $70, $50, 	$1F, $1F, $1F, $1F, 	$00, $00, $00, $00
+;	$06, $0A, $00, $0A, 	$00, $0F, $00, $0F, 	$1A, $80, $10, $80
+	smpsVcAlgorithm     $04
+	smpsVcFeedback      $00
+	smpsVcUnusedBits    $00
+	smpsVcDetune        $05, $07, $00, $05
+	smpsVcCoarseFreq    $00, $00, $02, $07
+	smpsVcRateScale     $00, $00, $00, $00
+	smpsVcAttackRate    $1F, $1F, $1F, $1F
+	smpsVcAmpMod        $00, $00, $00, $00
+	smpsVcDecayRate1    $00, $00, $00, $00
+	smpsVcDecayRate2    $0A, $00, $0A, $06
+	smpsVcDecayLevel    $00, $00, $00, $00
+	smpsVcReleaseRate   $0F, $00, $0F, $00
+	smpsVcTotalLevel    $00, $10, $00, $1A
 
