@@ -350,7 +350,7 @@ Snd_FinalFight_DAC:
 Snd_FinalFight_Loop00:
 	smpsCall            Snd_FinalFight_Call00
 	smpsLoop            $00, $03, Snd_FinalFight_Loop00
-	dc.b	dIntroKick, $06, dIntroKick, dIntroKick, dIntroKick, dSnareS3
+	dc.b	dFinalFightMetalCrash, $06, dFinalFightMetalCrash, dFinalFightMetalCrash, dFinalFightMetalCrash, dSnareS3
 	smpsPan             panRight, $00
 	dc.b	dElectricMidTom
 	smpsPan             panLeft, $00
@@ -369,7 +369,7 @@ Snd_FinalFight_Loop00:
 Snd_FinalFight_Loop01:
 	smpsCall            Snd_FinalFight_Call00
 	smpsLoop            $00, $07, Snd_FinalFight_Loop01
-	dc.b	dIntroKick, $06, dIntroKick, dIntroKick, dIntroKick, dSnareS3
+	dc.b	dFinalFightMetalCrash, $06, dFinalFightMetalCrash, dFinalFightMetalCrash, dFinalFightMetalCrash, dSnareS3
 	smpsPan             panRight, $00
 	dc.b	dElectricMidTom
 	smpsPan             panLeft, $00
@@ -390,13 +390,13 @@ Snd_FinalFight_Loop01:
 	smpsJump            Snd_FinalFight_Loop01
 
 Snd_FinalFight_Call00:
-	dc.b	dIntroKick, $06, dIntroKick, dIntroKick, dIntroKick, dSnareS3
+	dc.b	dFinalFightMetalCrash, $06, dFinalFightMetalCrash, dFinalFightMetalCrash, dFinalFightMetalCrash, dSnareS3
 	smpsPan             panRight, $00
 	dc.b	dElectricMidTom
 	smpsPan             panLeft, $00
 	dc.b	dElectricFloorTom
 	smpsPan             panCenter, $00
-	dc.b	dSnareS3, dIntroKick, dSnareS3, dIntroKick, nRst, nRst, nRst, nRst, nRst
+	dc.b	dSnareS3, dFinalFightMetalCrash, dSnareS3, dFinalFightMetalCrash, nRst, nRst, nRst, nRst, nRst
 	smpsReturn
 
 Snd_FinalFight_Voices:

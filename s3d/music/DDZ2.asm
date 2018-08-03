@@ -1,5 +1,5 @@
 Snd_DDZ2_Header:
-	smpsHeaderStartSong 3
+	smpsHeaderStartSong 3, 1
 	smpsHeaderVoice     Snd_DDZ2_Voices
 	smpsHeaderChan      $06, $03
 	smpsHeaderTempo     $01, $1D
@@ -441,7 +441,7 @@ Snd_DDZ2_Voices:
 	smpsVcDecayRate2    $01, $01, $05, $01
 	smpsVcDecayLevel    $0F, $08, $09, $0F
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $23, $39, $29
+	smpsVcTotalLevel    $80, $23, $39, $29
 
 ;	Voice $01
 ;	$3C
@@ -459,7 +459,7 @@ Snd_DDZ2_Voices:
 	smpsVcDecayRate2    $02, $09, $04, $07
 	smpsVcDecayLevel    $01, $02, $03, $05
 	smpsVcReleaseRate   $0A, $05, $0A, $05
-	smpsVcTotalLevel    $00, $07, $00, $1A
+	smpsVcTotalLevel    $80, $07, $80, $1A
 
 ;	Voice $02
 ;	$3E
@@ -477,7 +477,7 @@ Snd_DDZ2_Voices:
 	smpsVcDecayRate2    $00, $00, $06, $08
 	smpsVcDecayLevel    $00, $00, $00, $01
 	smpsVcReleaseRate   $0A, $0A, $0A, $05
-	smpsVcTotalLevel    $00, $00, $00, $1B
+	smpsVcTotalLevel    $80, $80, $80, $1B
 
 ;	Voice $03
 ;	$16
@@ -495,7 +495,7 @@ Snd_DDZ2_Voices:
 	smpsVcDecayRate2    $05, $07, $0A, $07
 	smpsVcDecayLevel    $05, $0A, $0A, $02
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $02, $00, $24
+	smpsVcTotalLevel    $80, $82, $80, $24
 
 ;	Voice $04
 ;	$45
@@ -513,7 +513,7 @@ Snd_DDZ2_Voices:
 	smpsVcDecayRate2    $00, $00, $06, $08
 	smpsVcDecayLevel    $00, $00, $00, $01
 	smpsVcReleaseRate   $0A, $0A, $0A, $05
-	smpsVcTotalLevel    $00, $00, $00, $6B
+	smpsVcTotalLevel    $80, $80, $80, $6B
 
 ; Unused voice
 ;	Voice $05
@@ -532,7 +532,7 @@ Snd_DDZ2_Voices:
 	smpsVcDecayRate2    $02, $06, $0F, $06
 	smpsVcDecayLevel    $02, $04, $02, $01
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $0E, $0E, $0F
+	smpsVcTotalLevel    $80, $0E, $0E, $0F
 
 ; Unused voice
 ;	Voice $06
@@ -551,7 +551,7 @@ Snd_DDZ2_Voices:
 	smpsVcDecayRate2    $05, $05, $05, $05
 	smpsVcDecayLevel    $04, $04, $04, $04
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $2A, $00, $20
+	smpsVcTotalLevel    $80, $2A, $80, $20
 
 ; Unused voice
 ;	Voice $07
@@ -570,5 +570,5 @@ Snd_DDZ2_Voices:
 	smpsVcDecayRate2    $00, $00, $01, $00
 	smpsVcDecayLevel    $01, $01, $01, $00
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $07, $08, $08, $1F
+	smpsVcTotalLevel    $87, $88, $88, $1F
 

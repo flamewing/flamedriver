@@ -388,7 +388,7 @@ Snd_RRZ2_CallUnk00:
 	dc.b	(nMaxPSG2-$23)&$FF, $0C
 	smpsPSGvoice        sTone_0F
 	dc.b	$06, $06
-	smpsLoop            $00, $04, Snd_RRZ1_CallUnk00
+	smpsLoop            $00, $04, Snd_RRZ2_CallUnk00
 	smpsReturn
 
 ; Unreachable
@@ -403,7 +403,7 @@ Snd_RRZ2_CallUnk01:
 	dc.b	(nMaxPSG2-$23)&$FF, $06
 	smpsPSGvoice        sTone_0F
 	dc.b	(nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF, (nMaxPSG2-$23)&$FF
-	smpsLoop            $00, $07, Snd_RRZ1_CallUnk01
+	smpsLoop            $00, $07, Snd_RRZ2_CallUnk01
 	smpsReturn
 
 ; Unreachable

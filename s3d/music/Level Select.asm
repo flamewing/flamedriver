@@ -1,6 +1,6 @@
 Snd_LevSel_Header:
 	smpsHeaderStartSong 3
-	smpsHeaderVoice     Snd_LevSel_Voices
+	smpsHeaderVoice     Snd_Results_Voices
 	smpsHeaderChan      $06, $03
 	smpsHeaderTempo     $01, $58
 
@@ -232,4 +232,3 @@ Snd_LevSel_Jump05:
 	smpsStop
 	smpsStop
 
-Snd_LevSel_Voices:

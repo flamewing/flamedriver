@@ -254,7 +254,7 @@ Snd_Title_DAC:
 	smpsPan             panCenter, $00
 	dc.b	dKickS3, $06, nRst, dKickS3, nRst, dMuffledSnare, nRst, dKickS3, dMuffledSnare, nRst, dMuffledSnare, dKickS3
 	dc.b	nRst, dMuffledSnare, dKickS3, dMuffledSnare, nRst, dKickS3, nRst, dKickS3, nRst, dMuffledSnare, nRst, dKickS3
-	dc.b	dMuffledSnare, nRst, dMuffledSnare, dKickS3, nRst, dMuffledSnare, dMuffledSnare, dMuffledSnare, dMuffledSnare, dFinalFightMetalCrash, $06, nRst
+	dc.b	dMuffledSnare, nRst, dMuffledSnare, dKickS3, nRst, dMuffledSnare, dMuffledSnare, dMuffledSnare, dMuffledSnare, dIntroKick, $06, nRst
 	dc.b	nRst, nRst, dMuffledSnare, nRst, dKickS3, dMuffledSnare, nRst, dMuffledSnare, dKickS3, nRst, dMuffledSnare, dKickS3
 	dc.b	dMuffledSnare, nRst
 
@@ -263,7 +263,7 @@ Snd_Title_Loop00:
 	dc.b	nRst, dMuffledSnare, dKickS3, dMuffledSnare, nRst
 	smpsLoop            $00, $06, Snd_Title_Loop00
 	dc.b	dMuffledSnare, dMuffledSnare, dMuffledSnare, dKickS3, nRst, dMuffledSnare, dKickS3, dMuffledSnare, dMuffledSnare, nRst, dMuffledSnare, nRst
-	dc.b	dKickS3, dMuffledSnare, dMuffledSnare, dFinalFightMetalCrash
+	dc.b	dKickS3, dMuffledSnare, dMuffledSnare, dIntroKick
 	smpsStop
 
 Snd_Title_Voices:
