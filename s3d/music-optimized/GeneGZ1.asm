@@ -1,5 +1,5 @@
 Snd_GeneGZ1_Header:
-	smpsHeaderStartSong 3
+	smpsHeaderStartSong 3, 1
 	smpsHeaderVoice     Snd_GeneGZ1_Voices
 	smpsHeaderChan      $06, $03
 	smpsHeaderTempo     $01, $10
@@ -467,7 +467,7 @@ Snd_GeneGZ1_Voices:
 	smpsVcDecayRate2    $00, $00, $01, $00
 	smpsVcDecayLevel    $01, $01, $01, $00
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $07, $08, $08, $1F
+	smpsVcTotalLevel    $87, $88, $88, $1F
 
 ;	Voice $01
 ;	$3C
@@ -485,7 +485,7 @@ Snd_GeneGZ1_Voices:
 	smpsVcDecayRate2    $02, $09, $04, $07
 	smpsVcDecayLevel    $01, $02, $03, $05
 	smpsVcReleaseRate   $0A, $05, $0A, $05
-	smpsVcTotalLevel    $00, $07, $00, $1A
+	smpsVcTotalLevel    $80, $07, $80, $1A
 
 ;	Voice $02
 ;	$3E
@@ -503,7 +503,7 @@ Snd_GeneGZ1_Voices:
 	smpsVcDecayRate2    $00, $00, $06, $08
 	smpsVcDecayLevel    $00, $00, $00, $01
 	smpsVcReleaseRate   $0A, $0A, $0A, $05
-	smpsVcTotalLevel    $00, $00, $00, $1B
+	smpsVcTotalLevel    $80, $80, $80, $1B
 
 ;	Voice $03
 ;	$3C
@@ -521,25 +521,25 @@ Snd_GeneGZ1_Voices:
 	smpsVcDecayRate2    $00, $00, $00, $00
 	smpsVcDecayLevel    $0F, $0F, $0F, $0F
 	smpsVcReleaseRate   $08, $07, $08, $07
-	smpsVcTotalLevel    $00, $14, $00, $1E
+	smpsVcTotalLevel    $80, $14, $80, $1E
 
 ;	Voice $04
 ;	$E5
-;	$E6, $00, $B0, $01, 	$EC, $17, $13, $09, 	$31, $00, $2C, $2E
+;	$E6, $00, $B0, $01, 	$EC, $17, $13, $09, 	$B1, $80, $AC, $AE
 ;	$AC, $AE, $AC, $AE, 	$A5, $E6, $FE, $EF, 	$51, $80, $80, $81
 	smpsVcAlgorithm     $05
 	smpsVcFeedback      $04
-	smpsVcUnusedBits    $03
+	smpsVcUnusedBits    $03, $01, $01, $00, $01
 	smpsVcDetune        $00, $0B, $00, $0E
 	smpsVcCoarseFreq    $01, $00, $00, $06
 	smpsVcRateScale     $00, $00, $00, $03
 	smpsVcAttackRate    $09, $13, $17, $2C
-	smpsVcAmpMod        $01, $01, $00, $01
+	smpsVcAmpMod        $01, $01, $01, $01
 	smpsVcDecayRate1    $0E, $0C, $00, $11
 	smpsVcDecayRate2    $AE, $AC, $AE, $AC
 	smpsVcDecayLevel    $0E, $0F, $0E, $0A
 	smpsVcReleaseRate   $0F, $0E, $06, $05
-	smpsVcTotalLevel    $01, $00, $00, $51
+	smpsVcTotalLevel    $81, $80, $80, $51
 
 ;	Voice $05
 ;	$3A
@@ -557,7 +557,7 @@ Snd_GeneGZ1_Voices:
 	smpsVcDecayRate2    $07, $00, $00, $00
 	smpsVcDecayLevel    $00, $01, $0F, $01
 	smpsVcReleaseRate   $0F, $0F, $0F, $0F
-	smpsVcTotalLevel    $00, $27, $28, $18
+	smpsVcTotalLevel    $80, $27, $28, $18
 
 ;	Voice $06
 ;	$3C
@@ -575,5 +575,5 @@ Snd_GeneGZ1_Voices:
 	smpsVcDecayRate2    $00, $00, $00, $00
 	smpsVcDecayLevel    $0F, $0F, $0F, $0F
 	smpsVcReleaseRate   $08, $07, $08, $07
-	smpsVcTotalLevel    $00, $0A, $00, $1E
+	smpsVcTotalLevel    $80, $0A, $80, $1E
 

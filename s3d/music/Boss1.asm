@@ -327,7 +327,7 @@ Snd_Boss1_CallUnk00:
 	dc.b	(nMaxPSG2-$23)&$FF, $06, (nMaxPSG2-$23)&$FF
 	smpsPSGvoice        sTone_12
 	dc.b	$0C
-	smpsLoop            $00, $10, Snd_PPZ2_CallUnk00
+	smpsLoop            $00, $10, Snd_Boss1_CallUnk00
 	smpsReturn
 
 ; Unreachable
