@@ -4287,57 +4287,57 @@ VolEnv_33:	db	0Eh, 0Dh, 0Ch, 0Bh, 0Ah,   9,   8,   7,   6,   5,   4,   3,   2,  
 ; MUSIC BANKS
 ; ===========================================================================
 z80_MusicBanks:
-	db zmake68kBank(Mus_AIZ1)
-	db zmake68kBank(Mus_AIZ2)
-	db zmake68kBank(Mus_HCZ1)
-	db zmake68kBank(Mus_HCZ2)
-	db zmake68kBank(Mus_MGZ1)
-	db zmake68kBank(Mus_MGZ2)
-	db zmake68kBank(Mus_CNZ1)
-	db zmake68kBank(Mus_CNZ2)
-	db zmake68kBank(Mus_FBZ1)
-	db zmake68kBank(Mus_FBZ2)
-	db zmake68kBank(Mus_ICZ1)
-	db zmake68kBank(Mus_ICZ2)
-	db zmake68kBank(Mus_LBZ1)
-	db zmake68kBank(Mus_LBZ2)
-	db zmake68kBank(Mus_MHZ1)
-	db zmake68kBank(Mus_MHZ2)
-	db zmake68kBank(Mus_SOZ1)
-	db zmake68kBank(Mus_SOZ2)
-	db zmake68kBank(Mus_LRZ1)
-	db zmake68kBank(Mus_LRZ2)
-	db zmake68kBank(Mus_SSZ)
-	db zmake68kBank(Mus_DEZ1)
-	db zmake68kBank(Mus_DEZ2)
-	db zmake68kBank(Mus_Minib_SK)
-	db zmake68kBank(Mus_Boss)
-	db zmake68kBank(Mus_DDZ)
-	db zmake68kBank(Mus_PachBonus)
-	db zmake68kBank(Mus_SpecialS)
-	db zmake68kBank(Mus_SlotBonus)
-	db zmake68kBank(Mus_GumBonus)
-	db zmake68kBank(Mus_Knux)
-	db zmake68kBank(Mus_ALZ)
-	db zmake68kBank(Mus_BPZ)
-	db zmake68kBank(Mus_DPZ)
-	db zmake68kBank(Mus_CGZ)
-	db zmake68kBank(Mus_EMZ)
-	db zmake68kBank(Mus_Title)
-	db zmake68kBank(Mus_S3Credits)
-	db zmake68kBank(Mus_GameOver)
-	db zmake68kBank(Mus_Continue)
-	db zmake68kBank(Mus_Results)
-	db zmake68kBank(Mus_1UP)
-	db zmake68kBank(Mus_Emerald)
-	db zmake68kBank(Mus_Invic)
-	db zmake68kBank(Mus_2PMenu)
-	db zmake68kBank(Mus_Minib_SK)
-	db zmake68kBank(Mus_Menu)
-	db zmake68kBank(Mus_FinalBoss)
-	db zmake68kBank(Mus_Drown)
-	db zmake68kBank(Mus_PresSega)
-	db zmake68kBank(Mus_SKCredits)
+	db zmake68kBank(MusData_AIZ1)
+	db zmake68kBank(MusData_AIZ2)
+	db zmake68kBank(MusData_HCZ1)
+	db zmake68kBank(MusData_HCZ2)
+	db zmake68kBank(MusData_MGZ1)
+	db zmake68kBank(MusData_MGZ2)
+	db zmake68kBank(MusData_CNZ1)
+	db zmake68kBank(MusData_CNZ2)
+	db zmake68kBank(MusData_FBZ1)
+	db zmake68kBank(MusData_FBZ2)
+	db zmake68kBank(MusData_ICZ1)
+	db zmake68kBank(MusData_ICZ2)
+	db zmake68kBank(MusData_LBZ1)
+	db zmake68kBank(MusData_LBZ2)
+	db zmake68kBank(MusData_MHZ1)
+	db zmake68kBank(MusData_MHZ2)
+	db zmake68kBank(MusData_SOZ1)
+	db zmake68kBank(MusData_SOZ2)
+	db zmake68kBank(MusData_LRZ1)
+	db zmake68kBank(MusData_LRZ2)
+	db zmake68kBank(MusData_SSZ)
+	db zmake68kBank(MusData_DEZ1)
+	db zmake68kBank(MusData_DEZ2)
+	db zmake68kBank(MusData_Minib_SK)
+	db zmake68kBank(MusData_Boss)
+	db zmake68kBank(MusData_DDZ)
+	db zmake68kBank(MusData_PachBonus)
+	db zmake68kBank(MusData_SpecialS)
+	db zmake68kBank(MusData_SlotBonus)
+	db zmake68kBank(MusData_GumBonus)
+	db zmake68kBank(MusData_Knux)
+	db zmake68kBank(MusData_ALZ)
+	db zmake68kBank(MusData_BPZ)
+	db zmake68kBank(MusData_DPZ)
+	db zmake68kBank(MusData_CGZ)
+	db zmake68kBank(MusData_EMZ)
+	db zmake68kBank(MusData_Title)
+	db zmake68kBank(MusData_S3Credits)
+	db zmake68kBank(MusData_GameOver)
+	db zmake68kBank(MusData_Continue)
+	db zmake68kBank(MusData_Results)
+	db zmake68kBank(MusData_1UP)
+	db zmake68kBank(MusData_Emerald)
+	db zmake68kBank(MusData_Invic)
+	db zmake68kBank(MusData_2PMenu)
+	db zmake68kBank(MusData_Minib_SK)
+	db zmake68kBank(MusData_Menu)
+	db zmake68kBank(MusData_FinalBoss)
+	db zmake68kBank(MusData_Drown)
+	db zmake68kBank(MusData_PresSega)
+	db zmake68kBank(MusData_SKCredits)
 ; ---------------------------------------------------------------------------
 	if $ > z80_stack_top
 		fatal "Your Z80 tables won't fit before the z80 stack. It's \{$-z80_stack_top}h bytes past the start of the bottom of the stack, at \{z80_stack_top}h"
@@ -4630,57 +4630,57 @@ MusicPointers label *
 	elseif (MusicPointers&$7FFF)<>((*)&$7FFF)
 		fatal "Inconsistent placement of Music_Master_Table macro on bank"
 	endif
-	declsong Mus_AIZ1
-	declsong Mus_AIZ2
-	declsong Mus_HCZ1
-	declsong Mus_HCZ2
-	declsong Mus_MGZ1
-	declsong Mus_MGZ2
-	declsong Mus_CNZ1
-	declsong Mus_CNZ2
-	declsong Mus_FBZ1
-	declsong Mus_FBZ2
-	declsong Mus_ICZ1
-	declsong Mus_ICZ2
-	declsong Mus_LBZ1
-	declsong Mus_LBZ2
-	declsong Mus_MHZ1
-	declsong Mus_MHZ2
-	declsong Mus_SOZ1
-	declsong Mus_SOZ2
-	declsong Mus_LRZ1
-	declsong Mus_LRZ2
-	declsong Mus_SSZ
-	declsong Mus_DEZ1
-	declsong Mus_DEZ2
-	declsong Mus_Minib_SK
-	declsong Mus_Boss
-	declsong Mus_DDZ
-	declsong Mus_PachBonus
-	declsong Mus_SpecialS
-	declsong Mus_SlotBonus
-	declsong Mus_GumBonus
-	declsong Mus_Knux
-	declsong Mus_ALZ
-	declsong Mus_BPZ
-	declsong Mus_DPZ
-	declsong Mus_CGZ
-	declsong Mus_EMZ
-	declsong Mus_Title
-	declsong Mus_S3Credits
-	declsong Mus_GameOver
-	declsong Mus_Continue
-	declsong Mus_Results
-	declsong Mus_1UP
-	declsong Mus_Emerald
-	declsong Mus_Invic
-	declsong Mus_2PMenu
-	declsong Mus_Minib_SK
-	declsong Mus_Menu
-	declsong Mus_FinalBoss
-	declsong Mus_Drown
-	declsong Mus_PresSega
-	declsong Mus_SKCredits
+	declsong MusData_AIZ1
+	declsong MusData_AIZ2
+	declsong MusData_HCZ1
+	declsong MusData_HCZ2
+	declsong MusData_MGZ1
+	declsong MusData_MGZ2
+	declsong MusData_CNZ1
+	declsong MusData_CNZ2
+	declsong MusData_FBZ1
+	declsong MusData_FBZ2
+	declsong MusData_ICZ1
+	declsong MusData_ICZ2
+	declsong MusData_LBZ1
+	declsong MusData_LBZ2
+	declsong MusData_MHZ1
+	declsong MusData_MHZ2
+	declsong MusData_SOZ1
+	declsong MusData_SOZ2
+	declsong MusData_LRZ1
+	declsong MusData_LRZ2
+	declsong MusData_SSZ
+	declsong MusData_DEZ1
+	declsong MusData_DEZ2
+	declsong MusData_Minib_SK
+	declsong MusData_Boss
+	declsong MusData_DDZ
+	declsong MusData_PachBonus
+	declsong MusData_SpecialS
+	declsong MusData_SlotBonus
+	declsong MusData_GumBonus
+	declsong MusData_Knux
+	declsong MusData_ALZ
+	declsong MusData_BPZ
+	declsong MusData_DPZ
+	declsong MusData_CGZ
+	declsong MusData_EMZ
+	declsong MusData_Title
+	declsong MusData_S3Credits
+	declsong MusData_GameOver
+	declsong MusData_Continue
+	declsong MusData_Results
+	declsong MusData_1UP
+	declsong MusData_Emerald
+	declsong MusData_Invic
+	declsong MusData_2PMenu
+	declsong MusData_Minib_SK
+	declsong MusData_Menu
+	declsong MusData_FinalBoss
+	declsong MusData_Drown
+	declsong MusData_PresSega
+	declsong MusData_SKCredits
 	ifndef zMusIDPtr__End
 zMusIDPtr__End label *
 	endif
@@ -5171,24 +5171,24 @@ Sound_DB:	include "Sound/SFX/DB.asm"
 Mus_Bank1_Start:	startBank
 	Music_Master_Table
 z80_UniVoiceBank:	include "Sound/UniBank.asm"
-Mus_FBZ1:			include	"Sound/Music/FBZ1.asm"
-Mus_FBZ2:			include	"Sound/Music/FBZ2.asm"
-Mus_MHZ1:			include	"Sound/Music/MHZ1.asm"
-Mus_MHZ2:			include	"Sound/Music/MHZ2.asm"
-Mus_SOZ1:			include	"Sound/Music/SOZ1.asm"
-Mus_SOZ2:			include	"Sound/Music/SOZ2.asm"
-Mus_LRZ1:			include	"Sound/Music/LRZ1.asm"
-Mus_LRZ2:			include	"Sound/Music/LRZ2.asm"
-Mus_SSZ:			include	"Sound/Music/SSZ.asm"
-Mus_DEZ1:			include	"Sound/Music/DEZ1.asm"
-Mus_DEZ2:			include	"Sound/Music/DEZ2.asm"
-Mus_Minib_SK:		include	"Sound/Music/Miniboss.asm"
-Mus_Boss:			include	"Sound/Music/Zone Boss.asm"
-Mus_DDZ:			include	"Sound/Music/DDZ.asm"
-Mus_PachBonus:		include	"Sound/Music/Pachinko.asm"
-Mus_SpecialS:		include	"Sound/Music/Special Stage.asm"
-Mus_SlotBonus:		include	"Sound/Music/Slots.asm"
-Mus_Knux:			include	"Sound/Music/Knuckles.asm"
+MusData_FBZ1:			include	"Sound/Music/FBZ1.asm"
+MusData_FBZ2:			include	"Sound/Music/FBZ2.asm"
+MusData_MHZ1:			include	"Sound/Music/MHZ1.asm"
+MusData_MHZ2:			include	"Sound/Music/MHZ2.asm"
+MusData_SOZ1:			include	"Sound/Music/SOZ1.asm"
+MusData_SOZ2:			include	"Sound/Music/SOZ2.asm"
+MusData_LRZ1:			include	"Sound/Music/LRZ1.asm"
+MusData_LRZ2:			include	"Sound/Music/LRZ2.asm"
+MusData_SSZ:			include	"Sound/Music/SSZ.asm"
+MusData_DEZ1:			include	"Sound/Music/DEZ1.asm"
+MusData_DEZ2:			include	"Sound/Music/DEZ2.asm"
+MusData_Minib_SK:		include	"Sound/Music/Miniboss.asm"
+MusData_Boss:			include	"Sound/Music/Zone Boss.asm"
+MusData_DDZ:			include	"Sound/Music/DDZ.asm"
+MusData_PachBonus:		include	"Sound/Music/Pachinko.asm"
+MusData_SpecialS:		include	"Sound/Music/Special Stage.asm"
+MusData_SlotBonus:		include	"Sound/Music/Slots.asm"
+MusData_Knux:			include	"Sound/Music/Knuckles.asm"
 
 	finishBank
 
@@ -5198,17 +5198,17 @@ Mus_Knux:			include	"Sound/Music/Knuckles.asm"
 Mus_Bank2_Start:	startBank
 	Music_Master_Table
 					include "Sound/UniBank.asm"
-Mus_Title:			include	"Sound/Music/Title.asm"
-Mus_1UP:			include	"Sound/Music/1UP.asm"
-Mus_Emerald:		include	"Sound/Music/Chaos Emerald.asm"
-Mus_AIZ1:			include	"Sound/Music/AIZ1.asm"
-Mus_AIZ2:			include	"Sound/Music/AIZ2.asm"
-Mus_HCZ1:			include	"Sound/Music/HCZ1.asm"
-Mus_HCZ2:			include	"Sound/Music/HCZ2.asm"
-Mus_MGZ1:			include	"Sound/Music/MGZ1.asm"
-Mus_MGZ2:			include	"Sound/Music/MGZ2.asm"
-Mus_CNZ2:			include	"Sound/Music/CNZ2.asm"
-Mus_CNZ1:			include	"Sound/Music/CNZ1.asm"
+MusData_Title:			include	"Sound/Music/Title.asm"
+MusData_1UP:			include	"Sound/Music/1UP.asm"
+MusData_Emerald:		include	"Sound/Music/Chaos Emerald.asm"
+MusData_AIZ1:			include	"Sound/Music/AIZ1.asm"
+MusData_AIZ2:			include	"Sound/Music/AIZ2.asm"
+MusData_HCZ1:			include	"Sound/Music/HCZ1.asm"
+MusData_HCZ2:			include	"Sound/Music/HCZ2.asm"
+MusData_MGZ1:			include	"Sound/Music/MGZ1.asm"
+MusData_MGZ2:			include	"Sound/Music/MGZ2.asm"
+MusData_CNZ2:			include	"Sound/Music/CNZ2.asm"
+MusData_CNZ1:			include	"Sound/Music/CNZ1.asm"
 
 	finishBank
 
@@ -5218,18 +5218,18 @@ Mus_CNZ1:			include	"Sound/Music/CNZ1.asm"
 Mus_Bank3_Start:	startBank
 	Music_Master_Table
 					include "Sound/UniBank.asm"
-Mus_ICZ2:			include	"Sound/Music/ICZ2.asm"
-Mus_ICZ1:			include	"Sound/Music/ICZ1.asm"
-Mus_LBZ2:			include	"Sound/Music/LBZ2.asm"
-Mus_LBZ1:			include	"Sound/Music/LBZ1.asm"
-Mus_SKCredits:		include	"Sound/Music/Credits.asm"
-Mus_GameOver:		include	"Sound/Music/Game Over.asm"
-Mus_Continue:		include	"Sound/Music/Continue.asm"
-Mus_Results:		include	"Sound/Music/Level Outro.asm"
-Mus_Invic:			include	"Sound/Music/Invincible.asm"
-Mus_Menu:			include	"Sound/Music/Menu.asm"
-Mus_FinalBoss:		include	"Sound/Music/Final Boss.asm"
-Mus_PresSega:		include	"Sound/Music/Game Complete.asm"
+MusData_ICZ2:			include	"Sound/Music/ICZ2.asm"
+MusData_ICZ1:			include	"Sound/Music/ICZ1.asm"
+MusData_LBZ2:			include	"Sound/Music/LBZ2.asm"
+MusData_LBZ1:			include	"Sound/Music/LBZ1.asm"
+MusData_SKCredits:		include	"Sound/Music/Credits.asm"
+MusData_GameOver:		include	"Sound/Music/Game Over.asm"
+MusData_Continue:		include	"Sound/Music/Continue.asm"
+MusData_Results:		include	"Sound/Music/Level Outro.asm"
+MusData_Invic:			include	"Sound/Music/Invincible.asm"
+MusData_Menu:			include	"Sound/Music/Menu.asm"
+MusData_FinalBoss:		include	"Sound/Music/Final Boss.asm"
+MusData_PresSega:		include	"Sound/Music/Game Complete.asm"
 
 	finishBank
 
@@ -5239,15 +5239,15 @@ Mus_PresSega:		include	"Sound/Music/Game Complete.asm"
 Mus_Bank4_Start:	startBank
 	Music_Master_Table
 					include "Sound/UniBank.asm"
-Mus_GumBonus:		include	"Sound/Music/Gum Ball Machine.asm"
-Mus_ALZ:			include	"Sound/Music/Azure Lake.asm"
-Mus_BPZ:			include	"Sound/Music/Balloon Park.asm"
-Mus_DPZ:			include	"Sound/Music/Desert Palace.asm"
-Mus_CGZ:			include	"Sound/Music/Chrome Gadget.asm"
-Mus_EMZ:			include	"Sound/Music/Endless Mine.asm"
-Mus_S3Credits:		include	"Sound/Music/Sonic 3 Credits.asm"
-Mus_2PMenu:			include	"Sound/Music/Competition Menu.asm"	
-Mus_Drown:			include	"Sound/Music/Countdown.asm"
+MusData_GumBonus:		include	"Sound/Music/Gum Ball Machine.asm"
+MusData_ALZ:			include	"Sound/Music/Azure Lake.asm"
+MusData_BPZ:			include	"Sound/Music/Balloon Park.asm"
+MusData_DPZ:			include	"Sound/Music/Desert Palace.asm"
+MusData_CGZ:			include	"Sound/Music/Chrome Gadget.asm"
+MusData_EMZ:			include	"Sound/Music/Endless Mine.asm"
+MusData_S3Credits:		include	"Sound/Music/Sonic 3 Credits.asm"
+MusData_2PMenu:			include	"Sound/Music/Competition Menu.asm"	
+MusData_Drown:			include	"Sound/Music/Countdown.asm"
 
 	finishBank
 
