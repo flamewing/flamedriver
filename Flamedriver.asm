@@ -1,8 +1,8 @@
 ; ---------------------------------------------------------------------------
 ; ===========================================================================
-; º                                                                         º
-; º	                        SONIC&K SOUND DRIVER                            º
-; º                                                                         º
+; |                                                                         |
+; |	                        SONIC&K SOUND DRIVER                            |
+; |                                                                         |
 ; ===========================================================================
 ; Disassembled by MarkeyJester
 ; Routines, pointers and stuff by Linncaki
@@ -236,19 +236,193 @@ z80_SoundDriver:
 		CPU Z80
 		listing purecode
 ; ---------------------------------------------------------------------------
+	ifndef MusID__First
+		ifdef Mus__First
+MusID__First			= Mus__First
+		else
+			ifdef bgm__First
+MusID__First			= bgm__First
+			endif
+		endif
+		ifndef MusID__First
 MusID__First			= 01h
+		endif
+	endif
+
+	ifndef MusID_ExtraLife
+		ifdef mus_ExtraLife
+MusID_ExtraLife			= mus_ExtraLife
+		else
+			ifdef bgm_ExtraLife
+MusID_ExtraLife			= bgm_ExtraLife
+			endif
+		endif
+		ifndef MusID_ExtraLife
 MusID_ExtraLife			= 2Ah
+		endif
+	endif
+
+	ifndef MusID__End
+		ifdef Mus__End
+MusID__End				= Mus__End
+		else
+			ifdef bgm__Last
+MusID__End				= bgm__Last
+			endif
+		endif
+		ifndef MusID__End
 MusID__End				= 33h
-SndID__First			= MusID__End
+		endif
+	endif
+
+	ifdef MusID_SKCredits
+		if MusID_SKCredits>=MusID__End
+			fatal "S&K Credits music must have an ID within the music range of [$\{MusID__First}, $\{MusID__End}), but it has ID $\{MusID_SKCredits}"
+		endif
+	endif
+	ifdef mus_CreditsK
+		if mus_CreditsK>=MusID__End
+			fatal "S&K Credits music must have an ID within the music range of [$\{MusID__First}, $\{MusID__End}), but it has ID $\{mus_CreditsK}"
+		endif
+	endif
+
+	ifndef SndID__First
+		ifdef sfx_First
+SndID__First			= sfx_First
+			if sfx_First>1
+				message "You can gain more IDs for SFX by changing the the definition of the sfx_First constant to 1 (it is currently $\{sfx_First})"
+			endif
+		else
+			ifdef sfx__First
+SndID__First			= sfx__First
+				if sfx_First>1
+					message "You can gain more IDs for SFX by changing the the definition of the sfx_First constant to 1 (it is currently $\{sfx__First})"
+				endif
+			endif
+		endif
+		ifndef SndID__First
+SndID__First			= 01h
+		endif
+	elseif SndID__First>1
+		message "You can gain more IDs for SFX by changing the the definition of the SndID__First constant to 1 (it is currently $\{SndID__First})"
+	endif
+
+	ifndef SndID_Ring
+		ifdef sfx_RingRight
+SndID_Ring				= sfx_RingRight
+		else
+			ifdef sfx_Ring
+SndID_Ring				= sfx_Ring
+			endif
+		endif
+		ifndef SndID_Ring
 SndID_Ring				= SndID__First
-SndID_SpindashRev		= 0ABh
-SndID__FirstContinuous	= 0BCh
-MusID_SKCredits			= 0DCh
-SndID__End				= 0E0h
+		endif
+	endif
+
+	ifndef SndID_RingLeft
+		ifdef sfx_RingLeft
+SndID_RingLeft			= sfx_RingLeft
+		endif
+		ifndef SndID_RingLeft
+SndID_RingLeft			= SndID_Ring+1
+		endif
+	endif
+
+	if SndID_RingLeft==SndID_Ring+1
+RingSoundsAdjacent := 1
+	else
+RingSoundsAdjacent := 0
+		warning "You should make sure SndID_RingLeft is immediately after SndID_Ring"
+	endif
+
+	ifndef SndID_SpindashRev
+		ifdef sfx_Spindash
+SndID_SpindashRev		= sfx_Spindash
+		else
+			ifdef sfx_Roll
+SndID_SpindashRev		= sfx_Roll
+				warning "Approximating spindash rev sound by rolling sound. Please provide an adequate equate for the ported spindash rev sound"
+			endif
+		endif
+		ifndef SndID_SpindashRev
+SndID_SpindashRev		= 0ABh-33h+SndID__First
+		endif
+	endif
+
+	ifndef SndID__End
+		ifdef sfx__End
+SndID__End				= sfx__End
+		else
+			ifdef sfx__Last
+SndID__End				= sfx__Last
+			endif
+		endif
+		ifndef SndID__End
+SndID__End				= 0E0h-33h+SndID__First
+		endif
+	endif
+
+	ifndef SndID__FirstContinuous
+		ifdef sfx__FirstContinuous
+SndID__FirstContinuous	= sfx__FirstContinuous
+		else
+SndID__FirstContinuous	= 0BCh-33h+SndID__First
+		endif
+	endif
+
+	ifndef SndID__FirstContinuous
+SndID__FirstContinuous	= SndID__End
+	endif
+
+	ifndef FadeID__First
+		ifdef mus__FirstCmd
+FadeID__First			= mus__FirstCmd
+		else
+			ifdef flg__First
+FadeID__First			= flg__First
+			endif
+		endif
+		ifndef FadeID__First
 FadeID__First			= 0E1h
+		endif
+	endif
+
+	ifndef FadeID__End
+		ifdef Mus__EndCmd
+FadeID__End				= Mus__EndCmd
+		else
+			ifdef flg__Last
+FadeID__End				= flg__Last
+			endif
+		endif
+		ifndef FadeID__End
 FadeID__End				= 0E6h
+		endif
+	endif
+
+	ifndef MusID_StopSega
+		ifdef mus_StopSEGA
+MusID_StopSega			= mus_StopSEGA
+		else
+			ifndef MusID_StopSega
 MusID_StopSega			= 0FEh
+			endif
+		endif
+	endif
+
+	ifndef MusID_SegaSound
+		ifdef mus_SEGA
+MusID_SegaSound			= mus_SEGA
+		else
+			ifdef sfx_Sega
+MusID_SegaSound			= sfx_Sega
+			endif
+		endif
+		ifndef MusID_SegaSound
 MusID_SegaSound			= 0FFh
+		endif
+	endif
 ; ---------------------------------------------------------------------------
 NoteRest				= 080h
 FirstCoordFlag			= 0E0h
@@ -1753,11 +1927,29 @@ zPSGInitBytes:
 ;loc_6A9
 zPlaySound_CheckRing:
 		sub	SndID__First					; Make it a 0-based index
+	if SndID_Ring==SndID__First
 		or	a								; Is it the ring sound?
+	else
+		cp	SndID_Ring-SndID__First			; Is it the ring sound?
+	endif
 		jp	nz, zPlaySound_Bankswitch		; Branch if not
+	if RingSoundsAdjacent==0
+		ld	c, a							; Save SFX ID
+	endif
 		ld	a, (zRingSpeaker)				; Get speaker on which ring sound is played
 		xor	1								; Toggle bit 0
 		ld	(zRingSpeaker), a				; Save it
+	if RingSoundsAdjacent==1
+		if SndID_Ring<>SndID__First
+			add	a, SndID_Ring-SndID__First
+		endif
+	else
+		or	a								; 0 plays left, 1 plays right
+		jr	nz, .play_right
+		ld	c, SndID_RingLeft-SndID__First	; Play on left speaker
+.play_right:
+		ld	a, c							; Get ring sound to play
+	endif
 
 ;loc_6B7
 zPlaySound_Bankswitch:
@@ -5246,8 +5438,7 @@ MusData_DPZ:			include	"Sound/Music/Desert Palace.asm"
 MusData_CGZ:			include	"Sound/Music/Chrome Gadget.asm"
 MusData_EMZ:			include	"Sound/Music/Endless Mine.asm"
 MusData_S3Credits:		include	"Sound/Music/Sonic 3 Credits.asm"
-MusData_2PMenu:			include	"Sound/Music/Competition Menu.asm"	
+MusData_2PMenu:			include	"Sound/Music/Competition Menu.asm"
 MusData_Drown:			include	"Sound/Music/Countdown.asm"
 
 	finishBank
-
