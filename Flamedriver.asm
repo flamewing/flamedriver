@@ -703,12 +703,12 @@ zUpdateMusic:
 		call	zDoMusicFadeOut				; Check if music should be faded out and fade if needed
 		call	zDoMusicFadeIn				; Check if music should be faded in and fade if needed
 		ld	a, (zFadeToPrevFlag)			; Get fade-to-prev flag
-		cp	MusID_ExtraLife-MusID__First	; Is it still 1-Up?
+		cp	MusID_ExtraLife-1				; Is it still 1-Up?
 		jr	nz, .check_fade_in				; Branch if not
 		ld	a, (zMusicNumber)				; Get next music to play
 		cp	MusID_ExtraLife					; Is it another 1-Up?
 		jr	z, .clr_queue					; Branch if yes
-		cp	MusID__End-MusID__First			; Is it music (except credits song)?
+		cp	MusID__End-1					; Is it music?
 		jr	c, .clr_sfx						; Branch if not
 
 .clr_queue:
@@ -1667,16 +1667,9 @@ zSilenceStopTrack:
 ; End of function zSilenceStopTrack
 ; ---------------------------------------------------------------------------
 
-;loc_552
-zPlayMusicCredits:
-		ld	a, 32h							; Credits music is the last entry on the music table
-		push	af							; Save af
-		jp	zPlayMusic_DoFade				; Continue as music
-; ---------------------------------------------------------------------------
-
 ;loc_558
 zPlayMusic:
-		sub	MusID__First					; Remap index from 1h-32h to 0h-31h (see also credits music, above)
+		sub	MusID__First					; Remap index from 1h-33h to 0h-32h
 		ret	m								; Return if negative (id = 0)
 		push	af							; Save af
 		cp	MusID_ExtraLife-MusID__First	; Is it the 1-up music?
@@ -1697,7 +1690,7 @@ zPlayMusic:
 ; ---------------------------------------------------------------------------
 .no_fade:
 		ld	a, (zFadeToPrevFlag)			; Get fade-to-prev flag
-		cp	MusID_ExtraLife-MusID__First	; Was it triggered by the 1-up song?
+		cp	MusID_ExtraLife-1				; Was it triggered by the 1-up song?
 		jp	z, zBGMLoad						; Branch if yes
 		xor	a								; a = 0
 		ld	(zMusicNumber), a				; Clear M68K input queue...
@@ -1735,7 +1728,7 @@ zPlayMusic:
 		add	hl, de							; Advance to next track
 		djnz	.loop						; Loop for all tracks
 
-		ld	a, MusID_ExtraLife-MusID__First	; a = 1-up id-1
+		ld	a, MusID_ExtraLife-1			; a = 1-up id-1
 		ld	(zFadeToPrevFlag), a			; Set fade-to-prev flag to it
 		ld	hl, (zVoiceTblPtr)				; Get voice table pointer
 		ld	(zVoiceTblPtrSave), hl			; Save it
