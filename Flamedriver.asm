@@ -4089,7 +4089,13 @@ zPlayDigitalAudio:
 		dec	a								; a -= 1
 		set	7, (hl)							; Set bit 7 to indicate that DAC sample is being played
 		ld	hl, zmake68kPtr(DACPointers)	; hl = pointer to ROM window
-		rst	PointerTableOffset				; hl = pointer to DAC data
+		ld	c, a
+		ld	b, 0
+		add	hl, bc
+		add	hl, bc
+		add	hl, bc
+		add	hl, bc
+		add	hl, bc
 		ld	c, 80h							; c is an accumulator below; this initializes it to 80h
 		ld	a, (hl)							; a = DAC rate
 		ld	(.sample1_rate+1), a			; Store into following instruction (self-modifying code)
@@ -4594,211 +4600,107 @@ DACPointers label *
 		fatal "Inconsistent placement of DAC_Master_Table macro on bank \{soundBankName}"
 	endif
 	if (use_s3_samples<>0)||(use_sk_samples<>0)||(use_s3d_samples<>0)
-		offsetBankTableEntry.w	DAC_81_Setup
-		offsetBankTableEntry.w	DAC_82_Setup
-		offsetBankTableEntry.w	DAC_83_Setup
-		offsetBankTableEntry.w	DAC_84_Setup
-		offsetBankTableEntry.w	DAC_85_Setup
-		offsetBankTableEntry.w	DAC_86_Setup
-		offsetBankTableEntry.w	DAC_87_Setup
-		offsetBankTableEntry.w	DAC_88_Setup
-		offsetBankTableEntry.w	DAC_89_Setup
-		offsetBankTableEntry.w	DAC_8A_Setup
-		offsetBankTableEntry.w	DAC_8B_Setup
-		offsetBankTableEntry.w	DAC_8C_Setup
-		offsetBankTableEntry.w	DAC_8D_Setup
-		offsetBankTableEntry.w	DAC_8E_Setup
-		offsetBankTableEntry.w	DAC_8F_Setup
-
-		offsetBankTableEntry.w	DAC_90_Setup
-		offsetBankTableEntry.w	DAC_91_Setup
-		offsetBankTableEntry.w	DAC_92_Setup
-		offsetBankTableEntry.w	DAC_93_Setup
-		offsetBankTableEntry.w	DAC_94_Setup
-		offsetBankTableEntry.w	DAC_95_Setup
-		offsetBankTableEntry.w	DAC_96_Setup
-		offsetBankTableEntry.w	DAC_97_Setup
-		offsetBankTableEntry.w	DAC_98_Setup
-		offsetBankTableEntry.w	DAC_99_Setup
-		offsetBankTableEntry.w	DAC_9A_Setup
-		offsetBankTableEntry.w	DAC_9B_Setup
-		offsetBankTableEntry.w	DAC_9C_Setup
-		offsetBankTableEntry.w	DAC_9D_Setup
-		offsetBankTableEntry.w	DAC_9E_Setup
+		DAC_Setup $04,DAC_81_Data
+		DAC_Setup $0E,DAC_82_83_84_85_Data
+		DAC_Setup $14,DAC_82_83_84_85_Data
+		DAC_Setup $1A,DAC_82_83_84_85_Data
+		DAC_Setup $20,DAC_82_83_84_85_Data
+		DAC_Setup $04,DAC_86_Data
+		DAC_Setup $04,DAC_87_Data
+		DAC_Setup $06,DAC_88_Data
+		DAC_Setup $0A,DAC_89_Data
+		DAC_Setup $14,DAC_8A_8B_Data
+		DAC_Setup $1B,DAC_8A_8B_Data
+		DAC_Setup $08,DAC_8C_Data
+		DAC_Setup $0B,DAC_8D_8E_Data
+		DAC_Setup $11,DAC_8D_8E_Data
+		DAC_Setup $08,DAC_8F_Data
+		DAC_Setup $03,DAC_90_91_92_93_Data
+		DAC_Setup $07,DAC_90_91_92_93_Data
+		DAC_Setup $0A,DAC_90_91_92_93_Data
+		DAC_Setup $0E,DAC_90_91_92_93_Data
+		DAC_Setup $06,DAC_94_95_96_97_Data
+		DAC_Setup $0A,DAC_94_95_96_97_Data
+		DAC_Setup $0D,DAC_94_95_96_97_Data
+		DAC_Setup $12,DAC_94_95_96_97_Data
+		DAC_Setup $0B,DAC_98_99_9A_Data
+		DAC_Setup $13,DAC_98_99_9A_Data
+		DAC_Setup $16,DAC_98_99_9A_Data
+		DAC_Setup $0C,DAC_9B_Data
 	endif
 	if (use_s3_samples<>0)||(use_sk_samples<>0)
-		offsetBankTableEntry.w	DAC_9F_Setup
-
-		offsetBankTableEntry.w	DAC_A0_Setup
-		offsetBankTableEntry.w	DAC_A1_Setup
-		offsetBankTableEntry.w	DAC_A2_Setup
-		offsetBankTableEntry.w	DAC_A3_Setup
-		offsetBankTableEntry.w	DAC_A4_Setup
-		offsetBankTableEntry.w	DAC_A5_Setup
-		offsetBankTableEntry.w	DAC_A6_Setup
-		offsetBankTableEntry.w	DAC_A7_Setup
-		offsetBankTableEntry.w	DAC_A8_Setup
-		offsetBankTableEntry.w	DAC_A9_Setup
-		offsetBankTableEntry.w	DAC_AA_Setup
-		offsetBankTableEntry.w	DAC_AB_Setup
-		offsetBankTableEntry.w	DAC_AC_Setup
-		offsetBankTableEntry.w	DAC_AD_Setup
-		offsetBankTableEntry.w	DAC_AE_Setup
-		offsetBankTableEntry.w	DAC_AF_Setup
-
-		offsetBankTableEntry.w	DAC_B0_Setup
-		offsetBankTableEntry.w	DAC_B1_Setup
-		offsetBankTableEntry.w	DAC_B2_Setup
-		offsetBankTableEntry.w	DAC_B3_Setup
-		offsetBankTableEntry.w	DAC_B4_Setup
-		offsetBankTableEntry.w	DAC_B5_Setup
-		offsetBankTableEntry.w	DAC_B6_Setup
-		offsetBankTableEntry.w	DAC_B7_Setup
-		offsetBankTableEntry.w	DAC_B8_B9_Setup
-		offsetBankTableEntry.w	DAC_B8_B9_Setup
-		offsetBankTableEntry.w	DAC_BA_Setup
-		offsetBankTableEntry.w	DAC_BB_Setup
-		offsetBankTableEntry.w	DAC_BC_Setup
-		offsetBankTableEntry.w	DAC_BD_Setup
-		offsetBankTableEntry.w	DAC_BE_Setup
-		offsetBankTableEntry.w	DAC_BF_Setup
-
-		offsetBankTableEntry.w	DAC_C0_Setup
-		offsetBankTableEntry.w	DAC_C1_Setup
-		offsetBankTableEntry.w	DAC_C2_Setup
-		offsetBankTableEntry.w	DAC_C3_Setup
-		offsetBankTableEntry.w	DAC_C4_Setup
-	endif
-	if (use_s2_samples<>0)
-		offsetBankTableEntry.w	DAC_C5_Setup
-		offsetBankTableEntry.w	DAC_C6_Setup
-		offsetBankTableEntry.w	DAC_C7_Setup
-		offsetBankTableEntry.w	DAC_C8_Setup
-		offsetBankTableEntry.w	DAC_C9_Setup
-		offsetBankTableEntry.w	DAC_CA_Setup
-		offsetBankTableEntry.w	DAC_CB_Setup
-		offsetBankTableEntry.w	DAC_CC_Setup
-		offsetBankTableEntry.w	DAC_CD_Setup
-		offsetBankTableEntry.w	DAC_CE_Setup
-		offsetBankTableEntry.w	DAC_CF_Setup
-
-		offsetBankTableEntry.w	DAC_D0_Setup
-		offsetBankTableEntry.w	DAC_D1_Setup
-		offsetBankTableEntry.w	DAC_D2_Setup
-		offsetBankTableEntry.w	DAC_D3_Setup
-		offsetBankTableEntry.w	DAC_D4_Setup
-		offsetBankTableEntry.w	DAC_D5_Setup
-	endif
-	if (use_s3d_samples<>0)
-		offsetBankTableEntry.w	DAC_D6_Setup
-		offsetBankTableEntry.w	DAC_D7_Setup
-	endif
-	if (use_s3_samples<>0)
-		offsetBankTableEntry.w	DAC_D8_Setup
-		offsetBankTableEntry.w	DAC_D9_Setup
-	endif
-
-	if (use_s3_samples<>0)||(use_sk_samples<>0)||(use_s3d_samples<>0)
-DAC_81_Setup:			DAC_Setup $04,DAC_81_Data
-DAC_82_Setup:			DAC_Setup $0E,DAC_82_83_84_85_Data
-DAC_83_Setup:			DAC_Setup $14,DAC_82_83_84_85_Data
-DAC_84_Setup:			DAC_Setup $1A,DAC_82_83_84_85_Data
-DAC_85_Setup:			DAC_Setup $20,DAC_82_83_84_85_Data
-DAC_86_Setup:			DAC_Setup $04,DAC_86_Data
-DAC_87_Setup:			DAC_Setup $04,DAC_87_Data
-DAC_88_Setup:			DAC_Setup $06,DAC_88_Data
-DAC_89_Setup:			DAC_Setup $0A,DAC_89_Data
-DAC_8A_Setup:			DAC_Setup $14,DAC_8A_8B_Data
-DAC_8B_Setup:			DAC_Setup $1B,DAC_8A_8B_Data
-DAC_8C_Setup:			DAC_Setup $08,DAC_8C_Data
-DAC_8D_Setup:			DAC_Setup $0B,DAC_8D_8E_Data
-DAC_8E_Setup:			DAC_Setup $11,DAC_8D_8E_Data
-DAC_8F_Setup:			DAC_Setup $08,DAC_8F_Data
-DAC_90_Setup:			DAC_Setup $03,DAC_90_91_92_93_Data
-DAC_91_Setup:			DAC_Setup $07,DAC_90_91_92_93_Data
-DAC_92_Setup:			DAC_Setup $0A,DAC_90_91_92_93_Data
-DAC_93_Setup:			DAC_Setup $0E,DAC_90_91_92_93_Data
-DAC_94_Setup:			DAC_Setup $06,DAC_94_95_96_97_Data
-DAC_95_Setup:			DAC_Setup $0A,DAC_94_95_96_97_Data
-DAC_96_Setup:			DAC_Setup $0D,DAC_94_95_96_97_Data
-DAC_97_Setup:			DAC_Setup $12,DAC_94_95_96_97_Data
-DAC_98_Setup:			DAC_Setup $0B,DAC_98_99_9A_Data
-DAC_99_Setup:			DAC_Setup $13,DAC_98_99_9A_Data
-DAC_9A_Setup:			DAC_Setup $16,DAC_98_99_9A_Data
-DAC_9B_Setup:			DAC_Setup $0C,DAC_9B_Data
-	endif
-	if (use_s3_samples<>0)||(use_sk_samples<>0)
-DAC_A2_Setup:			DAC_Setup $0A,DAC_A2_Data
-DAC_A3_Setup:			DAC_Setup $18,DAC_A3_Data
-DAC_A4_Setup:			DAC_Setup $18,DAC_A4_Data
-DAC_A5_Setup:			DAC_Setup $0C,DAC_A5_Data
-DAC_A6_Setup:			DAC_Setup $09,DAC_A6_Data
-DAC_A7_Setup:			DAC_Setup $18,DAC_A7_Data
-DAC_A8_Setup:			DAC_Setup $18,DAC_A8_Data
-DAC_A9_Setup:			DAC_Setup $0C,DAC_A9_Data
-DAC_AA_Setup:			DAC_Setup $0A,DAC_AA_Data
-DAC_AB_Setup:			DAC_Setup $0D,DAC_AB_Data
-DAC_AC_Setup:			DAC_Setup $06,DAC_AC_Data
-DAC_AD_Setup:			DAC_Setup $10,DAC_AD_AE_Data
-DAC_AE_Setup:			DAC_Setup $18,DAC_AD_AE_Data
-DAC_AF_Setup:			DAC_Setup $09,DAC_AF_B0_Data
-DAC_B0_Setup:			DAC_Setup $12,DAC_AF_B0_Data
-DAC_B1_Setup:			DAC_Setup $18,DAC_B1_Data
-DAC_B2_Setup:			DAC_Setup $16,DAC_B2_B3_Data
-DAC_B3_Setup:			DAC_Setup $20,DAC_B2_B3_Data
-DAC_B4_Setup:			DAC_Setup $0C,DAC_B4_C1_C2_C3_C4_Data
-DAC_B5_Setup:			DAC_Setup $0C,DAC_B5_Data
-DAC_B6_Setup:			DAC_Setup $0C,DAC_B6_Data
-DAC_B7_Setup:			DAC_Setup $18,DAC_B7_Data
-DAC_B8_B9_Setup:		DAC_Setup $0C,DAC_B8_B9_Data
-DAC_BA_Setup:			DAC_Setup $18,DAC_BA_Data
-DAC_BB_Setup:			DAC_Setup $18,DAC_BB_Data
-DAC_BC_Setup:			DAC_Setup $18,DAC_BC_Data
-DAC_BD_Setup:			DAC_Setup $0C,DAC_BD_Data
-DAC_BE_Setup:			DAC_Setup $0C,DAC_BE_Data
-DAC_BF_Setup:			DAC_Setup $1C,DAC_BF_Data
-DAC_C0_Setup:			DAC_Setup $0B,DAC_C0_Data
-DAC_C1_Setup:			DAC_Setup $0F,DAC_B4_C1_C2_C3_C4_Data
-DAC_C2_Setup:			DAC_Setup $11,DAC_B4_C1_C2_C3_C4_Data
-DAC_C3_Setup:			DAC_Setup $12,DAC_B4_C1_C2_C3_C4_Data
-DAC_C4_Setup:			DAC_Setup $0B,DAC_B4_C1_C2_C3_C4_Data
+		DAC_Setup $0A,DAC_A2_Data
+		DAC_Setup $18,DAC_A3_Data
+		DAC_Setup $18,DAC_A4_Data
+		DAC_Setup $0C,DAC_A5_Data
+		DAC_Setup $09,DAC_A6_Data
+		DAC_Setup $18,DAC_A7_Data
+		DAC_Setup $18,DAC_A8_Data
+		DAC_Setup $0C,DAC_A9_Data
+		DAC_Setup $0A,DAC_AA_Data
+		DAC_Setup $0D,DAC_AB_Data
+		DAC_Setup $06,DAC_AC_Data
+		DAC_Setup $10,DAC_AD_AE_Data
+		DAC_Setup $18,DAC_AD_AE_Data
+		DAC_Setup $09,DAC_AF_B0_Data
+		DAC_Setup $12,DAC_AF_B0_Data
+		DAC_Setup $18,DAC_B1_Data
+		DAC_Setup $16,DAC_B2_B3_Data
+		DAC_Setup $20,DAC_B2_B3_Data
+		DAC_Setup $0C,DAC_B4_C1_C2_C3_C4_Data
+		DAC_Setup $0C,DAC_B5_Data
+		DAC_Setup $0C,DAC_B6_Data
+		DAC_Setup $18,DAC_B7_Data
+		DAC_Setup $0C,DAC_B8_B9_Data
+		DAC_Setup $0C,DAC_B8_B9_Data
+		DAC_Setup $18,DAC_BA_Data
+		DAC_Setup $18,DAC_BB_Data
+		DAC_Setup $18,DAC_BC_Data
+		DAC_Setup $0C,DAC_BD_Data
+		DAC_Setup $0C,DAC_BE_Data
+		DAC_Setup $1C,DAC_BF_Data
+		DAC_Setup $0B,DAC_C0_Data
+		DAC_Setup $0F,DAC_B4_C1_C2_C3_C4_Data
+		DAC_Setup $11,DAC_B4_C1_C2_C3_C4_Data
+		DAC_Setup $12,DAC_B4_C1_C2_C3_C4_Data
+		DAC_Setup $0B,DAC_B4_C1_C2_C3_C4_Data
 	endif
 	if (use_s3_samples<>0)||(use_sk_samples<>0)||(use_s3d_samples<>0)
-DAC_9C_Setup:			DAC_Setup $0A,DAC_9C_Data
-DAC_9D_Setup:			DAC_Setup $18,DAC_9D_Data
-DAC_9E_Setup:			DAC_Setup $18,DAC_9E_Data
+		DAC_Setup $0A,DAC_9C_Data
+		DAC_Setup $18,DAC_9D_Data
+		DAC_Setup $18,DAC_9E_Data
 	endif
 	if (use_s3_samples<>0)||(use_sk_samples<>0)
-DAC_9F_Setup:			DAC_Setup $0C,DAC_9F_Data
-DAC_A0_Setup:			DAC_Setup $0C,DAC_A0_Data
-DAC_A1_Setup:			DAC_Setup $0A,DAC_A1_Data
+		DAC_Setup $0C,DAC_9F_Data
+		DAC_Setup $0C,DAC_A0_Data
+		DAC_Setup $0A,DAC_A1_Data
 	endif
 	if (use_s2_samples<>0)
-DAC_C5_Setup:			DAC_Setup $17,DAC_C5_Data
-DAC_C6_Setup:			DAC_Setup $01,DAC_C6_Data
-DAC_C7_Setup:			DAC_Setup $06,DAC_C7_Data
-DAC_C8_Setup:			DAC_Setup $08,DAC_C8_Data
-DAC_C9_Setup:			DAC_Setup $1B,DAC_C9_CC_CD_CE_CF_Data
-DAC_CA_Setup:			DAC_Setup $0A,DAC_CA_D0_D1_D2_Data
-DAC_CB_Setup:			DAC_Setup $1B,DAC_CB_D3_D4_D5_Data
-DAC_CC_Setup:			DAC_Setup $12,DAC_C9_CC_CD_CE_CF_Data
-DAC_CD_Setup:			DAC_Setup $15,DAC_C9_CC_CD_CE_CF_Data
-DAC_CE_Setup:			DAC_Setup $1C,DAC_C9_CC_CD_CE_CF_Data
-DAC_CF_Setup:			DAC_Setup $1D,DAC_C9_CC_CD_CE_CF_Data
-DAC_D0_Setup:			DAC_Setup $02,DAC_CA_D0_D1_D2_Data
-DAC_D1_Setup:			DAC_Setup $05,DAC_CA_D0_D1_D2_Data
-DAC_D2_Setup:			DAC_Setup $08,DAC_CA_D0_D1_D2_Data
-DAC_D3_Setup:			DAC_Setup $08,DAC_CB_D3_D4_D5_Data
-DAC_D4_Setup:			DAC_Setup $0B,DAC_CB_D3_D4_D5_Data
-DAC_D5_Setup:			DAC_Setup $12,DAC_CB_D3_D4_D5_Data
+		DAC_Setup $17,DAC_C5_Data
+		DAC_Setup $01,DAC_C6_Data
+		DAC_Setup $06,DAC_C7_Data
+		DAC_Setup $08,DAC_C8_Data
+		DAC_Setup $1B,DAC_C9_CC_CD_CE_CF_Data
+		DAC_Setup $0A,DAC_CA_D0_D1_D2_Data
+		DAC_Setup $1B,DAC_CB_D3_D4_D5_Data
+		DAC_Setup $12,DAC_C9_CC_CD_CE_CF_Data
+		DAC_Setup $15,DAC_C9_CC_CD_CE_CF_Data
+		DAC_Setup $1C,DAC_C9_CC_CD_CE_CF_Data
+		DAC_Setup $1D,DAC_C9_CC_CD_CE_CF_Data
+		DAC_Setup $02,DAC_CA_D0_D1_D2_Data
+		DAC_Setup $05,DAC_CA_D0_D1_D2_Data
+		DAC_Setup $08,DAC_CA_D0_D1_D2_Data
+		DAC_Setup $08,DAC_CB_D3_D4_D5_Data
+		DAC_Setup $0B,DAC_CB_D3_D4_D5_Data
+		DAC_Setup $12,DAC_CB_D3_D4_D5_Data
 	endif
 	if (use_s3d_samples<>0)
-DAC_D6_Setup:			DAC_Setup $01,DAC_D6_Data
-DAC_D7_Setup:			DAC_Setup $12,DAC_D7_Data
+		DAC_Setup $01,DAC_D6_Data
+		DAC_Setup $12,DAC_D7_Data
 	endif
 	if (use_s3_samples<>0)
-DAC_D8_Setup:			DAC_Setup $16,DAC_D8_D9_Data
-DAC_D9_Setup:			DAC_Setup $20,DAC_D8_D9_Data
+		DAC_Setup $16,DAC_D8_D9_Data
+		DAC_Setup $20,DAC_D8_D9_Data
 	endif
 	endm
 
