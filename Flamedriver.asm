@@ -440,8 +440,6 @@ MusID_SegaSound			= sfx_Sega
 MusID_SegaSound			= 0FFh
 		endif
 	endif
-
-
 ; ---------------------------------------------------------------------------
 NoteRest				= 080h
 FirstCoordFlag			= 0E0h
