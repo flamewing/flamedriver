@@ -229,6 +229,15 @@ zTracksSaveEnd:
 		fatal "The RAM variable declarations are too large by $\{$} bytes."
 	endif
 		dephase
+zNumMusicTracks = (zTracksEnd-zTracksStart)/zTrack.len
+zNumMusicFMorPSGTracks = (zTracksEnd-zSongFM1)/zTrack.len
+zNumMusicFMorDACTracks = (zSongPSG1-zTracksStart)/zTrack.len
+zNumMusicFMTracks = (zSongPSG1-zSongFM1)/zTrack.len
+zNumMusicFM1Tracks = (zSongFM4-zSongFM1)/zTrack.len
+zNumMusicFM2Tracks = (zSongPSG1-zSongFM4)/zTrack.len
+zNumMusicPSGTracks = (zTracksEnd-zSongPSG1)/zTrack.len
+zNumSFXTracks = (zTracksSFXEnd-zTracksSFXStart)/zTrack.len
+zNumSaveTracks = (zTracksSaveEnd-zTracksSaveStart)/zTrack.len
 ; ---------------------------------------------------------------------------
 		!org z80_SoundDriverStart
 z80_SoundDriver:
@@ -767,7 +776,7 @@ zUpdateMusic:
 		ld	ix, zSongDAC					; ix = DAC track RAM
 		bit	7, (ix+zTrack.PlaybackControl)	; Is DAC track playing?
 		call	nz, zUpdateDACTrack			; Branch if yes
-		ld	b, (zTracksEnd-zSongFM1)/zTrack.len	; Number of tracks
+		ld	b, zNumMusicFMorPSGTracks		; Number of FM+PSG tracks
 		ld	ix, zSongFM1					; ix = FM1 track RAM
 		jr	zTrackUpdLoop					; Play all tracks
 
@@ -780,7 +789,7 @@ zUpdateSFXTracks:
 		ld	a, zmake68kBank(SndBank)		; Get SFX bank ID
 		bankswitch							; Bank switch to SFX
 		ld	ix, zTracksSFXStart				; ix = start of SFX track RAM
-		ld	b, (zTracksSFXEnd-zTracksSFXStart)/zTrack.len	; Number of channels
+		ld	b, zNumSFXTracks				; Number of channels
 
 zTrackUpdLoop:
 		push	bc							; Save bc
@@ -1667,7 +1676,7 @@ zFadeEffects:
 ;sub_52E
 zStopSFX:
 		ld	ix, zTracksSFXStart				; ix = pointer to SFX track memory
-		ld	b, (zTracksSFXEnd-zTracksSFXStart)/zTrack.len	; Number of channels
+		ld	b, zNumSFXTracks				; Number of channels
 		ld	a, 1							; a = 1
 		ld	(zUpdatingSFX), a				; Set flag to update SFX
 
@@ -1744,7 +1753,7 @@ zPlayMusic:
 		ldir								; while (bc-- > 0) *de++ = *hl++;
 		ld	hl, zTracksSaveStart			; hl = pointer to saved song's RAM area
 		ld	de, zTrack.len					; Spacing between tracks
-		ld	b, (zTracksSaveEnd-zTracksSaveStart)/zTrack.len	; Number of tracks
+		ld	b, zNumSaveTracks				; Number of tracks
 
 .loop:
 		ld	a, (hl)							; Get playback control byte for song
@@ -2218,7 +2227,7 @@ zPauseUnpause:
 		or	a								; Is it zero?
 		jp	nz, zMusicFade					; Stop all music if not
 		ld	ix, zSongFM1					; Start with FM1 track
-		ld	b, (zSongPSG1-zSongFM1)/zTrack.len	; Number of FM tracks
+		ld	b, zNumMusicFMTracks			; Number of FM tracks
 		ld	a, (zDACEnable)					; Get DAC enable
 		or	a								; Is it supposed to be on?
 		jr	z, .fm_loop						; Branch if not
@@ -2242,7 +2251,7 @@ zPauseUnpause:
 		djnz	.fm_loop					; Loop for all tracks
 
 		ld	ix, zTracksSFXStart				; Start at the start of SFX track data
-		ld	b, (zTracksSFXEnd-zTracksSFXStart)/zTrack.len	; Number of tracks
+		ld	b, zNumSFXTracks				; Number of tracks
 
 .psg_loop:
 		bit	7, (ix+zTrack.PlaybackControl)	; Is track playing?
@@ -2309,7 +2318,7 @@ zDoMusicFadeOut:
 		jp	z, zMusicFade					; Stop all music if it is zero
 		bankswitchToMusic
 		ld	ix, zTracksStart				; ix = pointer to track RAM
-		ld	b, (zSongPSG1-zTracksStart)/zTrack.len	; Number of FM+DAC tracks
+		ld	b, zNumMusicFMorDACTracks		; Number of FM+DAC tracks
 
 .loop:
 		inc	(ix+zTrack.Volume)				; Decrease volume
@@ -2348,7 +2357,7 @@ zDoMusicFadeIn:
 		ret	nz								; Return if it is not yet zero
 		ld	a, (zFadeDelayTimeout)			; Get current fade delay timeout
 		ld	(zFadeDelay), a					; Reset to starting fade delay
-		ld	b, (zSongPSG1-zSongFM1)/zTrack.len	; Number of FM tracks
+		ld	b, zNumMusicFMTracks			; Number of FM tracks
 		ld	ix, zSongFM1					; ix = start of FM1 RAM
 		ld	de, zTrack.len					; Spacing between tracks
 
@@ -2364,7 +2373,7 @@ zDoMusicFadeIn:
 		ld	hl, zFadeInTimeout				; Get fading timeout
 		dec	(hl)							; Decrement it
 		ret	nz								; Return if still fading
-		ld	b, (zTracksEnd-zSongPSG1)/zTrack.len	; Number of PSG tracks
+		ld	b, zNumMusicPSGTracks			; Number of PSG tracks
 		ld	ix, zSongPSG1					; ix = start of PSG RAM
 		ld	de, zTrack.len					; Spacing between tracks
 
@@ -2415,7 +2424,7 @@ zMusicFade:
 
 zMusicFadeSimple:
 		ld	ix, zFMDACInitBytes				; Initialization data for channels
-		ld	b, (zSongPSG1-zSongFM1)/zTrack.len	; Number of FM channels
+		ld	b, zNumMusicFMTracks			; Number of FM channels
 
 .loop:
 		push	bc							; Save bc for loop
@@ -2437,7 +2446,7 @@ zMusicFadeSimple:
 		djnz	.loop						; Loop while b > 0
 
 		ld	ix, zPSGInitBytes				; Initialization data for channels
-		ld	b, (zTracksEnd-zSongPSG1)/zTrack.len	; Loop 4 times: 3 PSG channels + noise channel
+		ld	b, zNumMusicPSGTracks			; Number of PSG tracks
 
 .looppsg:
 		push	bc							; Save bc for loop
@@ -2483,7 +2492,7 @@ zFMClearSSGEGOps:
 zPauseAudio:
 		push	bc							; Save bc
 		push	af							; Save af
-		ld	b, (zSongFM4-zSongFM1)/zTrack.len	; FM1/FM2/FM3
+		ld	b, zNumMusicFM1Tracks			; FM1/FM2/FM3
 		ld	a, 0B4h							; Command to select AMS/FMS/panning register (FM1)
 		ld	c, 0							; AMS=FMS=panning=0
 
@@ -2494,7 +2503,7 @@ zPauseAudio:
 		inc	a								; Advance to next channel
 		djnz	.loop1						; Loop for all channels
 
-		ld	b, (zSongPSG1-zSongFM4)/zTrack.len	; FM4/FM5/FM6
+		ld	b, zNumMusicFM2Tracks			; FM4/FM5/FM6
 		ld	a, 0B4h							; Command to select AMS/FMS/panning register
 
 .loop2:
@@ -2505,7 +2514,7 @@ zPauseAudio:
 		djnz	.loop2						; Loop for all channels
 
 		ld	c, 0							; Note off for all operators
-		ld	b, (zSongPSG1-zSongFM1)/zTrack.len+1	; FM channels + gap between FM3 and FM4
+		ld	b, zNumMusicFMTracks+1			; FM channels + gap between FM3 and FM4
 		ld	a, 28h							; Command to send note on/off
 
 .loop3:
@@ -2525,7 +2534,7 @@ zPauseAudio:
 ;sub_9BC
 zPSGSilenceAll:
 		push	bc							; Save bc
-		ld	b, (zTracksEnd-zSongPSG1)/zTrack.len+1	; Loop 4 times: 3 PSG channels + noise channel
+		ld	b, zNumMusicPSGTracks+1			; Loop 4 times: 3 PSG channels + noise channel
 		ld	a, 9Fh							; Command to silence PSG1
 
 .loop:
@@ -2551,7 +2560,7 @@ TempoWait:
 		ret	nc								; If the addition did not overflow, return
 		ld	hl, zTracksStart+zTrack.DurationTimeout	; Duration timeout of first track
 		ld	de, zTrack.len					; Spacing between tracks
-		ld	b, (zTracksEnd-zTracksStart)/zTrack.len	; Number of tracks
+		ld	b, zNumMusicTracks				; Number of tracks
 
 .loop:
 		inc	(hl)							; Delay notes another frame
@@ -2693,7 +2702,7 @@ zFadeInToPrevious:
 
 .no_dac:
 		ld	ix, zSongFM1					; ix = pointer to FM1 track RAM
-		ld	b, (zTracksEnd-zSongFM1)/zTrack.len	; Number of FM+PSG tracks
+		ld	b, zNumMusicFMorPSGTracks		; Number of FM+PSG tracks
 
 .loop:
 		ld	a, (ix+zTrack.VoiceControl)		; Get voice bits
@@ -3746,7 +3755,7 @@ cfHaltSound:
 		push	ix							; Save ix
 		push	de							; Save de
 		ld	ix, zTracksStart				; Start of song RAM
-		ld	b, (zTracksEnd-zTracksStart)/zTrack.len	; Number of tracks
+		ld	b, zNumMusicTracks				; Number of tracks
 		ld	de, zTrack.len					; Spacing between tracks
 
 .loop1:
@@ -3762,7 +3771,7 @@ cfHaltSound:
 		push	ix							; Save ix
 		push	de							; Save de
 		ld	ix, zTracksStart				; Start of song RAM
-		ld	b, (zTracksEnd-zTracksStart)/zTrack.len	; Number of tracks
+		ld	b, zNumMusicTracks				; Number of tracks
 		ld	de, zTrack.len					; Spacing between tracks
 
 .loop2:
@@ -3806,7 +3815,7 @@ cfCopyData:
 ;
 ;loc_F8B
 cfSetTempoDivider:
-		ld	b, (zTracksEnd-zTracksStart)/zTrack.len	; Number of tracks
+		ld	b, zNumMusicTracks				; Number of tracks
 		ld	hl, zTracksStart+zTrack.TempoDivider	; Want to change tempo dividers
 
 .loop:
