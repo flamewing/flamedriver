@@ -3021,13 +3021,13 @@ cfSetVolume:
 		srl	a
 		srl	a
 		srl	a
-		xor	0Fh								; Invert lower nibble's bits
+		cpl									; Invert bits
 		and	0Fh								; Clear out high nibble
 		jp	zStoreTrackVolume
 ; ---------------------------------------------------------------------------
 .not_psg:
-		xor	7Fh								; Invert parameter byte (except irrelevant sign bit)
-		and	7Fh								; Strip sign bit
+		cpl									; Invert parameter byte
+		and	7Fh								; Strip irrelevant sign bit
 		ld	(ix+zTrack.Volume), a			; Set as new track volume
 		jr	zSendTL							; Begin using new volume immediately
 
