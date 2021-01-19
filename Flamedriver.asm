@@ -1614,7 +1614,6 @@ zPlaySFXByIndex:
 		ret	nc
 		; "PlayVoice/PlayDACSFX" in ValleyBell's SMPS disassemblies
 		sub	DACID__First-1
-		ld	a, 42
 		ld	(zDACIndex), a
 		ld	a, 1
 		ld	(zSongDAC.DACSFXPlaying), a
