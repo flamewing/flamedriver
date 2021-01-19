@@ -80,6 +80,7 @@ zTrack STRUCT DOTS
 	; ---------------------------------
 	FreqHigh:			ds.b 1	; S&K: 0Eh		; For FM/PSG channels
 	VoiceSongID:		ds.b 1	; S&K: 0Fh		; For using voices from a different song
+	DACSFXPlaying:
 	Detune:				ds.b 1	; S&K: 10h/11h	; In S&K, some places used 11h instead of 10h
 						;ds.b 6	; S&K: 11h-16h	; Unused
 	VolEnv:				ds.b 1	; S&K: 17h		; Used for dynamic volume adjustments
@@ -375,6 +376,22 @@ SndID__FirstContinuous	= 0BCh-33h+SndID__First
 SndID__FirstContinuous	= SndID__End
 	endif
 
+	ifndef DACID__First
+		ifdef dac__First
+DACID__First	= dac__First
+		else
+DACID__First	= SndID__End
+		endif
+	endif
+
+	ifndef DACID__End
+		ifdef dac__End
+DACID__End	= dac__End
+		else
+DACID__End	= SndID__End
+		endif
+	endif
+
 	ifndef FadeID__First
 		ifdef mus__FirstCmd
 FadeID__First			= mus__FirstCmd
@@ -423,6 +440,8 @@ MusID_SegaSound			= sfx_Sega
 MusID_SegaSound			= 0FFh
 		endif
 	endif
+
+
 ; ---------------------------------------------------------------------------
 NoteRest				= 080h
 FirstCoordFlag			= 0E0h
@@ -1589,7 +1608,17 @@ zPlaySFXByIndex:
 	endif
 		cp	SndID__End						; Is this a sound effect?
 		jp	c, zPlaySound_CheckRing			; Branch if yes
-		ret
+		cp	DACID__First
+		ret	c
+		cp	DACID__End
+		ret	nc
+		; "PlayVoice/PlayDACSFX" in ValleyBell's SMPS disassemblies
+		sub	DACID__First-1
+		ld	a, 42
+		ld	(zDACIndex), a
+		ld	a, 1
+		ld	(zSongDAC.DACSFXPlaying), a
+		jp	zClearNextSound
 ; End of function zPlaySFXByIndex
 
 ; =============== S U B	R O U T	I N E =======================================
@@ -2655,10 +2684,12 @@ zFadeInToPrevious:
 		ld	(zDACEnable), a					; Restore it
 		or	a
 		jr	z, .no_dac
-		ld	hl, zSongDAC.PlaybackControl
+		ld	ix, zSongDAC
+		xor	a
+		ld	(ix+zTrack.DACSFXPlaying), a
 		ld	a, 84h							; a = 'track is playing' and 'track is resting' flags
-		or	(hl)							; Add in track playback control bits
-		ld	(hl), a							; Save everything
+		or	(ix+zTrack.PlaybackControl)				; Add in track playback control bits
+		ld	(ix+zTrack.PlaybackControl), a				; Save everything
 		ld	c, 6							; Get voice control byte for FM6
 		ld	a, 28h							; Write to KEY ON/OFF port
 		call	zWriteFMI
@@ -2744,6 +2775,10 @@ zUpdateDACTrack_cont:
 
 .got_sample:
 		ld	(ix+zTrack.SavedDAC), a			; Store new DAC sample
+		ld	a, (ix+zTrack.DACSFXPlaying)
+		or	a
+		jr	nz, .get_duration
+		ld	a, (ix+zTrack.SavedDAC)
 		sub	NoteRest						; Is it a rest?
 		jp	z, .get_duration				; Branch if yes
 		bit	2, (ix+zTrack.PlaybackControl)	; Is SFX overriding DAC channel?
@@ -4061,11 +4096,15 @@ zPlayDigitalAudio:
 		ld	a, 2Bh							; DAC enable/disable register
 		ld	c, 0							; Value to disable DAC
 		call	zWriteFMI					; Send YM2612 command
-		ld	hl, zSongDAC					; Get pointer to DAC track
+		ld	hl, zSongFM6					; Get pointer to FM6 track
 		ld	a, (zDACEnable)					; Get DAC enable
 		or	a								; Is DAC supposed to be enabled?
-		jr	nz, .enabletrack				; Branch if yes
-		ld	hl, zSongFM6					; Get pointer to FM6 track
+		jr	z, .enabletrack					; Branch if not
+		ld	hl, zSongDAC					; Get pointer to DAC track
+		; Don't allow music DAC to be re-enabled by DAC SFX ending during fading
+		ld	a, (zFadeInTimeout)				; Get fading timeout
+		or	a						; Is music being faded?
+		jr	nz, .dac_idle_loop				; Branch if yes
 
 .enabletrack:
 		res	2, (hl)							; Mark track as no longer being overridden
@@ -4162,9 +4201,9 @@ zPlayDigitalAudio:
 		ld	a, d							; a = d
 		or	e								; Is length zero?
 		jp	nz, .dac_playback_loop			; Loop if not
-
 		xor	a								; a = 0
 		ld	(zDACIndex), a					; Mark DAC as being idle
+		ld	(zSongDAC.DACSFXPlaying),a
 		jp	zPlayDigitalAudio				; Loop
 ; ---------------------------------------------------------------------------
 ; ===========================================================================
