@@ -4201,6 +4201,7 @@ zPlayDigitalAudio:
 		ld	a, d							; a = d
 		or	e								; Is length zero?
 		jp	nz, .dac_playback_loop			; Loop if not
+
 		xor	a								; a = 0
 		ld	(zDACIndex), a					; Mark DAC as being idle
 		ld	(zSongDAC.DACSFXPlaying),a
