@@ -498,6 +498,40 @@ __LABEL__ label $
 	endif
     endm
 
+setMaxAR macro
+		or	1Fh								; Set AR to maximum
+    endm
+
+calcVolume macro
+		or	a								; Is it positive?
+		jp	p, .skip_track_vol				; Branch if yes
+		add	a, (ix+zTrack.Volume)			; Add track's volume to it
+		; TODO: Maybe turn this into a saturation add to prevent clipping?
+.skip_track_vol:
+		and	7Fh								; Strip sign bit
+    endm
+
+zFastWriteFM macro reg, data, dataMacro
+		ld	a, reg							; Get register to write to
+		add	a, c							; Add the channel bits to the register address
+		ld	(iy+0), a						; Select YM2612 register
+		ld	a, data							; a = data to send
+		if "dataMacro"<>""
+			dataMacro
+		endif
+		ld	(iy+1), a						; Send data to register
+    endm
+
+zGetFMPartPointer macro reg
+		ld	c, (ix+zTrack.VoiceControl)		; Get voice control bits for future use
+		ld	iy, zYM2612_A0					; Point to part I
+		bit	2, c							; Is this the DAC channel or FM4 or FM5 or FM6?
+		jr	z, .notFMII						; If not, write reg/data pair to part I
+		res	2, c							; Strip 'bound to part II regs' bit
+		ld	iy, zYM2612_A1					; Point to part II
+.notFMII:
+    endm
+
 ; function to turn a 68k address into a word the Z80 can use to access it
 zmake68kPtr function addr,zROMWindow+(addr&7FFFh)
 
@@ -1528,37 +1562,48 @@ zFMInstrumentSSGEGTable_End
 ;
 ;sub_4B9
 zSendFMInstrument:
+		bit	2, (ix+zTrack.PlaybackControl)	; Is SFX overriding this track?
+		jr	z, .active						; Is so, quit
+		ld	c, zFMInstrumentOperatorTable_End-zFMInstrumentRegTable
+		ld	b, 0
+		add	hl, bc							; Point hl to TL data
+		ld	(ix+zTrack.TLPtrLow), l			; Save low byte of pointer to (not yet uploaded) TL data
+		ld	(ix+zTrack.TLPtrHigh), h		; Save high byte of pointer to (not yet uploaded) TL data
+		ret
+; ---------------------------------------------------------------------------
+.active:
+		push	iy							; Save iy
+		zGetFMPartPointer					; Point iy to appropriate FM part
 		ld	de, zFMInstrumentRegTable		; de = pointer to register output table
-		ld	c, (ix+zTrack.AMSFMSPan)		; Send track AMS/FMS/panning
-		ld	a, 0B4h							; Select AMS/FMS/panning register
-		call	zWriteFMIorII				; Set track data
-		call	zSendFMInstrData			; Send data to register
+		zFastWriteFM 0B4h, (ix+zTrack.AMSFMSPan)
+		ld	a, (hl)							; Get current feedback/algorithm
 		ld	(ix+zTrack.FeedbackAlgo), a		; Save current feedback/algorithm
+		jp	m, .gotssgeg					; Branch if yes
+		ld	b, zFMInstrumentOperatorTable_End-zFMInstrumentRegTable	; Number of commands to issue
+		ld	a, (ix+zTrack.HaveSSGEGFlag)	; Get custom SSG-EG flag
+		or	a								; Does track have custom SSG-EG data?
+		jp	p, .sendinstrument				; Branch if yes
 
+.gotssgeg:
+		; Handle case of SSG-EG
 		; Start with detune/multiplier operators
-		ld	b, zFMInstrumentRSARTable-zFMInstrumentOperatorTable	; Number of commands to issue
-
-.loop1:
+		ld	b, zFMInstrumentRSARTable-zFMInstrumentRegTable	; Number of commands to issue
 		call	zSendFMInstrData			; Send FM instrument data
-		djnz	.loop1						; Loop
 
 		; Now for rate scaling/attack rate. The attack rate must be 1Fh if using
 		; SSG-EG, which is the reason for the split.
 		ld	b, zFMInstrumentAMD1RTable-zFMInstrumentRSARTable	; Number of commands to issue
-
-.loop2:
 		call	zSendFMInstrDataRSAR		; Send FM instrument data
-		djnz	.loop2						; Loop
 
 		; Finalize with all the other operators.
 		ld	b, zFMInstrumentOperatorTable_End-zFMInstrumentAMD1RTable	; Number of commands to issue
 
-.loop3:
+.sendinstrument:
 		call	zSendFMInstrData			; Send FM instrument data
-		djnz	.loop3						; Loop
 		ld	(ix+zTrack.TLPtrLow), l			; Save low byte of pointer to (not yet uploaded) TL data
 		ld	(ix+zTrack.TLPtrHigh), h		; Save high byte of pointer to (not yet uploaded) TL data
-		jp	zSendTL							; Send TL data
+		push	de							; Needed to balance stack
+		jp	zSendTL.got_pointers			; Send TL data
 ; End of function zSendFMInstrument
 
 ; =============== S U B	R O U T	I N E =======================================
@@ -1572,24 +1617,19 @@ zSendFMInstrument:
 ;
 ;sub_4DA
 zSendFMInstrData:
-		ld	a, (de)							; Get register output
+		zFastWriteFM (de), (hl)
 		inc	de								; Advance pointer
-		ld	c, (hl)							; Get value from instrument RAM
 		inc	hl								; Advance pointer
-		jp	zWriteFMIorII					; Write track data
+		djnz	zSendFMInstrData			; Loop
+		ret
 ; End of function zSendFMInstrData
 
 zSendFMInstrDataRSAR:
-		ld	a, (ix+zTrack.HaveSSGEGFlag)	; Get custom SSG-EG flag
-		or	a								; Does track have custom SSG-EG data?
-		jp	p, zSendFMInstrData				; Branch if not
-		ld	a, (hl)							; Get value from instrument RAM
-		inc	hl								; Advance pointer
-		or 1Fh								; Set AR to maximum
-		ld	c, a							; c = RS/AR for operator
-		ld	a, (de)							; Get register output
+		zFastWriteFM (de), (hl), setMaxAR
 		inc	de								; Advance pointer
-		jp	zWriteFMIorII					; Write track data
+		inc	hl								; Advance pointer
+		djnz	zSendFMInstrDataRSAR		; Loop
+		ret
 
 ; =============== S U B	R O U T	I N E =======================================
 ; Rotates sound queue and clears last entry. Then plays the popped sound from
@@ -2329,10 +2369,9 @@ zDoMusicFadeOut:
 .chk_change_volume:
 		bit	7, (ix+zTrack.PlaybackControl)	; Is track still playing?
 		jr	z, .next_track					; Branch if not
-		bit	2, (ix+zTrack.PlaybackControl)	; Is SFX overriding track?
-		jr	nz, .next_track					; Branch if yes
 		push	bc							; Save bc
-		call	zSendTL						; Send new volume
+		bit	2, (ix+zTrack.PlaybackControl)	; Is SFX overriding track?
+		call	z, zSendTL.active			; Send new volume if not
 		pop	bc								; Restore bc
 
 .next_track:
@@ -2365,7 +2404,7 @@ zDoMusicFadeIn:
 		dec	(ix+zTrack.Volume)				; Increase track volume
 		push	bc							; Save bc
 		bit	2, (ix+zTrack.PlaybackControl)	; Is 'SFX is overriding' bit set?
-		call	z, zSendTL					; Send new volume if not
+		call	z, zSendTL.active			; Send new volume if not
 		pop	bc								; Restore bc
 		add	ix, de							; Advance to next track
 		djnz	.fm_loop					; Loop for all tracks
@@ -2726,7 +2765,7 @@ zFadeInToPrevious:
 		push	bc							; Save bc
 		ld	b, a							; b = FM instrument
 		call	zGetFMInstrumentPointer		; hl = pointer to instrument data
-		call	zSendFMInstrument			; Send instrument
+		call	zSendFMInstrument.active	; Send instrument
 		pop	bc								; Restore bc
 
 .skip_track:
@@ -3082,28 +3121,28 @@ cfChangeVolume:
 ;
 ;sub_CBA
 zSendTL:
+		bit	2, (ix+zTrack.PlaybackControl)	; Is SFX overriding this track?
+		ret	nz								; Is so, quit
+
+.active:
+		push	iy							; Save iy
 		push	de							; Save de
 		ld	de, zFMInstrumentTLTable		; de = pointer to FM TL register table
+		zGetFMPartPointer					; Point iy to appropriate FM part
 		ld	l, (ix+zTrack.TLPtrLow)			; l = low byte of pointer to instrument's TL data
 		ld	h, (ix+zTrack.TLPtrHigh)		; h = high byte of pointer to instrument's TL data
+
+.got_pointers:
 		ld	b, zFMInstrumentTLTable_End-zFMInstrumentTLTable	; Number of entries
 
 .loop:
-		ld	a, (hl)							; a = register data
-		or	a								; Is it positive?
-		jp	p, .skip_track_vol				; Branch if yes
-		add	a, (ix+zTrack.Volume)			; Add track's volume to it
-
-.skip_track_vol:
-		and	7Fh								; Strip sign bit
-		ld	c, a							; c = new volume for operator
-		ld	a, (de)							; a = register write command
-		call	zWriteFMIorII				; Send it to YM2612
+		zFastWriteFM (de), (hl), calcVolume
 		inc	de								; Advance pointer
 		inc	hl								; Advance pointer
 		djnz	.loop						; Loop
 
 		pop	de								; Restore de
+		pop	iy								; Restore iy
 		ret
 ; End of function zSendTL
 
@@ -3379,7 +3418,7 @@ cfStopTrack:
 		bankswitchToMusic					; Bank switch to song bank
 		pop	hl								; Restore hl
 		call	zGetFMInstrumentOffset		; hl = pointer to instrument data
-		call	zSendFMInstrument			; Send FM instrument
+		call	zSendFMInstrument.active	; Send FM instrument
 		ld	a, zmake68kBank(SndBank)		; Get SFX bank
 		bankswitch							; Bank switch to it
 		ld	a, (ix+zTrack.HaveSSGEGFlag)	; Get custom SSG-EG flag
