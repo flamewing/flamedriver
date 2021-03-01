@@ -4703,8 +4703,14 @@ DACPointers label *
 		DAC_Setup $13,DAC_98_99_9A_Data
 		DAC_Setup $16,DAC_98_99_9A_Data
 		DAC_Setup $0C,DAC_9B_Data
+		DAC_Setup $0A,DAC_9C_Data
+		DAC_Setup $18,DAC_9D_Data
+		DAC_Setup $18,DAC_9E_Data
 	endif
 	if (use_s3_samples<>0)||(use_sk_samples<>0)
+		DAC_Setup $0C,DAC_9F_Data
+		DAC_Setup $0C,DAC_A0_Data
+		DAC_Setup $0A,DAC_A1_Data
 		DAC_Setup $0A,DAC_A2_Data
 		DAC_Setup $18,DAC_A3_Data
 		DAC_Setup $18,DAC_A4_Data
@@ -4740,16 +4746,6 @@ DACPointers label *
 		DAC_Setup $11,DAC_B4_C1_C2_C3_C4_Data
 		DAC_Setup $12,DAC_B4_C1_C2_C3_C4_Data
 		DAC_Setup $0B,DAC_B4_C1_C2_C3_C4_Data
-	endif
-	if (use_s3_samples<>0)||(use_sk_samples<>0)||(use_s3d_samples<>0)
-		DAC_Setup $0A,DAC_9C_Data
-		DAC_Setup $18,DAC_9D_Data
-		DAC_Setup $18,DAC_9E_Data
-	endif
-	if (use_s3_samples<>0)||(use_sk_samples<>0)
-		DAC_Setup $0C,DAC_9F_Data
-		DAC_Setup $0C,DAC_A0_Data
-		DAC_Setup $0A,DAC_A1_Data
 	endif
 	if (use_s2_samples<>0)
 		DAC_Setup $17,DAC_C5_Data
