@@ -82,7 +82,6 @@ zTrack STRUCT DOTS
 	VoiceSongID:		ds.b 1	; S&K: 0Fh		; For using voices from a different song
 	DACSFXPlaying:
 	Detune:				ds.b 1	; S&K: 10h/11h	; In S&K, some places used 11h instead of 10h
-						;ds.b 6	; S&K: 11h-16h	; Unused
 	VolEnv:				ds.b 1	; S&K: 17h		; Used for dynamic volume adjustments
 	; ---------------------------------
 	; Alternate names for same offsets:
@@ -93,7 +92,6 @@ zTrack STRUCT DOTS
 	PSGNoise:					; S&K: 1Ah
 	SSGEGPointerHigh:	ds.b 1	; S&K: 1Ah		; For FM channels, custom SSG-EG data pointer
 	; ---------------------------------
-	FeedbackAlgo:		ds.b 1	; S&K: 1Bh
 	TLPtrLow:			ds.b 1	; S&K: 1Ch
 	TLPtrHigh:			ds.b 1	; S&K: 1Dh
 	NoteFillTimeout:	ds.b 1	; S&K: 1Eh
@@ -1577,8 +1575,6 @@ zSendFMInstrument:
 		zGetFMPartPointer					; Point iy to appropriate FM part
 		ld	de, zFMInstrumentRegTable		; de = pointer to register output table
 		zFastWriteFM 0B4h, (ix+zTrack.AMSFMSPan)
-		ld	a, (hl)							; Get current feedback/algorithm
-		ld	(ix+zTrack.FeedbackAlgo), a		; Save current feedback/algorithm
 		ld	b, zFMInstrumentOperatorTable_End-zFMInstrumentRegTable	; Number of commands to issue
 		ld	a, (ix+zTrack.HaveSSGEGFlag)	; Get custom SSG-EG flag
 		or	a								; Does track have custom SSG-EG data?
