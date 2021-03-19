@@ -1564,6 +1564,7 @@ zFMInstrumentSSGEGTable_End
 zSendFMInstrument:
 		bit	2, (ix+zTrack.PlaybackControl)	; Is SFX overriding this track?
 		jr	z, .active						; Is so, quit
+
 		ld	c, zFMInstrumentOperatorTable_End-zFMInstrumentRegTable
 		ld	b, 0
 		add	hl, bc							; Point hl to TL data
@@ -1578,13 +1579,11 @@ zSendFMInstrument:
 		zFastWriteFM 0B4h, (ix+zTrack.AMSFMSPan)
 		ld	a, (hl)							; Get current feedback/algorithm
 		ld	(ix+zTrack.FeedbackAlgo), a		; Save current feedback/algorithm
-		jp	m, .gotssgeg					; Branch if yes
 		ld	b, zFMInstrumentOperatorTable_End-zFMInstrumentRegTable	; Number of commands to issue
 		ld	a, (ix+zTrack.HaveSSGEGFlag)	; Get custom SSG-EG flag
 		or	a								; Does track have custom SSG-EG data?
-		jp	p, .sendinstrument				; Branch if yes
+		jp	p, .sendinstrument				; Branch if not
 
-.gotssgeg:
 		; Handle case of SSG-EG
 		; Start with detune/multiplier operators
 		ld	b, zFMInstrumentRSARTable-zFMInstrumentRegTable	; Number of commands to issue
