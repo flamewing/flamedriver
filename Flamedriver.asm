@@ -505,7 +505,6 @@ calcVolume macro
 		jp	p, .skip_track_vol				; Branch if yes
 		add	a, (ix+zTrack.Volume)			; Add track's volume to it
 		; TODO: Maybe turn this into a saturation add to prevent clipping?
-		and	7Fh								; Strip sign bit
 .skip_track_vol:
     endm
 
@@ -1236,7 +1235,6 @@ zDoFMVolEnv:
 		push	bc							; Save bc
 		jr	nc, .skip_reg					; Branch if c bit shifted was zero
 		add	a, (hl)							; Add TL value to volume envelope
-		and	7Fh								; Strip sign bit
 		ld	c, a							; c = TL + volume envelope
 		ld	a, (de)							; a = YM2612 register
 		call	zWriteFMIorII				; Send TL data to YM2612
