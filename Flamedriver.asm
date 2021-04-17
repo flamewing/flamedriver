@@ -505,8 +505,8 @@ calcVolume macro
 		jp	p, .skip_track_vol				; Branch if yes
 		add	a, (ix+zTrack.Volume)			; Add track's volume to it
 		; TODO: Maybe turn this into a saturation add to prevent clipping?
-.skip_track_vol:
 		and	7Fh								; Strip sign bit
+.skip_track_vol:
     endm
 
 zFastWriteFM macro reg, data, dataMacro
