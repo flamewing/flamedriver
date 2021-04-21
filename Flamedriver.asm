@@ -504,7 +504,8 @@ calcVolume macro
 		or	a								; Is it positive?
 		jp	p, .skip_track_vol				; Branch if yes
 		add	a, (ix+zTrack.Volume)			; Add track's volume to it
-		; TODO: Maybe turn this into a saturation add to prevent clipping?
+		jr	nc, .skip_track_vol
+		ld	a, 7Fh							; Clamp volume attenuation if it overflows
 .skip_track_vol:
     endm
 
