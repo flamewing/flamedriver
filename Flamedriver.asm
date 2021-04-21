@@ -3054,6 +3054,7 @@ cfSilenceStopTrack:
 ;
 ;loc_C85
 cfSetVolume:
+		cpl									; Invert parameter byte
 		bit	7, (ix+zTrack.VoiceControl)		; Is this a PSG channel?
 		jr	z, .not_psg						; Branch if not
 		; The following code gets bits 3, 4, 5 and 6 from the parameter byte,
@@ -3063,12 +3064,10 @@ cfSetVolume:
 		srl	a
 		srl	a
 		srl	a
-		cpl									; Invert bits
 		and	0Fh								; Clear out high nibble
 		jp	zStoreTrackVolume
 ; ---------------------------------------------------------------------------
 .not_psg:
-		cpl									; Invert parameter byte
 		and	7Fh								; Strip irrelevant sign bit
 		ld	(ix+zTrack.Volume), a			; Set as new track volume
 		jr	zSendTL							; Begin using new volume immediately
