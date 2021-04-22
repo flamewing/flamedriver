@@ -5,6 +5,11 @@ Snd_Ending_Header:
 	smpsHeaderTempo     $01, $10
 
 	smpsHeaderDAC       Snd_Ending_DAC
+	; The $D5 in the below line is an invalid transpose value and
+	; creates notes which are impossibly low. In Sonic 3D's driver,
+	; these impossibly low notes would underflow and become higher
+	; notes, but other drivers (including Sonic 1 & 2's) will not handle
+	; this so gracefully, and instead produce incorrect notes.
 	smpsHeaderFM        Snd_Ending_FM1,	$D5, $0B
 	smpsHeaderFM        Snd_Ending_FM2,	$FD, $03
 	smpsHeaderFM        Snd_Ending_FM3,	$FD, $05
