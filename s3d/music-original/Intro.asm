@@ -5,6 +5,11 @@ Snd_Title_Header:
 	smpsHeaderTempo     $01, $04
 
 	smpsHeaderDAC       Snd_Title_DAC
+	; The $D4 in the below line is an invalid transpose value and
+	; creates notes which are impossibly low. In Sonic 3D's driver,
+	; these impossibly low notes would underflow and become higher
+	; notes, but other drivers (including Sonic 1 & 2's) will not handle
+	; this so gracefully, and instead produce incorrect notes.
 	smpsHeaderFM        Snd_Title_FM1,	$D4, $0B
 	smpsHeaderFM        Snd_Title_FM2,	$00, $03
 	smpsHeaderFM        Snd_Title_FM3,	$00, $05

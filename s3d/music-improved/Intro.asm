@@ -5,7 +5,16 @@ Snd_Title_Header:
 	smpsHeaderTempo     $01, $04
 
 	smpsHeaderDAC       Snd_Title_DAC
-	smpsHeaderFM        Snd_Title_FM1,	$D4, $0B
+	; The $14 in the below line was $D4 in the original song data, but
+	; that is an invalid transpose value and creates notes which are
+	; impossibly low. In Sonic 3D's driver, these impossibly low notes
+	; would underflow and become higher notes, but other drivers
+	; (including Sonic 1 & 2's) will not handle this so gracefully, and
+	; instead produce incorrect notes.
+	; To address this, the value has been corrected to its
+	; post-underflow form, making it clear that this actually *raises*
+	; the pitch of the notes.
+	smpsHeaderFM        Snd_Title_FM1,	$14, $0B
 	smpsHeaderFM        Snd_Title_FM2,	$00, $03
 	smpsHeaderFM        Snd_Title_FM3,	$00, $05
 	smpsHeaderFM        Snd_Title_FM4,	$FC, $18
