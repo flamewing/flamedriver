@@ -145,7 +145,11 @@ Snd_GreenGZ2_Loop06:
 	dc.b	nG5, $06, nA5, nB5, nC6, nA5, nB5, nC6, nD6, nB5, nC6, nD6
 	dc.b	nE6, nC6, nD6, nE6, nF6
 	smpsFMAlterVol      $FF
-	smpsCall            Snd_GreenGZ2_Call07
+	; Snd_GreenGZ2_Call07 does 'smpsFMAlterVol $01' to counteract the 'smpsFMAlterVol $FF'
+	; performed by Snd_GreenGZ2_Call06, but this call isn't paired with a call to Snd_GreenGZ2_Call06,
+	; causing the volume of this channel to lowered by 1 every time the song loops.
+	; See https://www.youtube.com/watch?v=ZmryHIcNUdQ
+	smpsCall            Snd_GreenGZ2_Call07b
 	smpsJump            Snd_GreenGZ2_FM2
 
 Snd_GreenGZ2_Call05:
@@ -217,8 +221,11 @@ Snd_GreenGZ2_Call06:
 	smpsReturn
 
 Snd_GreenGZ2_Call07:
-	smpsSetvoice        $04
 	smpsFMAlterVol      $01
+
+Snd_GreenGZ2_Call07b:
+	smpsSetvoice        $04
+;	smpsFMAlterVol      $01 ; Moved to above to prevent a volume leak
 	smpsAlterPitch      $0C
 	smpsModSet          $07, $01, $03, $05
 	dc.b	nRst, $0C, nG5, nE5, $06, nRst, nF5, nRst, nG5, nC6, $0C, $06
