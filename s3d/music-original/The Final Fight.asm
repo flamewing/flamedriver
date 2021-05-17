@@ -5,6 +5,11 @@ Snd_FinalFight_Header:
 	smpsHeaderTempo     $01, $0A
 
 	smpsHeaderDAC       Snd_FinalFight_DAC
+	; The $B4 in the below line is an invalid transpose value that
+	; creates impossibly-low notes. In Sonic 3D's driver, these
+	; impossibly low notes would underflow and safely wrap around, but
+	; other drivers (including Sonic 1 & 2's) will not handle this so
+	; gracefully, and instead produce incorrect notes.
 	smpsHeaderFM        Snd_FinalFight_FM1,	$B4, $17
 	smpsHeaderFM        Snd_FinalFight_FM2,	$00, $14
 	smpsHeaderFM        Snd_FinalFight_FM3,	$00, $14
