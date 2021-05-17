@@ -6,7 +6,7 @@ Snd_2PMenu_Header:
 
 	smpsHeaderDAC       Snd_2PMenu_DAC
 	smpsHeaderFM        Snd_2PMenu_FM1,	$00, $03
-	smpsHeaderFM        Snd_2PMenu_FM2,	$F4, $00
+	smpsHeaderFM        Snd_2PMenu_FM2,	$F4, $00 ; This transpose causes a note to underflow (which may have been deliberate)
 	smpsHeaderFM        Snd_2PMenu_FM3,	$00, $05
 	smpsHeaderFM        Snd_2PMenu_FM4,	$00, $05
 	smpsHeaderFM        Snd_2PMenu_FM5,	$00, $05
@@ -44,6 +44,8 @@ Snd_2PMenu_Loop04:
 Snd_2PMenu_FM2:
 	smpsCall            Snd_2PMenu_Call03
 	smpsSetvoice        $06
+	; This use of nG0 is invalid, as the transpose is -$C, which causes
+	; the note to underflow and become nG7.
 	dc.b	nG0, $60, nRst
 	smpsSetvoice        $07
 	dc.b	nE5, $0D
@@ -55,6 +57,8 @@ Snd_2PMenu_FM2:
 	dc.b	nE5, $0B, nRst, $48
 	smpsFMAlterVol      $F8
 	smpsSetvoice        $06
+	; This use of nG0 is invalid, as the transpose is -$C, which causes
+	; the note to underflow and become nG7.
 	dc.b	nG0, $60, nRst
 	smpsSetvoice        $07
 	dc.b	nE5, $0D
