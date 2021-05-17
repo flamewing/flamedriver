@@ -762,29 +762,9 @@ Credits_Call11:
 	dc.b	nRst, $0C, nC6, $04, nRst, $10, nC6, $04, nRst, $0C, nC6, $0C
 	dc.b	nD6, $08, nC6, $04, nRst, $18, nRst, $0C, nB5, $04, nRst, $10
 	dc.b	nB5, $04, nRst, $0C, nB5, $0C, nC6, $08, nB5, $04, nRst, $18
-	dc.b	nRst, $0C
-	if 1==1
-	; this part of the original credits music (CNZ PSG) sounds buggy (dissonant)
-	dc.b	nA5, $04, nRst, $10, nA5, $04, nRst, $0C, nA5, $0C, nB5, $08
-	dc.b	nA5, $04, nRst, $18, nRst, $0C, nAb5, $04, nRst, $10, nAb5, $04
-	dc.b	nRst, $0C, nAb5, $0C, nBb5, $08
-	else
-	; replace the above block of notes with this to fix it.
-	; (I'm not sure why, but the notes $C6 and $C7 are broken here,
-	;  so I've replaced them with pitch-shifted $C8s)
-	smpsAlterNote       $C0
-	dc.b	nB5, $04, nRst, $10, nB5, $04, nRst, $0C, nB5, $0C
-	smpsAlterNote       $00
-	dc.b	nB5, $08
-	smpsAlterNote       $C0
-	dc.b	nB5, $04, nRst, $24
-	smpsAlterNote       $00
-	dc.b	nAb5, $04, nRst, $10, nAb5, $04, nRst, $0C, nAb5, $0C
-	smpsAlterNote       $E0
-	dc.b	nB5, $08
-	smpsAlterNote       $00
-	endif
-	dc.b	nAb5, $04, nRst, $18
+	dc.b	nRst, $0C, nA5, $04, nRst, $10, nA5, $04, nRst, $0C, nA5, $0C
+	dc.b	nB5, $08, nA5, $04, nRst, $18, nRst, $0C, nAb5, $04, nRst, $10
+	dc.b	nAb5, $04, nRst, $0C, nAb5, $0C, nBb5, $08, nAb5, $04, nRst, $18
 	smpsReturn
 
 Credits_Call0B:
@@ -1107,6 +1087,10 @@ Credits_Loop39:
 	smpsLoop            $00, $0A, Credits_Loop39
 	dc.b	nRst, $60
 	smpsPSGvoice        $00
+	; This is wrong: it should convert from EHZ 2P's PSG2 transpose ($D0)
+	; to CNZ's PSG2 transpose ($DC), but instead of adding $C, it subtracts
+	; $C, causing the note to be too low and underflow the sound driver's
+	; frequency table, producing invalid notes.
 	smpsAlterPitch      $F4
 	smpsPSGAlterVol     $FF
 	smpsAlterPitch      $E8
@@ -1122,6 +1106,8 @@ Credits_Loop39:
 	smpsPSGAlterVol     $FC
 	dc.b	nRst, nC4, nRst, nC4, nRst, nC4, $18, $08, nC4, $04
 	smpsPSGAlterVol     $01
+	; If the above bug is fixed, then this line needs removing (the track
+	; will already be $18 keys higher).
 	smpsAlterPitch      $18
 	smpsPSGvoice        fTone_05
 	smpsAlterNote       $01
