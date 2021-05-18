@@ -147,7 +147,7 @@ Snd_GreenGZ2_Loop06:
 	smpsFMAlterVol      $FF
 	; Snd_GreenGZ2_Call07 does 'smpsFMAlterVol $01' to counteract the 'smpsFMAlterVol $FF'
 	; performed by Snd_GreenGZ2_Call06, but this call isn't paired with a call to Snd_GreenGZ2_Call06,
-	; causing the volume of this channel to lowered by 1 every time the song loops.
+	; causing the volume of this channel to be lowered by 1 every time the song loops.
 	; See https://www.youtube.com/watch?v=ZmryHIcNUdQ
 	smpsCall            Snd_GreenGZ2_Call07
 	smpsJump            Snd_GreenGZ2_FM2
