@@ -467,8 +467,7 @@ bankswitch macro
 			rrca
 			ld	(hl), a
 		endm
-		xor	a
-		ld	(hl), a
+		ld	(hl), h							; The low bit of h is 0
     endm
 
 bankswitchLoop macro
@@ -477,8 +476,7 @@ bankswitchLoop macro
 		ld	(zBankRegister), a
 		rrca
 		djnz	.bankloop
-		xor	a
-		ld	(zBankRegister), a
+		ld	(hl), h							; The low bit of h is 0
     endm
 
 bankswitchToMusic macro
@@ -1118,8 +1116,8 @@ zFinishTrackUpdate:
 		bit	1, (ix+zTrack.PlaybackControl)	; Is 'do not attack next note' flag set?
 		ret	nz								; Branch if yes
 		xor	a								; Clear a
-		ld	(ix+zTrack.ModulationSpeed), a	; Clear modulation speed
-		ld	(ix+zTrack.ModulationValLow), a	; Clear low byte of accumulated modulation
+		ld	(ix+zTrack.ModEnvIndex), a		; Clear modulation envelope index
+		ld	(ix+zTrack.ModEnvSens), a		; Clear modulation envelope multiplier
 		ld	(ix+zTrack.VolEnv), a			; Reset volume envelope
 		ld	a, (ix+zTrack.NoteFillMaster)	; Get master note fill
 		ld	(ix+zTrack.NoteFillTimeout), a	; Set note fill timeout
@@ -2777,18 +2775,20 @@ zFadeInToPrevious:
 ; ---------------------------------------------------------------------------
 ;loc_AA5
 zPSGFrequencies:
-		; This table starts with 12 notes not in S1 or S2:
+		; This table differs from the one in Sonic 1 and 2's drivers by
+		; having an extra octave at the start and two extra notes at
+		; the end, allowing it to span notes c-0 to b-7.
 		dw 3FFh,3FFh,3FFh,3FFh,3FFh,3FFh,3FFh,3FFh,3FFh,3F7h,3BEh,388h
-		; The following notes are present on S1 and S2 too:
 		dw 356h,326h,2F9h,2CEh,2A5h,280h,25Ch,23Ah,21Ah,1FBh,1DFh,1C4h
 		dw 1ABh,193h,17Dh,167h,153h,140h,12Eh,11Dh,10Dh,0FEh,0EFh,0E2h
 		dw 0D6h,0C9h,0BEh,0B4h,0A9h,0A0h,097h,08Fh,087h,07Fh,078h,071h
 		dw 06Bh,065h,05Fh,05Ah,055h,050h,04Bh,047h,043h,040h,03Ch,039h
 		dw 036h,033h,030h,02Dh,02Bh,028h,026h,024h,022h,020h,01Fh,01Dh
 		dw 01Bh,01Ah,018h,017h,016h,015h,013h,012h,011h,010h,000h,000h
-		; Then, it falls through to the 12 base notes from FM octaves.
 ;loc_B4D
 zFMFrequencies:
+		; This table spans only a single octave, as the octave frequency
+		; is calculated at run-time unlike in Sonic 1 and 2's drivers.
 		dw 284h,2ABh,2D3h,2FEh,32Dh,35Ch,38Fh,3C5h,3FFh,43Ch,47Ch,4C0h
 ; ---------------------------------------------------------------------------
 
@@ -4065,6 +4065,11 @@ zDoVolEnv:
 		cp	80h								; Is it a command to reset envelope?
 		jr	z, zDoVolEnvReset				; Branch if yes
 
+		; NOTE: This code is meant for flag 82h, but can happen without it.
+		; In order to get here, the flutter value would have to be:
+		; (1) negative;
+		; (2) not 80h, 81h or 83h.
+		; VolEnv_0A contains such a value, but luckily isn't used by any songs or sounds.
 		inc	bc								; Increment envelope position
 		ld	a, (bc)							; Get next byte from volume envelope
 		jr	zDoVolEnvSetValue				; Use this as new envelope index
@@ -4431,16 +4436,16 @@ z80_ModEnvPointers:
 		dw	ModEnv_06
 		dw	ModEnv_07
 ModEnv_01:	db    0
-ModEnv_00:	db    1,   2,   1,   0,0FFh,0FEh,0FDh,0FCh,0FDh,0FEh,0FFh, 83h
+ModEnv_00:	db    1,   2,   1,   0,  -1,  -2,  -3,  -4,  -3,  -2,  -1, 83h
 ModEnv_02:	db    0,   0,   0,   0, 13h, 26h, 39h, 4Ch, 5Fh, 72h, 7Fh, 72h, 83h
-ModEnv_03:	db    1,   2,   3,   2,   1,   0,0FFh,0FEh,0FDh,0FEh,0FFh,   0, 82h,   0
-ModEnv_04:	db    0,   0,   1,   3,   1,   0,0FFh,0FDh,0FFh,   0, 82h,   2
-ModEnv_05:	db    0,   0,   0,   0,   0, 0Ah, 14h, 1Eh, 14h, 0Ah,   0,0F6h,0ECh,0E2h,0ECh,0F6h
-        	db  82h,   4
-ModEnv_06:	db    0,   0,   0,   0, 16h, 2Ch, 42h, 2Ch, 16h,   0,0EAh,0D4h,0BEh,0D4h,0EAh, 82h
-        	db    3
-ModEnv_07:	db    1,   2,   3,   4,   3,   2,   1,   0,0FFh,0FEh,0FDh,0FCh,0FDh,0FEh,0FFh,   0
-        	db  82h,   1
+ModEnv_03:	db    1,   2,   3,   2,   1,   0,  -1,  -2,  -3,  -2,  -1,   0, 82h,   0
+ModEnv_04:	db    0,   0,   1,   3,   1,   0,  -1,  -3,  -1,   0, 82h,   2
+ModEnv_05:	db    0,   0,   0,   0,   0, 0Ah, 14h, 1Eh, 14h, 0Ah,   0, -10, -20, -30, -20, -10
+          	db  82h,   4
+ModEnv_06:	db    0,   0,   0,   0, 16h, 2Ch, 42h, 2Ch, 16h,   0, -22, -44, -66, -44, -22, 82h
+          	db    3
+ModEnv_07:	db    1,   2,   3,   4,   3,   2,   1,   0,  -1,  -2,  -3,  -4,  -3,  -2,  -1,   0
+          	db  82h,   1
 ; ---------------------------------------------------------------------------
 ; ===========================================================================
 ; Volume Envelope Pointers
@@ -4470,7 +4475,15 @@ VolEnv_07:	db    0,   0,   0,   2,   3,   3,   4,   5,   6,   7,   8,   9, 0Ah, 
 VolEnv_08:	db    3,   2,   1,   1,   0,   0,   1,   2,   3,   4, 81h
 VolEnv_09:	db    1,   0,   0,   0,   0,   1,   1,   1,   2,   2,   2,   3,   3,   3,   3,   4
           	db    4,   4,   5,   5, 81h
-VolEnv_0A:	db  10h, 20h, 30h, 40h, 30h, 20h, 10h,   0,0F0h, 80h
+; The -10h in this FM volume envelope appears to be erroneous:
+; negative volume attenuations aren't supported, and instead
+; trigger the code intended for byte 82h.
+; This envelope appears in many SMPS Z80 Type 2 DAC drivers,
+; suggesting it was some kind of poorly-thought-out example.
+; Oddly, this same envelope appears in Ristar (whose driver
+; *does* support negative attenuations), despite SMPS 68k not
+; supporting FM volume envelopes.
+VolEnv_0A:	db  10h, 20h, 30h, 40h, 30h, 20h, 10h,   0,-10h, 80h
 VolEnv_0B:	db    0,   0,   1,   1,   3,   3,   4,   5, 83h
 VolEnv_0C:	db    0, 81h
 VolEnv_0D:	db    2, 83h
