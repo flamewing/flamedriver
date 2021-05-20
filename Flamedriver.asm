@@ -3219,7 +3219,8 @@ cfConditionalJump:
 ; Change PSG volume. Has no effect on FM or DAC channels.
 ;
 ; Has one parameter byte, the change in volume. The value is signed, but any
-; result greater than 0Fh (or lower than 0) will result in no output.
+; result greater than 0Fh will result in no output, while any result less than
+; 0 will result in maximum volume.
 ;
 ;loc_D01
 cfChangePSGVolume:
@@ -3228,8 +3229,16 @@ cfChangePSGVolume:
 		res	4, (ix+zTrack.PlaybackControl)	; Clear 'track is resting' flag
 		dec	(ix+zTrack.VolEnv)				; Decrement envelope index
 		add	a, (ix+zTrack.Volume)			; Add track's current volume
+		jp	p, .check_clamp					; Branch if result is positive
+		jp	pe, .do_clamp					; Branch if addition overflowed
+		xor	a								; Set maximum volume
+		jr	zStoreTrackVolume
+; ---------------------------------------------------------------------------
+.check_clamp:
 		cp	0Fh								; Is it 0Fh or more?
-		jp	c, zStoreTrackVolume			; Branch if not
+		jr	c, zStoreTrackVolume			; Branch if not
+
+.do_clamp:
 		ld	a, 0Fh							; Limit to 0Fh (silence)
 
 ;loc_D17
