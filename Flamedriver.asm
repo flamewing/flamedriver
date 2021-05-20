@@ -1226,23 +1226,38 @@ zDoFMVolEnv:
 		ld	l, (ix+zTrack.TLPtrLow)			; l = low byte to TL data pointer
 		ld	de, zFMInstrumentTLTable		; de = pointer to FM TL register table
 		ld	b, zFMInstrumentTLTable_End-zFMInstrumentTLTable	; Number of entries
-		ld	c, (ix+zTrack.FMVolEnvMask)		; c = envelope bitmask
+		ld	c, a							; Save volume envelope
+		ld	a, (ix+zTrack.FMVolEnvMask)		; a = envelope bitmask
 
 .loop:
+		sra	a								; Divide a by 2
+		jr	nc, .skip_reg					; Branch if bit shifted was zero
 		push	af							; Save af
-		sra	c								; Divide c by 2
+		ld	a, (hl)							; Get TL value
+		or	a								; Do we need to add track volume?
+		jp	p, .skip_track_vol				; Branch if not
+		add	a, (ix+zTrack.Volume)			; Add track's volume to it
+		jr	c, .do_clamp					; Branch on carry (overflow)
+		and	7Fh								; Clear top bit for overflow check below
+
+.skip_track_vol:
+		add	c								; Add volume envelope
+		jp	po, .update_volume				; Branch if no overflow
+
+.do_clamp:
+		ld	a, 7Fh							; Clamp volume attenuation to minimum volume
+
+.update_volume:
 		push	bc							; Save bc
-		jr	nc, .skip_reg					; Branch if c bit shifted was zero
-		add	a, (hl)							; Add TL value to volume envelope
 		ld	c, a							; c = TL + volume envelope
 		ld	a, (de)							; a = YM2612 register
 		call	zWriteFMIorII				; Send TL data to YM2612
+		pop	bc								; Restore bc
+		pop	af								; Restore af
 
 .skip_reg:
-		pop	bc								; Restore bc
 		inc	de								; Advance to next YM2612 register
 		inc	hl								; Advance to next TL value
-		pop	af								; Restore af
 		djnz	.loop						; Loop for all registers
 		ret
 ; End of function zDoFMVolEnv
