@@ -503,7 +503,7 @@ calcVolume macro
 		jp	p, .skip_track_vol				; Branch if yes
 		add	a, (ix+zTrack.Volume)			; Add track's volume to it
 		jr	nc, .skip_track_vol
-		ld	a, 7Fh							; Clamp volume attenuation if it overflows
+		sbc	a, a							; Clamp volume attenuation as it overflowed
 .skip_track_vol:
     endm
 
