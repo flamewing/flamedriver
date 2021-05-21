@@ -257,7 +257,7 @@ bitOutputLeft              = 7
 maskPanning                = $C0
 ; ---------------------------------------------------------------------------
 ; Envelope-related constants
-ModEnvSustain0  = $80
+ModEnvReset     = $80
 ModEnvSustain1  = $81
 ModEnvJumpTo    = $82
 ModEnvSustain   = $83
@@ -866,7 +866,7 @@ zWriteFMI:
 
 ;loc_CB
 zWriteFMII_reduced:
-		sub	(1<<ymPartII)					; Strip 'bound to part II regs' bit
+		sub	1<<ymPartII						; Strip 'bound to part II regs' bit
 ; ---------------------------------------------------------------------------
 
 ; =============== S U B	R O U T	I N E =======================================
@@ -1382,7 +1382,7 @@ zDoFMVolEnv:
 		and	7Fh								; Clear top bit for overflow check below
 
 .skip_track_vol:
-		add	c								; Add volume envelope
+		add	a, c							; Add volume envelope
 		jp	po, .update_volume				; Branch if no overflow
 
 .do_clamp:
@@ -1945,8 +1945,8 @@ zPlayMusic:
 
 .loop:
 		ld	a, (hl)							; Get playback control byte for song
-		and	~(1<<bitTrackPlaying)			; Strip the 'playing' bit
-		or	(1<<bitSFXOverride)				; Set bit 2 (SFX overriding)
+		and	(~(1<<bitTrackPlaying))&0FFh	; Strip the 'playing' bit
+		or	1<<bitSFXOverride				; Set bit 2 (SFX overriding)
 		ld	(hl), a							; And save it all
 		add	hl, de							; Advance to next track
 		djnz	.loop						; Loop for all tracks
@@ -3096,7 +3096,7 @@ cfPlayDACSample:
 ;
 ;sub_C51
 cfPanningAMSFMS:
-		ld	c, ~maskPanning					; Mask for all but panning
+		ld	c, (~maskPanning)&0FFh			; Mask for all but panning
 
 zDoChangePan:
 		ld	a, (ix+zTrack.AMSFMSPan)		; Get current AMS/FMS/panning
