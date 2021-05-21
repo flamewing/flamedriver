@@ -118,6 +118,36 @@ zTrack STRUCT DOTS
 	Stack_top:			ds.b 4	; S&K: 2Ch-2Fh	; Track stack; can be used by LoopCounters
 zTrack ENDSTRUCT
 ; ---------------------------------------------------------------------------
+; Playback control bits:
+bitPSGNoise       := 0
+bitFM3Special     := 0
+bitNoAttack       := 1
+bitSFXOverride    := 2
+bitAltFreqMode    := 3
+bitTrackAtRest    := 4
+bitPitchSlide     := 5
+bitSustainFreq    := 6
+bitTrackPlaying   := 7
+maskSkipFMNoteOn  := (1<<bitNoAttack)|(1<<bitSFXOverride)|(1<<bitNoAttack)
+maskSkipFMNoteOff := (1<<bitSFXOverride)|(1<<bitNoAttack)
+maskPlayRest      := (1<<bitTrackPlaying)|(1<<bitTrackAtRest)
+; Voice control values:
+ymFM1      := 0
+ymFM2      := 1
+ymFM3      := 2
+ymFM4      := 4
+ymFM5      := 5
+ymFM6      := 6
+ymDAC      := 6
+ymPartII   := 2			; Bit value
+snPSGTone  := 0
+snPSGVol   := 10h
+snPSG1     := 80h
+snPSG2     := 0A0h
+snPSG3     := 0C0h
+snNoise    := 0E0h
+bitIsPSG   := 7			; Bit value
+; ---------------------------------------------------------------------------
 ; equates: standard (for Genesis games) addresses in the memory map
 zYM2612_A0				=	$4000
 zYM2612_D0				=	$4001
@@ -521,9 +551,9 @@ zFastWriteFM macro reg, data, dataMacro
 zGetFMPartPointer macro reg
 		ld	c, (ix+zTrack.VoiceControl)		; Get voice control bits for future use
 		ld	iy, zYM2612_A0					; Point to part I
-		bit	2, c							; Is this the DAC channel or FM4 or FM5 or FM6?
+		bit	ymPartII, c						; Is this the DAC channel or FM4 or FM5 or FM6?
 		jr	z, .notFMII						; If not, write reg/data pair to part I
-		res	2, c							; Strip 'bound to part II regs' bit
+		res	ymPartII, c						; Strip 'bound to part II regs' bit
 		ld	iy, zYM2612_A1					; Point to part II
 .notFMII:
     endm
@@ -695,12 +725,12 @@ zInitAudioDriver:
 
 ;sub_AF
 zWriteFMIorII:
-		bit	7, (ix+zTrack.VoiceControl)		; Is this a PSG track?
+		bit	bitIsPSG, (ix+zTrack.VoiceControl)	; Is this a PSG track?
 		ret	nz								; Is so, quit
-		bit	2, (ix+zTrack.PlaybackControl)	; Is SFX overriding this track?
+		bit	bitSFXOverride, (ix+zTrack.PlaybackControl)	; Is SFX overriding this track?
 		ret	nz								; Return if yes
 		add	a, (ix+zTrack.VoiceControl)		; Add the channel bits to the register address
-		bit	2, (ix+zTrack.VoiceControl)		; Is this the DAC channel or FM4 or FM5 or FM6?
+		bit	ymPartII, (ix+zTrack.VoiceControl)	; Is this the DAC channel or FM4 or FM5 or FM6?
 		jr	nz, zWriteFMII_reduced			; If yes, write reg/data pair to part II;
 											; otherwise, write reg/data pair as is to part I.
 ; End of function zWriteFMIorII
@@ -725,7 +755,7 @@ zWriteFMI:
 
 ;loc_CB
 zWriteFMII_reduced:
-		sub	4								; Strip 'bound to part II regs' bit
+		sub	(1<<ymPartII)					; Strip 'bound to part II regs' bit
 ; ---------------------------------------------------------------------------
 
 ; =============== S U B	R O U T	I N E =======================================
@@ -804,7 +834,7 @@ zUpdateMusic:
 		cp	0FFh							; Is it 0FFh?
 		call	z, zFadeInToPrevious		; Fade to previous if yes
 		ld	ix, zSongDAC					; ix = DAC track RAM
-		bit	7, (ix+zTrack.PlaybackControl)	; Is DAC track playing?
+		bit	bitTrackPlaying, (ix+zTrack.PlaybackControl)	; Is DAC track playing?
 		call	nz, zUpdateDACTrack			; Branch if yes
 		ld	b, zNumMusicFMorPSGTracks		; Number of FM+PSG tracks
 		ld	ix, zSongFM1					; ix = FM1 track RAM
@@ -823,7 +853,7 @@ zUpdateSFXTracks:
 
 zTrackUpdLoop:
 		push	bc							; Save bc
-		bit	7, (ix+zTrack.PlaybackControl)	; Is track playing?
+		bit	bitTrackPlaying, (ix+zTrack.PlaybackControl)	; Is track playing?
 		call	nz, zUpdateFMorPSGTrack		; Call routine if yes
 		ld	de, zTrack.len					; Spacing between tracks
 		add	ix, de							; Advance to next track
@@ -852,12 +882,12 @@ zTrackUpdLoop:
 ;
 ;sub_1E9
 zUpdateFMorPSGTrack:
-		bit	7, (ix+zTrack.VoiceControl)		; Is this a PSG channel?
+		bit	bitIsPSG, (ix+zTrack.VoiceControl)	; Is this a PSG channel?
 		jp	nz, zUpdatePSGTrack				; Branch if yes
 		dec	(ix+zTrack.DurationTimeout)		; Run note timer
 		jr	nz, .note_going					; Branch if note hasn't expired yet
 		call	zGetNextNote				; Get next note for FM track
-		bit	4, (ix+zTrack.PlaybackControl)	; Is track resting?
+		bit	bitTrackAtRest, (ix+zTrack.PlaybackControl)	; Is track resting?
 		ret	nz								; Return if yes
 		call	zPrepareModulation			; Initialize modulation
 		call	zDoPitchSlide				; Apply pitch slide and detune
@@ -866,7 +896,7 @@ zUpdateFMorPSGTrack:
 		jp	zFMNoteOn						; Note on on all operators
 ; ---------------------------------------------------------------------------
 .note_going:
-		bit	4, (ix+zTrack.PlaybackControl)	; Is track resting?
+		bit	bitTrackAtRest, (ix+zTrack.PlaybackControl)	; Is track resting?
 		ret	nz								; Return if yes
 		call	zDoFMVolEnv					; Do FM volume envelope effects for track
 		ld	a, (ix+zTrack.NoteFillTimeout)	; Get note fill timeout
@@ -877,7 +907,7 @@ zUpdateFMorPSGTrack:
 
 .keep_going:
 		call	zDoPitchSlide				; Apply pitch slide and detune
-		bit	6, (ix+zTrack.PlaybackControl)	; Is 'sustain frequency' bit set?
+		bit	bitSustainFreq, (ix+zTrack.PlaybackControl)	; Is 'sustain frequency' bit set?
 		ret	nz								; Return if yes
 		call	zDoModulation				; Apply modulation then fall through
 		; Fall through to next function
@@ -897,9 +927,9 @@ zUpdateFMorPSGTrack:
 ;
 ;sub_22B
 zFMSendFreq:
-		bit	2, (ix+zTrack.PlaybackControl)	; Is SFX overriding this track?
+		bit	bitSFXOverride, (ix+zTrack.PlaybackControl)	; Is SFX overriding this track?
 		ret	nz								; Return if yes
-		bit	0, (ix+zTrack.PlaybackControl)	; Is track in special mode (FM3 only)?
+		bit	bitFM3Special, (ix+zTrack.PlaybackControl)	; Is track in special mode (FM3 only)?
 		jp	nz, .special_mode				; Branch if yes
 
 .not_fm3:
@@ -912,7 +942,7 @@ zFMSendFreq:
 ; ---------------------------------------------------------------------------
 .special_mode:
 		ld	a, (ix+zTrack.VoiceControl)		; a = voice control byte
-		cp	2								; Is this FM3?
+		cp	ymFM3							; Is this FM3?
 		jr	nz, .not_fm3					; Branch if not
 		call	zGetSpecialFM3DataPointer	; de = pointer to saved FM3 frequency shifts
 		ld	b, zSpecialFreqCommands_End-zSpecialFreqCommands	; Number of entries
@@ -980,8 +1010,8 @@ zGetSpecialFM3DataPointer:
 zGetNextNote:
 		ld	e, (ix+zTrack.DataPointerLow)	; e = low byte of track data pointer
 		ld	d, (ix+zTrack.DataPointerHigh)	; d = high byte of track data pointer
-		res	1, (ix+zTrack.PlaybackControl)	; Clear 'do not attack next note' flag
-		res	4, (ix+zTrack.PlaybackControl)	; Clear 'track is at rest' flag
+		res	bitNoAttack, (ix+zTrack.PlaybackControl)	; Clear 'do not attack next note' flag
+		res	bitTrackAtRest, (ix+zTrack.PlaybackControl)	; Clear 'track is at rest' flag
 
 ;loc_285
 zGetNextNote_cont:
@@ -992,7 +1022,7 @@ zGetNextNote_cont:
 		ex	af, af'							; Save af
 		call	zKeyOffIfActive				; Kill note
 		ex	af, af'							; Restore af
-		bit	3, (ix+zTrack.PlaybackControl)	; Is alternate frequency mode flag set?
+		bit	bitAltFreqMode, (ix+zTrack.PlaybackControl)	; Is alternate frequency mode flag set?
 		jp	nz, zAltFreqMode				; Branch if yes
 		or	a								; Is this a duration?
 		jp	p, zStoreDuration				; Branch if yes
@@ -1007,7 +1037,7 @@ zGetNextNote_cont:
 		push	af							; Save af
 		rst	PointerTableOffset				; hl = frequency value for note
 		pop	af								; Restore af
-		bit	7, (ix+zTrack.VoiceControl)		; Is this a PSG track?
+		bit	bitIsPSG, (ix+zTrack.VoiceControl)	; Is this a PSG track?
 		jr	nz, zGotNoteFreq				; Branch if yes
 		push	de							; Save de
 		ld	d, 8							; Each octave above the first adds this to frequency high bits
@@ -1039,7 +1069,7 @@ zGotNoteFreq:
 
 ;loc_2D4
 zGetNoteDuration:
-		bit	5, (ix+zTrack.PlaybackControl)
+		bit	bitPitchSlide, (ix+zTrack.PlaybackControl)
 		jr	nz, zApplyPitchSlide
 		ld	a, (de)							; Get duration from the track
 		or	a								; Is it an actual duration?
@@ -1089,7 +1119,7 @@ zAltFreqMode:
 .got_zero:
 		ld	(ix+zTrack.FreqLow), l			; Store low byte of note frequency
 		ld	(ix+zTrack.FreqHigh), h			; Store high byte of note frequency
-		bit	5, (ix+zTrack.PlaybackControl)
+		bit	bitPitchSlide, (ix+zTrack.PlaybackControl)
 		jr	z, zGetRawDuration
 		ld	a, (de)							; Get pitch slide value from the track
 		inc	de								; Advance to next byte in track
@@ -1113,7 +1143,7 @@ zFinishTrackUpdate:
 		ld	(ix+zTrack.DataPointerHigh), d	; Save high byte of current location in song
 		ld	a, (ix+zTrack.SavedDuration)	; Get current saved duration
 		ld	(ix+zTrack.DurationTimeout), a	; Set it as duration timeout
-		bit	1, (ix+zTrack.PlaybackControl)	; Is 'do not attack next note' flag set?
+		bit	bitNoAttack, (ix+zTrack.PlaybackControl)	; Is 'do not attack next note' flag set?
 		ret	nz								; Branch if yes
 		xor	a								; Clear a
 		ld	(ix+zTrack.ModEnvIndex), a		; Clear modulation envelope index
@@ -1154,7 +1184,7 @@ zFMNoteOn:
 		or	(ix+zTrack.FreqHigh)			; Is the note frequency zero?
 		ret	z								; Return if yes
 		ld	a, (ix+zTrack.PlaybackControl)	; Get playback control byte for track
-		and	16h								; Is either bit 4 ("track at rest") or 2 ("SFX overriding this track") or bit 1 ("do not attack next note") set?
+		and	maskSkipFMNoteOn				; Is either bit 4 ("track at rest") or 2 ("SFX overriding this track") or bit 1 ("do not attack next note") set?
 		ret	nz								; Return if yes
 		ld	a, (ix+zTrack.VoiceControl)		; Get voice control byte from track
 		or	0F0h							; We want only the FM channel assignment bits
@@ -1172,7 +1202,7 @@ zFMNoteOn:
 ;sub_35B
 zKeyOffIfActive:
 		ld	a, (ix+zTrack.PlaybackControl)	; Get playback control byte for track
-		and	6								; Is either bit 1 ("do not attack next note") or 2 ("SFX overriding this track") set?
+		and	maskSkipFMNoteOff				; Is either bit 1 ("do not attack next note") or 2 ("SFX overriding this track") set?
 		ret	nz								; Return if yes
 ; End of function zKeyOffIfActive
 
@@ -1185,7 +1215,7 @@ zKeyOffIfActive:
 ;loc_361
 zKeyOff:
 		ld	c, (ix+zTrack.VoiceControl)		; Get voice control byte for track (this will turn off all operators as high nibble = 0)
-		bit	7, c							; Is this a PSG track?
+		bit	bitIsPSG, c						; Is this a PSG track?
 		ret	nz								; Return if yes
 ; End of function zKeyOff
 
@@ -1196,8 +1226,7 @@ zKeyOff:
 ; Output:  a    Damaged
 ;loc_367
 zKeyOnOff:
-		ld	a, 28h							; Write to KEY ON/OFF port
-		res	6, (ix+zTrack.PlaybackControl)	; From Dyna Brothers 2, but in a better place; clear flag to sustain frequency
+		res	bitSustainFreq, (ix+zTrack.PlaybackControl)	; From Dyna Brothers 2, but in a better place; clear flag to sustain frequency
 		jp	zWriteFMI						; Send it
 ; End of function zKeyOnOff
 
@@ -1273,7 +1302,7 @@ zDoFMVolEnv:
 zPrepareModulation:
 		bit	7, (ix+zTrack.ModulationCtrl)	; Is modulation on?
 		ret	z								; Return if not
-		bit	1, (ix+zTrack.PlaybackControl)	; Is 'do not attack next note' bit set?
+		bit	bitNoAttack, (ix+zTrack.PlaybackControl)	; Is 'do not attack next note' bit set?
 		ret	nz								; Return if yes
 		ld	e, (ix+zTrack.ModulationPtrLow)	; e = low byte of pointer to modulation data
 		ld	d, (ix+zTrack.ModulationPtrHigh)	; d = high byte of pointer to modulation data
@@ -1392,7 +1421,7 @@ zDoModEnvelope_cont:
 		jr	z, zlocModEnvIncMultiplier		; Branch if yes
 		ld	h, 0FFh							; h = 0FFh
 		jr	nc, zlocApplyModEnvMod			; Branch if more than 84h
-		set	6, (ix+zTrack.PlaybackControl)	; Set 'sustain frequency' bit
+		set	bitSustainFreq, (ix+zTrack.PlaybackControl)	; Set 'sustain frequency' bit
 		pop	hl								; Tamper with return location so as to not return to caller
 		ret
 ; ---------------------------------------------------------------------------
@@ -1462,9 +1491,9 @@ zDoPitchSlide:
 
 		; Battletoads did this check under zApplyFreq below. Putting it
 		; here is an optimization.
-		bit	5, (ix+zTrack.PlaybackControl)	; Is pitch slide on?
+		bit	bitPitchSlide, (ix+zTrack.PlaybackControl)	; Is pitch slide on?
 		ret	z								; Return if not
-		bit	7, (ix+zTrack.VoiceControl)		; Is this a PSG track?
+		bit	bitIsPSG, (ix+zTrack.VoiceControl)	; Is this a PSG track?
 		jr	nz, zApplyFreq					; Branch if yes
 		ex	de, hl							; de = new frequency
 		ld	a, 7							; Want to mask off octave bits
@@ -1572,7 +1601,7 @@ zFMInstrumentSSGEGTable_End
 ;
 ;sub_4B9
 zSendFMInstrument:
-		bit	2, (ix+zTrack.PlaybackControl)	; Is SFX overriding this track?
+		bit	bitSFXOverride, (ix+zTrack.PlaybackControl)	; Is SFX overriding this track?
 		jr	z, .active						; Is so, quit
 
 		ld	c, zFMInstrumentOperatorTable_End-zFMInstrumentRegTable
@@ -1729,7 +1758,7 @@ zStopSFX:
 
 .loop:
 		push	bc							; Save bc
-		bit	7, (ix+zTrack.PlaybackControl)	; Is track playing?
+		bit	bitTrackPlaying, (ix+zTrack.PlaybackControl)	; Is track playing?
 		call	nz, zSilenceStopTrack		; Branch if yes
 		ld	de, zTrack.len					; Spacing between tracks
 		add	ix, de							; ix = pointer to next track
@@ -1804,8 +1833,8 @@ zPlayMusic:
 
 .loop:
 		ld	a, (hl)							; Get playback control byte for song
-		and	7Fh								; Strip the 'playing' bit
-		or	4								; Set bit 2 (SFX overriding)
+		and	~(1<<bitTrackPlaying)			; Strip the 'playing' bit
+		or	(1<<bitSFXOverride)				; Set bit 2 (SFX overriding)
 		ld	(hl), a							; And save it all
 		add	hl, de							; Advance to next track
 		djnz	.loop						; Loop for all tracks
@@ -1874,7 +1903,7 @@ zBGMLoad:
 		jp	p, .not_overriding_fm			; Branch if not
 		ex	hl, de							; Swap hl and de
 		dec	hl								; Point to track playback control
-		set	2, (hl)							; Set 'SFX is overriding this track' bit
+		set	bitSFXOverride, (hl)			; Set 'SFX is overriding this track' bit
 		inc	hl								; Point back to channel assignment bits
 		ex	hl, de							; Swap hl and de
 
@@ -1944,7 +1973,7 @@ zBGMLoad:
 		jp	p, .not_overriding_psg			; Branch if not
 		ex	hl, de							; Swap hl and de
 		dec	hl								; Point to track playback control
-		set	2, (hl)							; Set 'SFX is overriding this track' bit
+		set	bitSFXOverride, (hl)			; Set 'SFX is overriding this track' bit
 		inc	hl								; Point back to channel assignment bits
 		ex	hl, de							; Swap hl and de
 
@@ -1981,23 +2010,23 @@ zClearNextSound:
 ; The first is for DAC; then 0, 1, 2 then 4, 5, 6 for the FM channels (the missing 3
 ; is the gap between part I and part II for YM2612 port writes).
 zFMDACInitBytes:
-		db 80h, 6
-		db 80h, 0
-		db 80h, 1
+		db (1<<bitTrackPlaying), ymDAC
+		db (1<<bitTrackPlaying), ymFM1
+		db (1<<bitTrackPlaying), ymFM2
 
 zFMDACInitBytesFM3:
-		db 80h, 2
-		db 80h, 4
-		db 80h, 5
-		db 80h, 6
+		db (1<<bitTrackPlaying), ymFM3
+		db (1<<bitTrackPlaying), ymFM4
+		db (1<<bitTrackPlaying), ymFM5
+		db (1<<bitTrackPlaying), ymFM6
 ;loc_6A3
 ; Default values for PSG tracks
 ; The first byte in every pair (always 80h) is default value for playback control bits.
 ; The second byte in every pair is the default values for PSG tracks.
 zPSGInitBytes:
-		db 80h,  80h
-		db 80h, 0A0h
-		db 80h, 0C0h
+		db (1<<bitTrackPlaying), snPSG1
+		db (1<<bitTrackPlaying), snPSG2
+		db (1<<bitTrackPlaying), snPSG3
 ; ---------------------------------------------------------------------------
 ;loc_6A9
 zPlaySound_CheckRing:
@@ -2097,14 +2126,14 @@ zSFXTrackInitLoop:
 		inc	hl								; hl = pointer to channel identifier
 		ld	c, (hl)							; c = channel identifier
 		call	zGetSFXChannelPointers		; Get track pointers for track RAM (ix) and overridden song track (hl)
-		set	2, (hl)							; Set 'SFX is overriding this track' bit
+		set	bitSFXOverride, (hl)			; Set 'SFX is overriding this track' bit
 		push	ix							; Save pointer to SFX track data in RAM
 
 		pop		de							; de = pointer to SFX track data in RAM (unless you consider the above effectively dead code)
 		pop		hl							; hl = pointer to SFX track data
 		ldi									; *de++ = *hl++ (initial playback control)
 		ld	a, (de)							; Get the voice control byte from track RAM (to deal with SFX already there)
-		cp	2								; Is this FM3?
+		cp	ymFM3							; Is this FM3?
 		call	z, zFM3NormalMode			; Set FM3 to normal mode if so
 		ldi									; *de++ = *hl++ (copy channel identifier)
 		ld	a, (zSFXTempoDivider)			; Get SFX tempo divider
@@ -2122,7 +2151,7 @@ zSFXTrackInitLoop:
 		ld	(ix+zTrack.VoicesLow), l		; Low byte of voice pointer
 		ld	(ix+zTrack.VoicesHigh), h		; High byte of voice pointer
 		call	zKeyOffIfActive				; Kill channel notes
-		bit	7, (ix+zTrack.VoiceControl)		; Is this a PSG track?
+		bit	bitIsPSG, (ix+zTrack.VoiceControl)	; Is this a PSG track?
 		call	z, zFMClearSSGEGOps			; Clear SSG-EG operators for track's channels if not
 		call	zSilencePSGChannel			; Silence PSG channel
 		pop		hl							; Restore hl
@@ -2284,7 +2313,7 @@ zPauseUnpause:
 		ld	a, (zHaltFlag)					; Get halt flag
 		or	a								; Is song halted?
 		jr	nz, .set_pan					; Branch if yes
-		bit	7, (ix+zTrack.PlaybackControl)	; Is track playing?
+		bit	bitTrackPlaying, (ix+zTrack.PlaybackControl)	; Is track playing?
 		jr	z, .skip_fm_track				; Branch if not
 
 .set_pan:
@@ -2301,9 +2330,9 @@ zPauseUnpause:
 		ld	b, zNumSFXTracks				; Number of tracks
 
 .psg_loop:
-		bit	7, (ix+zTrack.PlaybackControl)	; Is track playing?
+		bit	bitTrackPlaying, (ix+zTrack.PlaybackControl)	; Is track playing?
 		jr	z, .skip_psg_track				; Branch if not
-		bit	7, (ix+zTrack.VoiceControl)		; Is this a PSG track?
+		bit	bitIsPSG, (ix+zTrack.VoiceControl)	; Is this a PSG track?
 		jr	nz, .skip_psg_track				; Branch if yes
 		ld	c, (ix+zTrack.AMSFMSPan)		; Get track AMS/FMS/panning
 		ld	a, 0B4h							; Command to select AMS/FMS/panning register
@@ -2374,10 +2403,10 @@ zDoMusicFadeOut:
 		jr	.next_track
 ; ---------------------------------------------------------------------------
 .chk_change_volume:
-		bit	7, (ix+zTrack.PlaybackControl)	; Is track still playing?
+		bit	bitTrackPlaying, (ix+zTrack.PlaybackControl)	; Is track still playing?
 		jr	z, .next_track					; Branch if not
 		push	bc							; Save bc
-		bit	2, (ix+zTrack.PlaybackControl)	; Is SFX overriding track?
+		bit	bitSFXOverride, (ix+zTrack.PlaybackControl)	; Is SFX overriding track?
 		call	z, zSendTL.active			; Send new volume if not
 		pop	bc								; Restore bc
 
@@ -2410,7 +2439,7 @@ zDoMusicFadeIn:
 .fm_loop:
 		dec	(ix+zTrack.Volume)				; Increase track volume
 		push	bc							; Save bc
-		bit	2, (ix+zTrack.PlaybackControl)	; Is 'SFX is overriding' bit set?
+		bit	bitSFXOverride, (ix+zTrack.PlaybackControl)	; Is 'SFX is overriding' bit set?
 		call	z, zSendTL.active			; Send new volume if not
 		pop	bc								; Restore bc
 		add	ix, de							; Advance to next track
@@ -2424,7 +2453,7 @@ zDoMusicFadeIn:
 		ld	de, zTrack.len					; Spacing between tracks
 
 .psg_loop:
-		res	2, (ix+zTrack.PlaybackControl)	; Clear 'SFX is overriding' bit
+		res	bitSFXOverride, (ix+zTrack.PlaybackControl)	; Clear 'SFX is overriding' bit
 		add	ix, de							; Advance to next track
 		djnz	.psg_loop					; Loop for all tracks
 
@@ -2432,7 +2461,7 @@ zDoMusicFadeIn:
 		or	a
 		ret	z
 		ld	ix, zSongDAC					; ix = start of DAC RAM
-		res	2, (ix+zTrack.PlaybackControl)	; Clear 'SFX is overriding' bit
+		res	bitSFXOverride, (ix+zTrack.PlaybackControl)	; Clear 'SFX is overriding' bit
 		ret
 ; End of function zDoMusicFadeIn
 
@@ -2479,7 +2508,7 @@ zMusicFadeSimple:
 		call	zFMSilenceChannel			; Silence track's channel
 		call	zFMClearSSGEGOps			; Clears the SSG-EG operators for this channel
 		ld	a, (ix+zTrack.VoiceControl)		; Fetch channel assignment byte
-		cp	2								; Is this FM3?
+		cp	ymFM3							; Is this FM3?
 		jr	nz, .skip_fmchannel				; Branch if yes
 		ld	c, 0							; FM3 mode: normal mode
 		ld	a, 27h							; FM3 special settings
@@ -2581,11 +2610,11 @@ zPauseAudio:
 zPSGSilenceAll:
 		push	bc							; Save bc
 		ld	b, zNumMusicPSGTracks+1			; Loop 4 times: 3 PSG channels + noise channel
-		ld	a, 9Fh							; Command to silence PSG1
+		ld	a, snPSG1|snPSGVol|0Fh			; Command to silence PSG1
 
 .loop:
 		ld	(zPSG), a						; Write command
-		add	a, 20h							; Next channel
+		add	a, snPSG2-snPSG1				; Next channel
 		djnz	.loop						; Loop for all PSG channels
 		pop	bc								; Restore bc
 		jp	zClearNextSound
@@ -2739,11 +2768,10 @@ zFadeInToPrevious:
 		ld	ix, zSongDAC
 		xor	a
 		ld	(ix+zTrack.DACSFXPlaying), a
-		ld	a, 84h							; a = 'track is playing' and 'track is resting' flags
-		or	(ix+zTrack.PlaybackControl)				; Add in track playback control bits
-		ld	(ix+zTrack.PlaybackControl), a				; Save everything
-		ld	c, 6							; Get voice control byte for FM6
-		ld	a, 28h							; Write to KEY ON/OFF port
+		ld	a, maskPlayRest					; a = 'track is playing' and 'track is resting' flags
+		or	(ix+zTrack.PlaybackControl)		; Add in track playback control bits
+		ld	(ix+zTrack.PlaybackControl), a	; Save everything
+		ld	c, ymFM6						; Get voice control byte for FM6
 		call	zWriteFMI
 
 .no_dac:
@@ -2752,7 +2780,7 @@ zFadeInToPrevious:
 
 .loop:
 		ld	a, (ix+zTrack.VoiceControl)		; Get voice bits
-		cp	6
+		cp	ymFM6
 		jr	nz, .not_fm6
 		ld	a, (zDACEnable)					; Get DAC enable
 		or	a
@@ -2760,11 +2788,11 @@ zFadeInToPrevious:
 
 .not_fm6:
 		ld	a, (ix+zTrack.PlaybackControl)	; a = track playback control
-		or	84h								; Set 'track is playing' and 'track is resting' flags
+		or	maskPlayRest					; Set 'track is playing' and 'track is resting' flags
 		ld	(ix+zTrack.PlaybackControl), a	; Set new value
-		bit	7, (ix+zTrack.VoiceControl)		; Is this a PSG track?
+		bit	bitIsPSG, (ix+zTrack.VoiceControl)	; Is this a PSG track?
 		jp	nz, .skip_track					; Branch if yes
-		res	2, (ix+zTrack.PlaybackControl)	; Clear 'SFX is overriding track' flag
+		res	bitSFXOverride, (ix+zTrack.PlaybackControl)	; Clear 'SFX is overriding track' flag
 		ld	a, (ix+zTrack.Volume)			; Get track volume
 		add	a, 40h							; Lower volume by 40h
 		ld	(ix+zTrack.Volume), a			; Store new volume
@@ -2835,12 +2863,12 @@ zUpdateDACTrack_cont:
 		ld	a, (ix+zTrack.SavedDAC)
 		sub	NoteRest						; Is it a rest?
 		jp	z, .get_duration				; Branch if yes
-		bit	2, (ix+zTrack.PlaybackControl)	; Is SFX overriding DAC channel?
+		bit	bitSFXOverride, (ix+zTrack.PlaybackControl)	; Is SFX overriding DAC channel?
 		jp	nz, .get_duration				; Branch if yes
 		ld	(zDACIndex), a					; Queue DAC sample
 		push	ix							; Save track pointer
 		ld	ix, zSongFM6					; Get pointer to FM6 track data
-		set	2, (ix+zTrack.PlaybackControl)	; Mark track as being overridden
+		set	bitSFXOverride, (ix+zTrack.PlaybackControl)	; Mark track as being overridden
 		call	zKeyOffIfActive				; Kill note (will do nothing if 'do not attack' is on)
 		pop	ix								; Restore track pointer
 
@@ -2940,9 +2968,9 @@ zExtraCoordFlagSwitchTable:
 cfPlayDACSample:
 		ld	(zDACIndex), a					; Set next DAC sample to the parameter byte
 		ld	hl, zSongDAC					; Get pointer to DAC track
-		set	2, (hl)							; Mark track as being overridden
+		set	bitSFXOverride, (hl)			; Mark track as being overridden
 		ld	hl, zSongFM6					; Get pointer to FM6 track
-		set	2, (hl)							; Mark track as being overridden
+		set	bitSFXOverride, (hl)			; Mark track as being overridden
 		ret
 ; End of function cfPlayDACSample
 
@@ -3048,7 +3076,7 @@ cfFadeInToPrevious:
 ;
 ;loc_C7F
 cfSilenceStopTrack:
-		bit	7, (ix+zTrack.VoiceControl)		; Is this a PSG track?
+		bit	bitIsPSG, (ix+zTrack.VoiceControl)	; Is this a PSG track?
 		call	z, zFMSilenceChannel		; If so, don't mess with the YM2612
 		jp	cfStopTrack
 ; End of function cfSilenceStopTrack
@@ -3070,7 +3098,7 @@ cfSilenceStopTrack:
 ;loc_C85
 cfSetVolume:
 		cpl									; Invert parameter byte
-		bit	7, (ix+zTrack.VoiceControl)		; Is this a PSG channel?
+		bit	bitIsPSG, (ix+zTrack.VoiceControl)	; Is this a PSG channel?
 		jr	z, .not_psg						; Branch if not
 		; The following code gets bits 3, 4, 5 and 6 from the parameter byte,
 		; puts them in positions 0 to 3 and inverts them, discarding all other
@@ -3110,7 +3138,7 @@ cfChangeVolume:
 		; S2 places this check further down (and S1 lacks it altogether),
 		; allowing PSG channels to change their volume. This means the
 		; likes of S2's SFX $F0 will sound different in this driver
-		bit	7, (ix+zTrack.VoiceControl)		; Is this a PSG track?
+		bit	bitIsPSG, (ix+zTrack.VoiceControl)	; Is this a PSG track?
 		ret	nz								; Return if yes
 		add	a, (ix+zTrack.Volume)			; Add in track's current volume
 		jp	p, .set_vol						; Branch if result is still positive
@@ -3129,7 +3157,7 @@ cfChangeVolume:
 ;
 ;sub_CBA
 zSendTL:
-		bit	2, (ix+zTrack.PlaybackControl)	; Is SFX overriding this track?
+		bit	bitSFXOverride, (ix+zTrack.PlaybackControl)	; Is SFX overriding this track?
 		ret	nz								; Is so, quit
 
 .active:
@@ -3161,7 +3189,7 @@ zSendTL:
 ;
 ;loc_CDB
 cfPreventAttack:
-		set	1, (ix+zTrack.PlaybackControl)	; Set flag to prevent attack
+		set	bitNoAttack, (ix+zTrack.PlaybackControl)	; Set flag to prevent attack
 		dec	de								; Put parameter byte back
 		ret
 
@@ -3224,9 +3252,9 @@ cfConditionalJump:
 ;
 ;loc_D01
 cfChangePSGVolume:
-		bit	7, (ix+zTrack.VoiceControl)		; Is this a PSG channel?
+		bit	bitIsPSG, (ix+zTrack.VoiceControl)	; Is this a PSG channel?
 		ret	z								; Return if not
-		res	4, (ix+zTrack.PlaybackControl)	; Clear 'track is resting' flag
+		res	bitTrackAtRest, (ix+zTrack.PlaybackControl)	; Clear 'track is resting' flag
 		dec	(ix+zTrack.VolEnv)				; Decrement envelope index
 		add	a, (ix+zTrack.Volume)			; Add track's current volume
 		jp	p, .check_clamp					; Branch if result is positive
@@ -3299,7 +3327,7 @@ zGetFMParams:
 ;
 ;loc_D2E
 cfSetVoice:
-		bit	7, (ix+zTrack.VoiceControl)		; Is this a PSG track?
+		bit	bitIsPSG, (ix+zTrack.VoiceControl)	; Is this a PSG track?
 		jr	nz, zSetVoicePSG				; Branch if yes
 		call	zSetMaxRelRate				; Set minimum D1L/RR for channel
 		ld	a, (de)							; Get voice index
@@ -3373,7 +3401,7 @@ cfModulation:
 ;loc_D7B
 cfAlterModulation:
 		inc	de								; Advance track pointer
-		bit	7, (ix+zTrack.VoiceControl)		; Is this a PSG track?
+		bit	bitIsPSG, (ix+zTrack.VoiceControl)	; Is this a PSG track?
 		jr	nz, cfSetModulation				; Branch if yes
 		ld	a, (de)							; Get new modulation status
 
@@ -3394,7 +3422,7 @@ cfSetModulation:
 ;
 ;loc_D87
 cfStopTrack:
-		res	7, (ix+zTrack.PlaybackControl)	; Clear 'track playing' flag
+		res	bitTrackPlaying, (ix+zTrack.PlaybackControl)	; Clear 'track playing' flag
 		call	zKeyOffIfActive				; Send key off for track channel
 		call	zSilencePSGChannel			; Silence PSG channel
 		ld	c, (ix+zTrack.VoiceControl)		; c = voice control bits
@@ -3406,16 +3434,16 @@ cfStopTrack:
 		push	hl							; Save hl
 		ld	hl, (zVoiceTblPtr)				; hl = pointer to voice table
 		pop	ix								; ix = overridden track's pointer
-		res	2, (ix+zTrack.PlaybackControl)	; Clear 'SFX is overriding' bit
-		bit	7, (ix+zTrack.VoiceControl)		; Is this a PSG channel?
+		res	bitSFXOverride, (ix+zTrack.PlaybackControl)	; Clear 'SFX is overriding' bit
+		bit	bitIsPSG, (ix+zTrack.VoiceControl)	; Is this a PSG channel?
 		jr	nz, zStopPSGTrack				; Branch if yes
-		bit	7, (ix+zTrack.PlaybackControl)	; Is 'track playing' bit set?
+		bit	bitTrackPlaying, (ix+zTrack.PlaybackControl)	; Is 'track playing' bit set?
 		jr	z, zStopCleanExit				; Exit if not
-		ld	a, 2							; a = 2 (FM3)
+		ld	a, ymFM3						; a = 2 (FM3)
 		cp	(ix+zTrack.VoiceControl)		; Is this track for FM3?
 		jr	nz, .not_fm3					; Branch if not
 		ld	a, 4Fh							; FM3 settings: special mode, enable and load A/B
-		bit	0, (ix+zTrack.PlaybackControl)	; Is FM3 in special mode?
+		bit	bitFM3Special, (ix+zTrack.PlaybackControl)	; Is FM3 in special mode?
 		jr	nz, .do_fm3_settings			; Branch if yes
 		and	0Fh								; FM3 settings: normal mode, enable and load A/B
 
@@ -3456,7 +3484,7 @@ zStopCleanExit:
 ; ---------------------------------------------------------------------------
 ;loc_E27
 zStopPSGTrack:
-		bit	0, (ix+zTrack.PlaybackControl)	; Is this a noise channel?
+		bit	bitPSGNoise, (ix+zTrack.PlaybackControl)	; Is this a noise channel?
 		jr	z, zStopCleanExit				; Exit if not
 		ld	a, (ix+zTrack.PSGNoise)			; Get track's PSG noise setting
 		or	a								; Is it an actual noise?
@@ -3476,18 +3504,18 @@ zStopPSGTrack:
 ;
 ;loc_E39
 cfSetPSGNoise:
-		bit	7, (ix+zTrack.VoiceControl)		; Is this a PSG track?
+		bit	bitIsPSG, (ix+zTrack.VoiceControl)	; Is this a PSG track?
 		ret	z								; Return if not
 		ld	(ix+zTrack.PSGNoise), a			; Store to track RAM
-		set	0, (ix+zTrack.PlaybackControl)	; Mark PSG track as being noise
+		set	bitPSGNoise, (ix+zTrack.PlaybackControl)	; Mark PSG track as being noise
 		or	a								; Test noise value
-		ld	a, 0DFh							; Command to silence PSG3
+		ld	a, snPSG3|snPSGVol|0Fh			; Command to silence PSG3
 		jr	nz, .skip_noise_silence			; If nonzero, branch
-		res	0, (ix+zTrack.PlaybackControl)	; Otherwise, mark track as not being a noise channel
-		ld	a, 0FFh							; Command to silence the noise channel
+		res	bitPSGNoise, (ix+zTrack.PlaybackControl)	; Otherwise, mark track as not being a noise channel
+		ld	a, snNoise|snPSGVol|0Fh			; Command to silence the noise channel
 
 .skip_noise_silence:
-		bit	2, (ix+zTrack.PlaybackControl)	; Is SFX overriding this track?
+		bit	bitSFXOverride, (ix+zTrack.PlaybackControl)	; Is SFX overriding this track?
 		ret	nz								; Return if yes
 		ld	(zPSG), a						; Execute it
 		ld	a, (de)							; Get PSG noise value
@@ -3502,7 +3530,7 @@ cfSetPSGNoise:
 ;loc_E58
 ;cfSetPSGTone
 cfSetPSGVolEnv:
-		bit	7, (ix+zTrack.VoiceControl)		; Is this a PSG track?
+		bit	bitIsPSG, (ix+zTrack.VoiceControl)	; Is this a PSG track?
 		ret	z								; Return if not
 
 ;loc_E5D
@@ -3531,12 +3559,12 @@ cfJumpTo:
 cfPitchSlide:
 		or	a								; Is parameter nonzero?
 		jr	z, .disable_slide				; Branch if not
-		set	5, (ix+zTrack.PlaybackControl)	; Enable pitch slide
+		set	bitPitchSlide, (ix+zTrack.PlaybackControl)	; Enable pitch slide
 		ret
 ; ---------------------------------------------------------------------------
 .disable_slide:
-		res	1, (ix+zTrack.PlaybackControl)	; Clear 'don't attack' flag
-		res	5, (ix+zTrack.PlaybackControl)	; Stop pitch slide
+		res	bitNoAttack, (ix+zTrack.PlaybackControl)	; Clear 'don't attack' flag
+		res	bitPitchSlide, (ix+zTrack.PlaybackControl)	; Stop pitch slide
 		ld	(ix+zTrack.Detune), a			; Clear detune (we already know a is zero)
 		ret
 
@@ -3674,11 +3702,11 @@ cfLoopContinuousSFX:
 cfToggleAltFreqMode:
 		or	a								; Is parameter equal to 0?
 		jr	z, .stop_altfreq_mode			; Branch if so
-		set	3, (ix+zTrack.PlaybackControl)	; Start alternate frequency mode for track
+		set	bitAltFreqMode, (ix+zTrack.PlaybackControl)	; Start alternate frequency mode for track
 		ret
 ; ---------------------------------------------------------------------------
 .stop_altfreq_mode:
-		res	3, (ix+zTrack.PlaybackControl)	; Stop alternate frequency mode for track
+		res	bitAltFreqMode, (ix+zTrack.PlaybackControl)	; Stop alternate frequency mode for track
 		ret
 
 ; =============== S U B	R O U T	I N E =======================================
@@ -3691,9 +3719,9 @@ cfToggleAltFreqMode:
 ;loc_EE8
 cfFM3SpecialMode:
 		ld	a, (ix+zTrack.VoiceControl)		; Get track's voice control
-		cp	2								; Is this FM3?
+		cp	ymFM3							; Is this FM3?
 		jr	nz, zTrackSkip3bytes			; Branch if not
-		set	0, (ix+zTrack.PlaybackControl)	; Put FM3 in special mode
+		set	bitFM3Special, (ix+zTrack.PlaybackControl)	; Put FM3 in special mode
 		ex	de, hl							; Exchange de and hl
 		call	zGetSpecialFM3DataPointer	; de = pointer to saved FM3 frequency shifts
 		ld	b, 4							; Loop counter: 4 parameter bytes
@@ -3815,7 +3843,7 @@ cfHaltSound:
 		ld	de, zTrack.len					; Spacing between tracks
 
 .loop1:
-		res	7, (ix+zTrack.PlaybackControl)	; Clear 'track is playing' bit
+		res	bitTrackPlaying, (ix+zTrack.PlaybackControl)	; Clear 'track is playing' bit
 		call	zKeyOff						; Stop current note
 		add	ix, de							; Advance to next track
 		djnz	.loop1						; Loop for all tracks
@@ -3831,7 +3859,7 @@ cfHaltSound:
 		ld	de, zTrack.len					; Spacing between tracks
 
 .loop2:
-		set	7, (ix+zTrack.PlaybackControl)	; Set 'track is playing' bit
+		set	bitTrackPlaying, (ix+zTrack.PlaybackControl)	; Set 'track is playing' bit
 		add	ix, de							; Advance to next track
 		djnz	.loop2						; Loop for all tracks
 		pop	de								; Restore de
@@ -3992,7 +4020,7 @@ zUpdatePSGTrack:
 		dec	(ix+zTrack.DurationTimeout)		; Run note timer
 		jr	nz, .note_going					; Branch if note hasn't expired yet
 		call	zGetNextNote				; Get next note for PSG track
-		bit	4, (ix+zTrack.PlaybackControl)	; Is track resting?
+		bit	bitTrackAtRest, (ix+zTrack.PlaybackControl)	; Is track resting?
 		ret	nz								; Return if yes
 		call	zPrepareModulation			; Initialize modulation
 		jr	.skip_fill
@@ -4007,7 +4035,7 @@ zUpdatePSGTrack:
 .skip_fill:
 		call	zDoPitchSlide				; Apply pitch slide and detune
 		call	zDoModulation				; Do modulation
-		bit	2, (ix+zTrack.PlaybackControl)	; Is SFX overriding this track?
+		bit	bitSFXOverride, (ix+zTrack.PlaybackControl)	; Is SFX overriding this track?
 		ret	nz								; Return if yes
 		ld	c, (ix+zTrack.VoiceControl)		; c = voice control byte
 		ld	a, l							; a = low byte of new frequency
@@ -4035,7 +4063,7 @@ zUpdatePSGTrack:
 		ld	c, a							; c = new volume envelope
 
 .no_volenv:
-		bit	4, (ix+zTrack.PlaybackControl)	; Is track resting?
+		bit	bitTrackAtRest, (ix+zTrack.PlaybackControl)	; Is track resting?
 		ret	nz								; Return if yes
 		ld	a, (ix+zTrack.Volume)			; Get track volume
 		add	a, c							; Add volume envelope to it
@@ -4045,10 +4073,10 @@ zUpdatePSGTrack:
 
 .no_underflow:
 		or	(ix+zTrack.VoiceControl)		; Mask in the PSG channel bits
-		add	a, 10h							; Flag to latch volume
-		bit	0, (ix+zTrack.PlaybackControl)	; Is this a noise channel?
+		add	a, snPSGVol						; Flag to latch volume
+		bit	bitPSGNoise, (ix+zTrack.PlaybackControl)	; Is this a noise channel?
 		jr	z, .not_noise					; Branch if not
-		add	a, 20h							; Change to noise channel
+		add	a, snNoise-snPSG3				; Change to noise channel
 
 .not_noise:
 		ld	(zPSG), a						; Set channel volume
@@ -4114,7 +4142,7 @@ zDoVolEnvReset:
 ;zDoFlutterRest
 zDoVolEnvRest:
 		pop	hl								; Pop return value from stack (causes a 'ret' to return to caller of zUpdatePSGTrack)
-		set	4, (ix+zTrack.PlaybackControl)	; Set 'track is resting' bit
+		set	bitTrackAtRest, (ix+zTrack.PlaybackControl)	; Set 'track is resting' bit
 		ret									; Do NOT silence PSG channel
 ; ---------------------------------------------------------------------------
 ;loc_1068
@@ -4129,8 +4157,8 @@ zDoVolEnvAdvance:
 ;
 ;sub_106C
 zRestTrack:
-		set	4, (ix+zTrack.PlaybackControl)	; Set 'track is resting' bit
-		bit	2, (ix+zTrack.PlaybackControl)	; Is SFX overriding this track?
+		set	bitTrackAtRest, (ix+zTrack.PlaybackControl)	; Set 'track is resting' bit
+		bit	bitSFXOverride, (ix+zTrack.PlaybackControl)	; Is SFX overriding this track?
 		ret	nz								; Return if so
 ; End of function zRestTrack
 
@@ -4139,14 +4167,14 @@ zRestTrack:
 ;
 ;sub_1075
 zSilencePSGChannel:
-		ld	a, 1Fh							; Set volume to zero on PSG channel
+		ld	a, snPSGVol|0Fh					; Set volume to zero on PSG channel
 		add	a, (ix+zTrack.VoiceControl)		; Add in the PSG channel selector
 		or	a								; Is it an actual PSG channel?
 		ret	p								; Return if not
 		ld	(zPSG), a						; Silence this channel
-		cp	0DFh							; Was this PSG3/Noise?
+		cp	snPSG3|snPSGVol|0Fh				; Was this PSG3/Noise?
 		ret	nz								; Return if not
-		ld	a, 0FFh							; Command to silence Noise channel
+		ld	a, snNoise|snPSGVol|0Fh			; Command to silence Noise channel
 		ld	(zPSG), a						; Do it
 		ret
 ; End of function zSilencePSGChannel
@@ -4174,7 +4202,7 @@ zPlayDigitalAudio:
 		jr	nz, .dac_idle_loop				; Branch if yes
 
 .enabletrack:
-		res	2, (hl)							; Mark track as no longer being overridden
+		res	bitSFXOverride, (hl)			; Mark track as no longer being overridden
 
 .dac_idle_loop:
 		ei									; Enable interrupts
