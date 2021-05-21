@@ -711,7 +711,7 @@ GetPointerTable:	rsttarget
 		ld	h, (hl)							; Read high byte of pointer into h
 		ld	l, a							; Put low byte of pointer into l
 		ex	af, af'							; Restore af
-		ret
+		jp	PointerTableOffset
 ; End of function GetPointerTable
 
 ; =============== S U B	R O U T	I N E =======================================
@@ -749,7 +749,7 @@ ReadPointer:	rsttarget
 		ld	h, (hl)							; Read high byte of pointer into h
 		ld	l, a							; Put low byte of pointer into l
 		ret
-; End of function PointerTableOffset
+; End of function ReadPointer
 
 ; ---------------------------------------------------------------------------
 ; There is room for two more 'rsttarget's here
@@ -1361,8 +1361,7 @@ zDoFMVolEnv:
 		ret	m								; Return if it is actually the custom SSG-EG flag
 		dec	a								; Make a into an index
 		ld	c, zID_VolEnvPointers			; Value for volume envelope pointer table
-		rst	GetPointerTable					; hl = pointer to volume envelope table
-		rst	PointerTableOffset				; hl = pointer to volume envelope for track
+		rst	GetPointerTable					; hl = pointer to volume envelope for track
 		call	zDoVolEnv					; a = new volume envelope
 		ld	h, (ix+zTrack.TLPtrHigh)			; h = high byte to TL data pointer
 		ld	l, (ix+zTrack.TLPtrLow)			; l = low byte to TL data pointer
@@ -1504,8 +1503,7 @@ zDoModEnvelope:
 		dec	a								; Convert into pointer table index
 		ex	de, hl							; Exchange de and hl; de = note frequency
 		ld	c, zID_ModEnvPointers			; Value for modulation envelope pointer table
-		rst	GetPointerTable					; hl = pointer to modulation envelope pointer table
-		rst	PointerTableOffset				; hl = modulation envelope pointer for modulation control byte
+		rst	GetPointerTable					; hl = modulation envelope pointer for modulation control byte
 		jr	zDoModEnvelope_cont
 ; ---------------------------------------------------------------------------
 ;zFreqFlutterSetIndex
@@ -1986,8 +1984,7 @@ zBGMLoad:
 		ld	(zYM2612_D1), a					; Write to YM2612 data register
 		pop	af								; Restore af
 		ld	c, zID_MusicPointers			; c = 4 (music pointer table)
-		rst	GetPointerTable					; hl = pointer table for music pointers
-		rst	PointerTableOffset				; hl = pointer to song data
+		rst	GetPointerTable					; hl = pointer to song data
 		push	hl							; Save hl...
 		push	hl							; ... twice
 		rst	ReadPointer						; Dereference pointer, so that hl = pointer to voice table
@@ -2191,9 +2188,8 @@ zPlaySound_Bankswitch:
 		; If we got here, a is zero.
 		inc	a								; a = 1
 		ld	(zContinuousSFXFlag), a			; Flag continuous SFX as being extended
-		rst	GetPointerTable					; hl = pointer to SFX data table
 		pop	af								; Restore af
-		rst	PointerTableOffset				; hl = pointer to SFX data
+		rst	GetPointerTable					; hl = pointer to SFX data
 		inc	hl								; Skip low byte of voice pointer
 		inc	hl								; Skip high byte of voice pointer
 		inc	hl								; Skip timing divisor
@@ -2218,8 +2214,7 @@ zPlaySound_Normal:
 
 ;loc_70C
 zPlaySound:
-		rst	GetPointerTable					; hl = pointer to SFX data table
-		rst	PointerTableOffset				; hl = pointer to SFX data
+		rst	GetPointerTable					; hl = pointer to SFX data
 		push	hl							; Save hl
 		rst	ReadPointer						; hl = voice table pointer
 		ld	(zSFXVoiceTblPtr), hl			; Save to RAM
@@ -3481,8 +3476,7 @@ zSetVoiceUploadAlter:
 		ld	a, (ix+zTrack.VoiceSongID)		; Get saved song ID for instrument data
 		sub	81h								; Convert it to a zero-based index
 		ld	c, zID_MusicPointers			; Value for music pointer table
-		rst	GetPointerTable					; hl = pointer to music pointer table
-		rst	PointerTableOffset				; hl = pointer to music data
+		rst	GetPointerTable					; hl = pointer to music data
 		rst	ReadPointer						; hl = pointer to music voice data
 		ld	a, (ix+zTrack.VoiceIndex)		; Get voice index
 		and	7Fh								; Strip sign bit
@@ -4191,8 +4185,7 @@ zUpdatePSGTrack:
 		jr	z, .no_volenv					; Branch if no PSG tone
 		dec	a								; Make it into a 0-based index
 		ld	c, zID_VolEnvPointers			; Value for volume envelope pointer table
-		rst	GetPointerTable					; hl = pointer to volume envelope table
-		rst	PointerTableOffset				; hl = pointer to volume envelope for track
+		rst	GetPointerTable					; hl = pointer to volume envelope for track
 		call	zDoVolEnv					; Get new volume envelope
 		ld	c, a							; c = new volume envelope
 
