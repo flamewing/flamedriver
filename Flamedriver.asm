@@ -131,6 +131,7 @@ bitTrackPlaying   = 7
 maskSkipFMNoteOn  = (1<<bitNoAttack)|(1<<bitSFXOverride)|(1<<bitNoAttack)
 maskSkipFMNoteOff = (1<<bitSFXOverride)|(1<<bitNoAttack)
 maskPlayRest      = (1<<bitTrackPlaying)|(1<<bitTrackAtRest)
+maskFM6Unused     = (1<<bitSFXOverride)|(1<<bitTrackAtRest)
 ; Voice control values:
 ymFM1      = 0
 ymFM2      = 1
@@ -176,6 +177,7 @@ bitTimerAEnable            = 2
 bitTimerBEnable            = 3
 bitTimerAReset             = 4
 bitTimerBReset             = 5
+maskEnableLoadTimers       = (1<<bitTimerBEnable)|(1<<bitTimerAEnable)|(1<<bitTimerBLoad)|(1<<bitTimerALoad)
 
 ymKeyOnOff                 = $28
 bitOperator1               = 4
@@ -2045,9 +2047,9 @@ zBGMLoad:
 		; Setup FM Channel 6 specifically if it's not in use
 		ld	hl, zSongFM6					; Get FM3 track
 		ld	b, zTrack.len-2					; Loop counter
-		ld	(hl), 14h						; Set 'SFX is overriding this track' and 'Track is resting' bits, clear 'Track is playing' bit
+		ld	(hl), maskFM6Unused				; Set 'SFX is overriding this track' and 'Track is resting' bits, clear 'Track is playing' bit
 		inc	hl								; Point to voice control byte
-		ld	(hl), 6							; This is FM6
+		ld	(hl), ymFM6						; This is FM6
 		xor	a								; Clear 'a'
 
 .loop:
@@ -3570,10 +3572,10 @@ cfStopTrack:
 		ld	a, ymFM3						; a = 2 (FM3)
 		cp	(ix+zTrack.VoiceControl)		; Is this track for FM3?
 		jr	nz, .not_fm3					; Branch if not
-		ld	a, 4Fh							; FM3 settings: special mode, enable and load A/B
+		ld	a, maskFM3Special|maskEnableLoadTimers	; FM3 settings: special mode, enable and load A/B
 		bit	bitFM3Special, (ix+zTrack.PlaybackControl)	; Is FM3 in special mode?
 		jr	nz, .do_fm3_settings			; Branch if yes
-		and	0Fh								; FM3 settings: normal mode, enable and load A/B
+		and	maskFM3Normal|maskEnableLoadTimers	; FM3 settings: normal mode, enable and load A/B
 
 .do_fm3_settings:
 		call	zWriteFM3Settings			; Set the above FM3 settings
