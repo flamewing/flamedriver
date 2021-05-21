@@ -617,8 +617,9 @@ bankswitchLoop macro
 		ld	(zBankRegister), a
 		rrca
 		djnz	.bankloop
-		ld	(hl), h							; The low bit of h is 0
-    endm
+		xor	a
+		ld	(zBankRegister), a
+   endm
 
 bankswitchToMusic macro
 		ld	a, (zSongBank)
