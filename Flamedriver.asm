@@ -119,34 +119,34 @@ zTrack STRUCT DOTS
 zTrack ENDSTRUCT
 ; ---------------------------------------------------------------------------
 ; Playback control bits:
-bitPSGNoise       := 0
-bitFM3Special     := 0
-bitNoAttack       := 1
-bitSFXOverride    := 2
-bitAltFreqMode    := 3
-bitTrackAtRest    := 4
-bitPitchSlide     := 5
-bitSustainFreq    := 6
-bitTrackPlaying   := 7
-maskSkipFMNoteOn  := (1<<bitNoAttack)|(1<<bitSFXOverride)|(1<<bitNoAttack)
-maskSkipFMNoteOff := (1<<bitSFXOverride)|(1<<bitNoAttack)
-maskPlayRest      := (1<<bitTrackPlaying)|(1<<bitTrackAtRest)
+bitPSGNoise       = 0
+bitFM3Special     = 0
+bitNoAttack       = 1
+bitSFXOverride    = 2
+bitAltFreqMode    = 3
+bitTrackAtRest    = 4
+bitPitchSlide     = 5
+bitSustainFreq    = 6
+bitTrackPlaying   = 7
+maskSkipFMNoteOn  = (1<<bitNoAttack)|(1<<bitSFXOverride)|(1<<bitNoAttack)
+maskSkipFMNoteOff = (1<<bitSFXOverride)|(1<<bitNoAttack)
+maskPlayRest      = (1<<bitTrackPlaying)|(1<<bitTrackAtRest)
 ; Voice control values:
-ymFM1      := 0
-ymFM2      := 1
-ymFM3      := 2
-ymFM4      := 4
-ymFM5      := 5
-ymFM6      := 6
-ymDAC      := 6
-ymPartII   := 2			; Bit value
-snPSGTone  := 0
-snPSGVol   := 10h
-snPSG1     := 80h
-snPSG2     := 0A0h
-snPSG3     := 0C0h
-snNoise    := 0E0h
-bitIsPSG   := 7			; Bit value
+ymFM1      = 0
+ymFM2      = 1
+ymFM3      = 2
+ymFM4      = 4
+ymFM5      = 5
+ymFM6      = 6
+ymDAC      = 6
+ymPartII   = 2			; Bit value
+snPSGTone  = 0
+snPSGVol   = $10
+snPSG1     = $80
+snPSG2     = $A0
+snPSG3     = $C0
+snNoise    = $E0
+bitIsPSG   = 7			; Bit value
 ; ---------------------------------------------------------------------------
 ; equates: standard (for Genesis games) addresses in the memory map
 zYM2612_A0				=	$4000
@@ -158,115 +158,115 @@ zPSG					=	$7F11
 zROMWindow				=	$8000
 ; ---------------------------------------------------------------------------
 ; YM2612 register equates
-ymLFO                      := 22h
-maskLFOFrequency           := 7
-bitLFOEnable               := 3
+ymLFO                      = $22
+maskLFOFrequency           = 7
+bitLFOEnable               = 3
 
-ymTimerAFrequencyHigh      := 24h
-ymTimerAFrequencyLow       := 25h
+ymTimerAFrequencyHigh      = $24
+ymTimerAFrequencyLow       = $25
 
-ymTimerBFrequency          := 26h
+ymTimerBFrequency          = $26
 
-ymTimerControlFm3Mode      := 27h
-maskFM3Normal              := 0
-maskFM3Special             := 40h
-bitTimerALoad              := 0
-bitTimerBLoad              := 1
-bitTimerAEnable            := 2
-bitTimerBEnable            := 3
-bitTimerAReset             := 4
-bitTimerBReset             := 5
+ymTimerControlFm3Mode      = $27
+maskFM3Normal              = 0
+maskFM3Special             = $40
+bitTimerALoad              = 0
+bitTimerBLoad              = 1
+bitTimerAEnable            = 2
+bitTimerBEnable            = 3
+bitTimerAReset             = 4
+bitTimerBReset             = 5
 
-ymKeyOnOff                 := 28h
-bitOperator1               := 4
-bitOperator2               := 5
-bitOperator3               := 6
-bitOperator4               := 7
-maskAllOperators           := (1<<bitOperator4)|(1<<bitOperator3)|(1<<bitOperator2)|(1<<bitOperator1)
+ymKeyOnOff                 = $28
+bitOperator1               = 4
+bitOperator2               = 5
+bitOperator3               = 6
+bitOperator4               = 7
+maskAllOperators           = (1<<bitOperator4)|(1<<bitOperator3)|(1<<bitOperator2)|(1<<bitOperator1)
 
-ymDACPCM                   := 2Ah
-ymDACEnable                := 2Bh
-maskDACDisable             := 0
-maskDACEnable              := 80h
+ymDACPCM                   = $2A
+ymDACEnable                = $2B
+maskDACDisable             = 0
+maskDACEnable              = $80
 
-ymDetuneMultiply1          := 30h
-ymDetuneMultiply2          := 34h
-ymDetuneMultiply3          := 38h
-ymDetuneMultiply4          := 3Ch
+ymDetuneMultiply1          = $30
+ymDetuneMultiply2          = $34
+ymDetuneMultiply3          = $38
+ymDetuneMultiply4          = $3C
 
-ymTotalLevel1              := 40h
-ymTotalLevel2              := 44h
-ymTotalLevel3              := 48h
-ymTotalLevel4              := 4Ch
+ymTotalLevel1              = $40
+ymTotalLevel2              = $44
+ymTotalLevel3              = $48
+ymTotalLevel4              = $4C
 
-ymRateScaleAttackRate1     := 50h
-ymRateScaleAttackRate2     := 54h
-ymRateScaleAttackRate3     := 58h
-ymRateScaleAttackRate4     := 5Ch
-maskAttackRate             := 1Fh
-maxAttackRate              := maskAttackRate
-maskRateScale              := 0C0h
+ymRateScaleAttackRate1     = $50
+ymRateScaleAttackRate2     = $54
+ymRateScaleAttackRate3     = $58
+ymRateScaleAttackRate4     = $5C
+maskAttackRate             = $1F
+maxAttackRate              = maskAttackRate
+maskRateScale              = $C0
 
-ymAMDecayRate1             := 60h
-ymAMDecayRate2             := 64h
-ymAMDecayRate3             := 68h
-ymAMDecayRate4             := 6Ch
+ymAMDecayRate1             = $60
+ymAMDecayRate2             = $64
+ymAMDecayRate3             = $68
+ymAMDecayRate4             = $6C
 
-ymSustainRate1             := 70h
-ymSustainRate2             := 74h
-ymSustainRate3             := 78h
-ymSustainRate4             := 7Ch
+ymSustainRate1             = $70
+ymSustainRate2             = $74
+ymSustainRate3             = $78
+ymSustainRate4             = $7C
 
-ymSustainLevelReleaseRate1 := 80h
-ymSustainLevelReleaseRate2 := 84h
-ymSustainLevelReleaseRate3 := 88h
-ymSustainLevelReleaseRate4 := 8Ch
-maskReleaseRate            := 0Fh
-maxReleaseRate             := maskReleaseRate
-maskSustainLevel           := 0F0h
-maxSustainLevel            := maskSustainLevel
+ymSustainLevelReleaseRate1 = $80
+ymSustainLevelReleaseRate2 = $84
+ymSustainLevelReleaseRate3 = $88
+ymSustainLevelReleaseRate4 = $8C
+maskReleaseRate            = $F
+maxReleaseRate             = maskReleaseRate
+maskSustainLevel           = $F0
+maxSustainLevel            = maskSustainLevel
 
-ymSSGEG1                   := 90h
-ymSSGEG2                   := 94h
-ymSSGEG3                   := 98h
-ymSSGEG4                   := 9Ch
-maskSSGEGEnvelopeShape     := 7
-bitSSGEGEnable             := 3
-maskSSGEGEnable            := 1<<bitSSGEGEnable
+ymSSGEG1                   = $90
+ymSSGEG2                   = $94
+ymSSGEG3                   = $98
+ymSSGEG4                   = $9C
+maskSSGEGEnvelopeShape     = 7
+bitSSGEGEnable             = 3
+maskSSGEGEnable            = 1<<bitSSGEGEnable
 
-ymFrequencyLow             := 0A0h
-ymFrequencyHigh            := 0A4h
-ymCH3FrequencyLow1         := 0A9h
-ymCH3FrequencyLow2         := 0AAh
-ymCH3FrequencyLow3         := 0A8h
-ymCH3FrequencyLow4         := 0A2h
-ymCH3FrequencyHigh1        := 0ADh
-ymCH3FrequencyHigh2        := 0AEh
-ymCH3FrequencyHigh3        := 0ACh
-ymCH3FrequencyHigh4        := 0A6h
+ymFrequencyLow             = $A0
+ymFrequencyHigh            = $A4
+ymCH3FrequencyLow1         = $A9
+ymCH3FrequencyLow2         = $AA
+ymCH3FrequencyLow3         = $A8
+ymCH3FrequencyLow4         = $A2
+ymCH3FrequencyHigh1        = $AD
+ymCH3FrequencyHigh2        = $AE
+ymCH3FrequencyHigh3        = $AC
+ymCH3FrequencyHigh4        = $A6
 
-ymAlgorithmFeedback        := 0B0h
-maskAlgorithm              := 7
-maskFeedback               := 38h
+ymAlgorithmFeedback        = $B0
+maskAlgorithm              = 7
+maskFeedback               = $38
 
-ymPanningAMSensFMSens      := 0B4h
-maskFMSensitivity          := 7
-maskAMSensitivity          := 30h
-bitOutputRight             := 6
-bitOutputLeft              := 7
-maskPanning                := 0C0h
+ymPanningAMSensFMSens      = $B4
+maskFMSensitivity          = 7
+maskAMSensitivity          = $30
+bitOutputRight             = 6
+bitOutputLeft              = 7
+maskPanning                = $C0
 ; ---------------------------------------------------------------------------
 ; Envelope-related constants
-ModEnvSustain0  := 80h
-ModEnvSustain1  := 81h
-ModEnvJumpTo    := 82h
-ModEnvSustain   := 83h
-ModEnvAlterSens := 84h
+ModEnvSustain0  = $80
+ModEnvSustain1  = $81
+ModEnvJumpTo    = $82
+ModEnvSustain   = $83
+ModEnvAlterSens = $84
 
-VolEnvReset     := 80h
-VolEnvRestTrack := 81h
-VolEnvJumpTo    := 82h
-VolEnvStopTrack := 83h
+VolEnvReset     = $80
+VolEnvRestTrack = $81
+VolEnvJumpTo    = $82
+VolEnvStopTrack = $83
 ; ---------------------------------------------------------------------------
 ; z80 RAM:
 zDataStart				=	$1C1A
