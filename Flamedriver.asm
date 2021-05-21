@@ -157,6 +157,105 @@ zBankRegister			=	$6000
 zPSG					=	$7F11
 zROMWindow				=	$8000
 ; ---------------------------------------------------------------------------
+; YM2612 register equates
+ymLFO                      := 22h
+maskLFOFrequency           := 7
+bitLFOEnable               := 3
+
+ymTimerAFrequencyHigh      := 24h
+ymTimerAFrequencyLow       := 25h
+
+ymTimerBFrequency          := 26h
+
+ymTimerControlFm3Mode      := 27h
+maskFM3Normal              := 0
+maskFM3Special             := 40h
+bitTimerALoad              := 0
+bitTimerBLoad              := 1
+bitTimerAEnable            := 2
+bitTimerBEnable            := 3
+bitTimerAReset             := 4
+bitTimerBReset             := 5
+
+ymKeyOnOff                 := 28h
+bitOperator1               := 4
+bitOperator2               := 5
+bitOperator3               := 6
+bitOperator4               := 7
+maskAllOperators           := (1<<bitOperator4)|(1<<bitOperator3)|(1<<bitOperator2)|(1<<bitOperator1)
+
+ymDACPCM                   := 2Ah
+ymDACEnable                := 2Bh
+maskDACDisable             := 0
+maskDACEnable              := 80h
+
+ymDetuneMultiply1          := 30h
+ymDetuneMultiply2          := 34h
+ymDetuneMultiply3          := 38h
+ymDetuneMultiply4          := 3Ch
+
+ymTotalLevel1              := 40h
+ymTotalLevel2              := 44h
+ymTotalLevel3              := 48h
+ymTotalLevel4              := 4Ch
+
+ymRateScaleAttackRate1     := 50h
+ymRateScaleAttackRate2     := 54h
+ymRateScaleAttackRate3     := 58h
+ymRateScaleAttackRate4     := 5Ch
+maskAttackRate             := 1Fh
+maxAttackRate              := maskAttackRate
+maskRateScale              := 0C0h
+
+ymAMDecayRate1             := 60h
+ymAMDecayRate2             := 64h
+ymAMDecayRate3             := 68h
+ymAMDecayRate4             := 6Ch
+
+ymSustainRate1             := 70h
+ymSustainRate2             := 74h
+ymSustainRate3             := 78h
+ymSustainRate4             := 7Ch
+
+ymSustainLevelReleaseRate1 := 80h
+ymSustainLevelReleaseRate2 := 84h
+ymSustainLevelReleaseRate3 := 88h
+ymSustainLevelReleaseRate4 := 8Ch
+maskReleaseRate            := 0Fh
+maxReleaseRate             := maskReleaseRate
+maskSustainLevel           := 0F0h
+maxSustainLevel            := maskSustainLevel
+
+ymSSGEG1                   := 90h
+ymSSGEG2                   := 94h
+ymSSGEG3                   := 98h
+ymSSGEG4                   := 9Ch
+maskSSGEGEnvelopeShape     := 7
+bitSSGEGEnable             := 3
+maskSSGEGEnable            := 1<<bitSSGEGEnable
+
+ymFrequencyLow             := 0A0h
+ymFrequencyHigh            := 0A4h
+ymCH3FrequencyLow1         := 0A9h
+ymCH3FrequencyLow2         := 0AAh
+ymCH3FrequencyLow3         := 0A8h
+ymCH3FrequencyLow4         := 0A2h
+ymCH3FrequencyHigh1        := 0ADh
+ymCH3FrequencyHigh2        := 0AEh
+ymCH3FrequencyHigh3        := 0ACh
+ymCH3FrequencyHigh4        := 0A6h
+
+ymAlgorithmFeedback        := 0B0h
+maskAlgorithm              := 7
+maskFeedback               := 38h
+
+ymPanningAMSensFMSens      := 0B4h
+maskFMSensitivity          := 7
+maskAMSensitivity          := 30h
+bitOutputRight             := 6
+bitOutputLeft              := 7
+maskPanning                := 0C0h
+; ---------------------------------------------------------------------------
 ; Envelope-related constants
 ModEnvSustain0  := 80h
 ModEnvSustain1  := 81h
@@ -537,7 +636,7 @@ __LABEL__ label $
     endm
 
 setMaxAR macro
-		or	1Fh								; Set AR to maximum
+		or	maxAttackRate					; Set AR to maximum
     endm
 
 calcVolume macro
@@ -945,10 +1044,10 @@ zFMSendFreq:
 		jp	nz, .special_mode				; Branch if yes
 
 .not_fm3:
-		ld	a, 0A4h							; Command to update frequency MSB
+		ld	a, ymFrequencyHigh				; Command to update frequency MSB
 		ld	c, h							; High byte of frequency
 		call	zWriteFMIorII				; Send it to YM2612
-		ld	a, 0A0h							; Command to update frequency LSB
+		ld	a, ymFrequencyLow				; Command to update frequency LSB
 		ld	c, l							; Low byte of frequency
 		jp	zWriteFMIorII					; Send it to YM2612
 ; ---------------------------------------------------------------------------
@@ -978,7 +1077,7 @@ zFMSendFreq:
 		ld	c, h							; High byte of frequency
 		call	zWriteFMI					; Sent it to YM2612
 		pop	af								; Restore af
-		sub	4								; Move on to frequency LSB
+		sub	ymCH3FrequencyHigh1-ymCH3FrequencyLow1	; Move on to frequency LSB
 		ld	c, l							; Low byte of frequency
 		call	zWriteFMI					; Sent it to YM2612
 		pop	hl								; Restore hl
@@ -990,10 +1089,10 @@ zFMSendFreq:
 ; ---------------------------------------------------------------------------
 ;loc_272
 zSpecialFreqCommands:
-		db 0ADh								; Operator 4 frequency MSB
-		db 0AEh								; Operator 3 frequency MSB
-		db 0ACh								; Operator 2 frequency MSB
-		db 0A6h								; Operator 1 frequency MSB
+		db ymCH3FrequencyHigh1				; Operator 4 frequency MSB
+		db ymCH3FrequencyHigh2				; Operator 3 frequency MSB
+		db ymCH3FrequencyHigh3				; Operator 2 frequency MSB
+		db ymCH3FrequencyHigh4				; Operator 1 frequency MSB
 zSpecialFreqCommands_End
 
 ; =============== S U B	R O U T	I N E =======================================
@@ -1199,9 +1298,9 @@ zFMNoteOn:
 		and	maskSkipFMNoteOn				; Is either bit 4 ("track at rest") or 2 ("SFX overriding this track") or bit 1 ("do not attack next note") set?
 		ret	nz								; Return if yes
 		ld	a, (ix+zTrack.VoiceControl)		; Get voice control byte from track
-		or	0F0h							; We want only the FM channel assignment bits
+		or	maskAllOperators				; Add in bits for all operators
 		ld	c, a							; Key on for all operators
-		ld	a, 28h							; Select key on/of register
+		ld	a, ymKeyOnOff					; Select key on/of register
 		jp	zWriteFMI						; Send command to YM2612
 ; ---------------------------------------------------------------------------
 
@@ -1238,6 +1337,7 @@ zKeyOff:
 ; Output:  a    Damaged
 ;loc_367
 zKeyOnOff:
+		ld	a, ymKeyOnOff					; Write to KEY ON/OFF port
 		res	bitSustainFreq, (ix+zTrack.PlaybackControl)	; From Dyna Brothers 2, but in a better place; clear flag to sustain frequency
 		jp	zWriteFMI						; Send it
 ; End of function zKeyOnOff
@@ -1566,46 +1666,46 @@ zGetFMInstrumentOffset:
 ; ---------------------------------------------------------------------------
 ;loc_49C
 zFMInstrumentRegTable:
-		db 0B0h								; Feedback/Algorithm
+		db ymAlgorithmFeedback				; Feedback/Algorithm
 zFMInstrumentOperatorTable:
-		db 30h								; Detune/multiple operator 1
-		db 38h								; Detune/multiple operator 3
-		db 34h								; Detune/multiple operator 2
-		db 3Ch								; Detune/multiple operator 4
+		db ymDetuneMultiply1				; Detune/multiple operator 1
+		db ymDetuneMultiply3				; Detune/multiple operator 3
+		db ymDetuneMultiply2				; Detune/multiple operator 2
+		db ymDetuneMultiply4				; Detune/multiple operator 4
 zFMInstrumentRSARTable:
-		db 50h								; Rate scaling/attack rate operator 1
-		db 58h								; Rate scaling/attack rate operator 3
-		db 54h								; Rate scaling/attack rate operator 2
-		db 5Ch								; Rate scaling/attack rate operator 4
+		db ymRateScaleAttackRate1			; Rate scaling/attack rate operator 1
+		db ymRateScaleAttackRate3			; Rate scaling/attack rate operator 3
+		db ymRateScaleAttackRate2			; Rate scaling/attack rate operator 2
+		db ymRateScaleAttackRate4			; Rate scaling/attack rate operator 4
 zFMInstrumentAMD1RTable:
-		db 60h								; Amplitude modulation/first decay rate operator 1
-		db 68h								; Amplitude modulation/first decay rate operator 3
-		db 64h								; Amplitude modulation/first decay rate operator 2
-		db 6Ch								; Amplitude modulation/first decay rate operator 4
+		db ymAMDecayRate1					; Amplitude modulation/first decay rate operator 1
+		db ymAMDecayRate3					; Amplitude modulation/first decay rate operator 3
+		db ymAMDecayRate2					; Amplitude modulation/first decay rate operator 2
+		db ymAMDecayRate4					; Amplitude modulation/first decay rate operator 4
 zFMInstrumentD2RTable:
-		db 70h								; Secondary decay rate operator 1
-		db 78h								; Secondary decay rate operator 3
-		db 74h								; Secondary decay rate operator 2
-		db 7Ch								; Secondary decay rate operator 4
+		db ymSustainRate1					; Secondary decay rate operator 1
+		db ymSustainRate3					; Secondary decay rate operator 3
+		db ymSustainRate2					; Secondary decay rate operator 2
+		db ymSustainRate4					; Secondary decay rate operator 4
 zFMInstrumentD1LRRTable:
-		db 80h								; Secondary amplitude/release rate operator 1
-		db 88h								; Secondary amplitude/release rate operator 3
-		db 84h								; Secondary amplitude/release rate operator 2
-		db 8Ch								; Secondary amplitude/release rate operator 4
+		db ymSustainLevelReleaseRate1		; Secondary amplitude/release rate operator 1
+		db ymSustainLevelReleaseRate3		; Secondary amplitude/release rate operator 3
+		db ymSustainLevelReleaseRate2		; Secondary amplitude/release rate operator 2
+		db ymSustainLevelReleaseRate4		; Secondary amplitude/release rate operator 4
 zFMInstrumentOperatorTable_End
 ;loc_4B1
 zFMInstrumentTLTable:
-		db 40h								; Total level operator 1
-		db 48h								; Total level operator 3
-		db 44h								; Total level operator 2
-		db 4Ch								; Total level operator 4
+		db ymTotalLevel1					; Total level operator 1
+		db ymTotalLevel3					; Total level operator 3
+		db ymTotalLevel2					; Total level operator 2
+		db ymTotalLevel4					; Total level operator 4
 zFMInstrumentTLTable_End
 ;loc_4B5
 zFMInstrumentSSGEGTable:
-		db 90h								; SSG-EG operator 1
-		db 98h								; SSG-EG operator 3
-		db 94h								; SSG-EG operator 2
-		db 9Ch								; SSG-EG operator 4
+		db ymSSGEG1							; SSG-EG operator 1
+		db ymSSGEG3							; SSG-EG operator 3
+		db ymSSGEG2							; SSG-EG operator 2
+		db ymSSGEG4							; SSG-EG operator 4
 zFMInstrumentSSGEGTable_End
 
 ; =============== S U B	R O U T	I N E =======================================
@@ -1627,7 +1727,7 @@ zSendFMInstrument:
 		push	iy							; Save iy
 		zGetFMPartPointer					; Point iy to appropriate FM part
 		ld	de, zFMInstrumentRegTable		; de = pointer to register output table
-		zFastWriteFM 0B4h, (ix+zTrack.AMSFMSPan)
+		zFastWriteFM ymPanningAMSensFMSens, (ix+zTrack.AMSFMSPan)
 		ld	b, zFMInstrumentOperatorTable_End-zFMInstrumentRegTable	; Number of commands to issue
 		ld	a, (ix+zTrack.HaveSSGEGFlag)	; Get custom SSG-EG flag
 		or	a								; Does track have custom SSG-EG data?
@@ -1876,10 +1976,10 @@ zBGMLoad:
 		ld	a, (hl)							; Get bank for the song to play
 		ld	(zSongBank), a					; Save the song's bank...
 		bankswitch							; ... then bank switch to it
-		ld	a, 0B6h							; Set Panning / AMS / FMS
+		ld	a, ymPanningAMSensFMSens|ymFM3	; Set Panning / AMS / FMS
 		ld	(zYM2612_A1), a					; Write destination address to YM2612 address register
 		nop
-		ld	a, 0C0h							; default Panning / AMS / FMS settings (only stereo L/R enabled)
+		ld	a, maskPanning					; default Panning / AMS / FMS settings (only stereo L/R enabled)
 		ld	(zYM2612_D1), a					; Write to YM2612 data register
 		pop	af								; Restore af
 		ld	c, zID_MusicPointers			; c = 4 (music pointer table)
@@ -1955,12 +2055,12 @@ zBGMLoad:
 		ld	(hl), a							; Put 0 into this byte
 		djnz	.loop						; Loop until end of track
 
-		ld	a, 80h							; FM Channel 6 is NOT in use (will enable DAC)
+		ld	a, maskDACEnable				; FM Channel 6 is NOT in use (will enable DAC)
 
 .set_dac:
 		ld	c, a							; Set this as value to be used in FM register write coming up...
 		ld	(zDACEnable), a					; Note whether FM Channel 6 is in use (enables DAC if not)
-		ld	a, 2Bh							; Set DAC Enable appropriately
+		ld	a, ymDACEnable					; Set DAC Enable appropriately
 		call	zWriteFMI
 		; End of DAC/FM init, begin PSG init
 
@@ -2255,7 +2355,7 @@ zZeroFillTrackRAM:
 		ex	de, hl							; Exchange the contents of de and hl
 		ld	(hl), zTrack.len				; Call subroutine stack pointer
 		inc	hl								; Advance to next byte
-		ld	(hl), 0C0h						; default Panning / AMS / FMS settings (only stereo L/R enabled)
+		ld	(hl), maskPanning				; default Panning / AMS / FMS settings (only stereo L/R enabled)
 		inc	hl								; Advance to next byte
 		ld	(hl), 1							; Current note duration timeout
 
@@ -2330,7 +2430,7 @@ zPauseUnpause:
 
 .set_pan:
 		ld	c, (ix+zTrack.AMSFMSPan)		; Get track AMS/FMS/panning
-		ld	a, 0B4h							; Command to select AMS/FMS/panning register
+		ld	a, ymPanningAMSensFMSens		; Command to select AMS/FMS/panning register
 		call	zWriteFMIorII				; Write data to YM2612
 
 .skip_fm_track:
@@ -2347,7 +2447,7 @@ zPauseUnpause:
 		bit	bitIsPSG, (ix+zTrack.VoiceControl)	; Is this a PSG track?
 		jr	nz, .skip_psg_track				; Branch if yes
 		ld	c, (ix+zTrack.AMSFMSPan)		; Get track AMS/FMS/panning
-		ld	a, 0B4h							; Command to select AMS/FMS/panning register
+		ld	a, ymPanningAMSensFMSens		; Command to select AMS/FMS/panning register
 		call	zWriteFMIorII				; Write data to YM2612
 
 .skip_psg_track:
@@ -2522,8 +2622,8 @@ zMusicFadeSimple:
 		ld	a, (ix+zTrack.VoiceControl)		; Fetch channel assignment byte
 		cp	ymFM3							; Is this FM3?
 		jr	nz, .skip_fmchannel				; Branch if yes
-		ld	c, 0							; FM3 mode: normal mode
-		ld	a, 27h							; FM3 special settings
+		ld	c, maskFM3Normal				; FM3 mode: normal mode
+		ld	a, ymTimerControlFm3Mode		; FM3 special settings
 		call	zWriteFMI					; Set it
 
 .skip_fmchannel:
@@ -2547,14 +2647,14 @@ zMusicFadeSimple:
 		xor	a								; a = 0
 		ld	(zFadeOutTimeout), a			; Set fade timeout to zero... again
 		ld	c, a							; Write a zero...
-		ld	a, 2Bh							; ... to DAC enable register
+		ld	a, ymDACEnable					; ... to DAC enable register
 		call	zWriteFMI					; Disable DAC
 		jp	zClearNextSound
 
 ;loc_979
 zFM3NormalMode:
-		ld	c, 0							; FM3 mode: normal mode
-		ld	a, 27h							; FM3 special settings
+		ld	c, maskFM3Normal				; FM3 mode: normal mode
+		ld	a, ymTimerControlFm3Mode		; FM3 special settings
 		call	zWriteFMI					; Set it
 		jp	zClearNextSound
 ; End of function zMusicFade
@@ -2568,7 +2668,7 @@ zFM3NormalMode:
 ;         c     Damaged
 ;sub_986
 zFMClearSSGEGOps:
-		ld	a, 90h							; Set SSG-EG registers...
+		ld	a, ymSSGEG1						; Set SSG-EG registers...
 		ld	c, 0							; ... set to zero (as docs say it should)...
 		jp	zFMOperatorWriteLoop			; ... for all operators of this track's channel
 ; End of function zFMClearSSGEGOps
@@ -2580,7 +2680,7 @@ zPauseAudio:
 		push	bc							; Save bc
 		push	af							; Save af
 		ld	b, zNumMusicFM1Tracks			; FM1/FM2/FM3
-		ld	a, 0B4h							; Command to select AMS/FMS/panning register (FM1)
+		ld	a, ymPanningAMSensFMSens		; Command to select AMS/FMS/panning register (FM1)
 		ld	c, 0							; AMS=FMS=panning=0
 
 .loop1:
@@ -2591,7 +2691,7 @@ zPauseAudio:
 		djnz	.loop1						; Loop for all channels
 
 		ld	b, zNumMusicFM2Tracks			; FM4/FM5/FM6
-		ld	a, 0B4h							; Command to select AMS/FMS/panning register
+		ld	a, ymPanningAMSensFMSens		; Command to select AMS/FMS/panning register
 
 .loop2:
 		push	af							; Save af
@@ -2602,7 +2702,7 @@ zPauseAudio:
 
 		ld	c, 0							; Note off for all operators
 		ld	b, zNumMusicFMTracks+1			; FM channels + gap between FM3 and FM4
-		ld	a, 28h							; Command to send note on/off
+		ld	a, ymKeyOnOff					; Command to send note on/off
 
 .loop3:
 		push	af							; Save af
@@ -2688,7 +2788,7 @@ zFillSoundQueue:
 ;sub_9F6
 zFMSilenceChannel:
 		call	zSetMaxRelRate
-		ld	a, 40h							; Set total level...
+		ld	a, ymTotalLevel1				; Set total level...
 		ld	c, 7Fh							; ... to minimum envelope amplitude...
 		call	zFMOperatorWriteLoop		; ... for all operators of this track's channel
 		ld	c, (ix+zTrack.VoiceControl)		; Send key off
@@ -2707,8 +2807,8 @@ zFMSilenceChannel:
 ;sub_A06
 ;zSetFMMinD1LRR
 zSetMaxRelRate:
-		ld	a, 80h							; Set D1L to minimum and RR to maximum...
-		ld	c, 0FFh							; ... for all operators on this track's channel (fall through)
+		ld	a, ymSustainLevelReleaseRate1	; Set D1L to minimum and RR to maximum...
+		ld	c, maxSustainLevel|maxReleaseRate	; ... for all operators on this track's channel (fall through)
 ; End of function zSetMaxRelRate
 
 
@@ -2784,6 +2884,7 @@ zFadeInToPrevious:
 		or	(ix+zTrack.PlaybackControl)		; Add in track playback control bits
 		ld	(ix+zTrack.PlaybackControl), a	; Save everything
 		ld	c, ymFM6						; Get voice control byte for FM6
+		ld	a, ymKeyOnOff					; Write to KEY ON/OFF port
 		call	zWriteFMI
 
 .no_dac:
@@ -2995,7 +3096,7 @@ cfPlayDACSample:
 ;
 ;sub_C51
 cfPanningAMSFMS:
-		ld	c, 3Fh							; Mask for all but panning
+		ld	c, ~maskPanning					; Mask for all but panning
 
 zDoChangePan:
 		ld	a, (ix+zTrack.AMSFMSPan)		; Get current AMS/FMS/panning
@@ -3005,7 +3106,7 @@ zDoChangePan:
 		or	(hl)							; Mask in the new panning; may also add AMS/FMS
 		ld	(ix+zTrack.AMSFMSPan), a		; Store new value in track RAM
 		ld	c, a							; c = new AMS/FMS/panning
-		ld	a, 0B4h							; a = YM2612 register to write to
+		ld	a, ymPanningAMSensFMSens		; a = YM2612 register to write to
 		call	zWriteFMIorII				; Set new panning/AMS/FMS
 		pop	de								; Restore de
 		ret
@@ -3020,10 +3121,10 @@ zDoChangePan:
 
 cfSetLFO:
 		ld	c, a							; Copy parameter byte
-		ld	a, 22h							; LFO enable/frequency
+		ld	a, ymLFO						; LFO enable/frequency
 		call	zWriteFMI					; Send it
 		inc	de								; Advance pointer
-		ld	c, 0C0h							; Mask for only panning
+		ld	c, maskPanning					; Mask for only panning
 		jr	zDoChangePan
 
 ; =============== S U B	R O U T	I N E =======================================
@@ -3766,7 +3867,7 @@ cfFM3SpecialMode:
 ;sub_F11
 zWriteFM3Settings:
 		ld	c, a							; c = FM3 settings
-		ld	a, 27h							; Write data to FM3 settings register
+		ld	a, ymTimerControlFm3Mode		; Write data to FM3 settings register
 		jp	zWriteFMI						; Do it
 ; End of function zWriteFM3Settings
 
@@ -3959,10 +4060,10 @@ zSendSSGEGData:
 		ld	a, (hl)							; a = RS/AR value for operator
 		inc	hl								; Advance pointer
 		ex	(sp), hl						; Save hl, hl = pointer to registers for SSG-EG data
-		or	1Fh								; Set AR to maximum, but keep RS intact
+		or	maxAttackRate					; Set AR to maximum, but keep RS intact
 		ld	c, a							; c = RS/AR
 		ld	a, (hl)							; a = register to send to
-		sub	40h								; Convert into command to set RS/AR
+		sub	ymSSGEG1-ymRateScaleAttackRate1	; Convert into command to set RS/AR
 		inc	hl								; Advance pointer
 		call	zWriteFMIorII				; Send data to correct channel
 		djnz	.loop						; Loop for all registers
@@ -4200,8 +4301,8 @@ zSilencePSGChannel:
 ;loc_108A
 zPlayDigitalAudio:
 		di									; Disable interrupts
-		ld	a, 2Bh							; DAC enable/disable register
-		ld	c, 0							; Value to disable DAC
+		ld	a, ymDACEnable					; DAC enable/disable register
+		ld	c, maskDACDisable				; Value to disable DAC
 		call	zWriteFMI					; Send YM2612 command
 		ld	hl, zSongFM6					; Get pointer to FM6 track
 		ld	a, (zDACEnable)					; Get DAC enable
@@ -4210,7 +4311,7 @@ zPlayDigitalAudio:
 		ld	hl, zSongDAC					; Get pointer to DAC track
 		; Don't allow music DAC to be re-enabled by DAC SFX ending during fading
 		ld	a, (zFadeInTimeout)				; Get fading timeout
-		or	a						; Is music being faded?
+		or	a								; Is music being faded?
 		jr	nz, .dac_idle_loop				; Branch if yes
 
 .enabletrack:
@@ -4224,8 +4325,8 @@ zPlayDigitalAudio:
 		ld	a, (zDACIndex)					; a = DAC index/flag
 		or	a								; Is DAC channel being used?
 		jr	z, .dac_idle_loop				; Loop if not
-		ld	a, 2Bh							; DAC enable/disable register
-		ld	c, 80h							; Value to enable DAC
+		ld	a, ymDACEnable					; DAC enable/disable register
+		ld	c, maskDACEnable				; Value to enable DAC
 		di									; Disable interrupts
 		call	zWriteFMI					; Send YM2612 command
 		ei									; Re-enable interrupts
@@ -4264,7 +4365,7 @@ zPlayDigitalAudio:
 		djnz	$							; Loop in this instruction, decrementing b each iteration, until b = 0
 
 		di									; Disable interrupts
-		ld	a, 2Ah							; DAC channel register
+		ld	a, ymDACPCM						; DAC channel register
 		ld	(zYM2612_A0), a					; Send to YM2612
 		ld	a, (hl)							; a = next byte of DAC sample
 		; Want only the high nibble now, so shift it into position
@@ -4287,7 +4388,7 @@ zPlayDigitalAudio:
 		djnz	$							; Loop in this instruction, decrementing b each iteration, until b = 0
 
 		di									; Disable interrupts
-		ld	a, 2Ah							; DAC channel register
+		ld	a, ymDACPCM						; DAC channel register
 		ld	(zYM2612_A0), a					; Send to YM2612
 		ld	a, (hl)							; a = next byte of DAC sample
 		and	0Fh								; Want only the low nibble
@@ -4334,16 +4435,16 @@ zPlaySEGAPCM:
 		di									; Disable interrupts
 		xor	a								; a = 0
 		ld	(PlaySegaPCMFlag), a			; Clear flag
-		ld	a, 2Bh							; DAC enable/disable register
+		ld	a, ymDACEnable					; DAC enable/disable register
 		ld	(zYM2612_A0), a					; Select the register
 		nop									; Delay
-		ld	a, 80h							; Value to enable DAC
+		ld	a, maskDACEnable				; Value to enable DAC
 		ld	(zYM2612_D0), a					; Enable DAC
 		ld	a, zmake68kBank(SEGA_PCM)		; a = sound bank index
 		bankswitchLoop						; Bank switch to sound bank
 		ld	hl, zmake68kPtr(SEGA_PCM)		; hl = pointer to SEGA PCM
 		ld	de, SEGA_PCM_End-SEGA_PCM		; de = length of SEGA PCM
-		ld	a, 2Ah							; DAC channel register
+		ld	a, ymDACPCM						; DAC channel register
 		ld	(zYM2612_A0), a					; Send to YM2612
 		nop									; Delay
 
