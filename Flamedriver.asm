@@ -157,6 +157,18 @@ zBankRegister			=	$6000
 zPSG					=	$7F11
 zROMWindow				=	$8000
 ; ---------------------------------------------------------------------------
+; Envelope-related constants
+ModEnvSustain0  := 80h
+ModEnvSustain1  := 81h
+ModEnvJumpTo    := 82h
+ModEnvSustain   := 83h
+ModEnvAlterSens := 84h
+
+VolEnvReset     := 80h
+VolEnvRestTrack := 81h
+VolEnvJumpTo    := 82h
+VolEnvStopTrack := 83h
+; ---------------------------------------------------------------------------
 ; z80 RAM:
 zDataStart				=	$1C1A
 		phase zDataStart
@@ -1413,11 +1425,11 @@ zDoModEnvelope_cont:
 		pop	hl								; Restore hl
 		bit	7, a							; Is modulation envelope negative?
 		jp	z, zlocPositiveModEnvMod		; Branch if not
-		cp	82h								; Is it 82h?
+		cp	ModEnvJumpTo					; Is it a command to jump to another value?
 		jr	z, zlocChangeModEnvIndex		; Branch if yes
-		cp	80h								; Is it 80h?
+		cp	ModEnvReset						; Is it a command to reset envelope?
 		jr	z, zlocResetModEnvMod			; Branch if yes
-		cp	84h								; Is it 84h?
+		cp	ModEnvAlterSens					; Is it a command to change sensibility?
 		jr	z, zlocModEnvIncMultiplier		; Branch if yes
 		ld	h, 0FFh							; h = 0FFh
 		jr	nc, zlocApplyModEnvMod			; Branch if more than 84h
@@ -4110,11 +4122,11 @@ zDoVolEnv:
 		pop	hl								; Restore hl
 		bit	7, a							; Is it a terminator?
 		jr	z, zDoVolEnvAdvance				; Branch if not
-		cp	83h								; Is it a command to put PSG channel to rest?
+		cp	VolEnvStopTrack					; Is it a command to put PSG channel to rest?
 		jr	z, zDoVolEnvFullRest			; Branch if yes
-		cp	81h								; Is it a command to set rest flag on PSG channel?
+		cp	VolEnvRestTrack					; Is it a command to set rest flag on PSG channel?
 		jr	z, zDoVolEnvRest				; Branch if yes
-		cp	80h								; Is it a command to reset envelope?
+		cp	VolEnvReset						; Is it a command to reset envelope?
 		jr	z, zDoVolEnvReset				; Branch if yes
 
 		; NOTE: This code is meant for flag 82h, but can happen without it.
@@ -4488,16 +4500,16 @@ z80_ModEnvPointers:
 		dw	ModEnv_06
 		dw	ModEnv_07
 ModEnv_01:	db    0
-ModEnv_00:	db    1,   2,   1,   0,  -1,  -2,  -3,  -4,  -3,  -2,  -1, 83h
-ModEnv_02:	db    0,   0,   0,   0, 13h, 26h, 39h, 4Ch, 5Fh, 72h, 7Fh, 72h, 83h
-ModEnv_03:	db    1,   2,   3,   2,   1,   0,  -1,  -2,  -3,  -2,  -1,   0, 82h,   0
-ModEnv_04:	db    0,   0,   1,   3,   1,   0,  -1,  -3,  -1,   0, 82h,   2
+ModEnv_00:	db    1,   2,   1,   0,  -1,  -2,  -3,  -4,  -3,  -2,  -1, ModEnvSustain
+ModEnv_02:	db    0,   0,   0,   0, 13h, 26h, 39h, 4Ch, 5Fh, 72h, 7Fh, 72h, ModEnvSustain
+ModEnv_03:	db    1,   2,   3,   2,   1,   0,  -1,  -2,  -3,  -2,  -1,   0, ModEnvJumpTo,   0
+ModEnv_04:	db    0,   0,   1,   3,   1,   0,  -1,  -3,  -1,   0, ModEnvJumpTo,   2
 ModEnv_05:	db    0,   0,   0,   0,   0, 0Ah, 14h, 1Eh, 14h, 0Ah,   0, -10, -20, -30, -20, -10
-          	db  82h,   4
-ModEnv_06:	db    0,   0,   0,   0, 16h, 2Ch, 42h, 2Ch, 16h,   0, -22, -44, -66, -44, -22, 82h
-          	db    3
+          	db  ModEnvJumpTo,   4
+ModEnv_06:	db    0,   0,   0,   0, 16h, 2Ch, 42h, 2Ch, 16h,   0, -22, -44, -66, -44, -22
+          	db    ModEnvJumpTo, 3
 ModEnv_07:	db    1,   2,   3,   4,   3,   2,   1,   0,  -1,  -2,  -3,  -4,  -3,  -2,  -1,   0
-          	db  82h,   1
+          	db  ModEnvJumpTo,   1
 ; ---------------------------------------------------------------------------
 ; ===========================================================================
 ; Volume Envelope Pointers
@@ -4513,20 +4525,20 @@ z80_VolEnvPointers:
 		dw		VolEnv_24,VolEnv_25,VolEnv_26,VolEnv_27,VolEnv_28,VolEnv_29
 		dw		VolEnv_2A,VolEnv_2B,VolEnv_2C,VolEnv_2D,VolEnv_2E,VolEnv_2F
 		dw		VolEnv_30,VolEnv_31,VolEnv_32,VolEnv_33
-VolEnv_00:	db    2, 83h
+VolEnv_00:	db    2, VolEnvStopTrack
 VolEnv_01:
-VolEnv_0E:	db    0,   2,   4,   6,   8, 10h, 83h
+VolEnv_0E:	db    0,   2,   4,   6,   8, 10h, VolEnvStopTrack
 VolEnv_02:	db    2,   1,   0,   0,   1,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2
-          	db    2,   3,   3,   3,   4,   4,   4,   5, 81h
-VolEnv_03:	db    0,   0,   2,   3,   4,   4,   5,   5,   5,   6,   6, 81h
-VolEnv_04:	db    3,   0,   1,   1,   1,   2,   3,   4,   4,   5, 81h
-VolEnv_05:	db    0,   0,   1,   1,   2,   3,   4,   5,   5,   6,   8,   7,   7,   6, 81h
-VolEnv_06:	db    1, 0Ch,   3, 0Fh,   2,   7,   3, 0Fh, 80h
+          	db    2,   3,   3,   3,   4,   4,   4,   5, VolEnvRestTrack
+VolEnv_03:	db    0,   0,   2,   3,   4,   4,   5,   5,   5,   6,   6, VolEnvRestTrack
+VolEnv_04:	db    3,   0,   1,   1,   1,   2,   3,   4,   4,   5, VolEnvRestTrack
+VolEnv_05:	db    0,   0,   1,   1,   2,   3,   4,   5,   5,   6,   8,   7,   7,   6, VolEnvRestTrack
+VolEnv_06:	db    1, 0Ch,   3, 0Fh,   2,   7,   3, 0Fh, VolEnvReset
 VolEnv_07:	db    0,   0,   0,   2,   3,   3,   4,   5,   6,   7,   8,   9, 0Ah, 0Bh, 0Eh, 0Fh
-          	db  83h
-VolEnv_08:	db    3,   2,   1,   1,   0,   0,   1,   2,   3,   4, 81h
+          	db  VolEnvStopTrack
+VolEnv_08:	db    3,   2,   1,   1,   0,   0,   1,   2,   3,   4, VolEnvRestTrack
 VolEnv_09:	db    1,   0,   0,   0,   0,   1,   1,   1,   2,   2,   2,   3,   3,   3,   3,   4
-          	db    4,   4,   5,   5, 81h
+          	db    4,   4,   5,   5, VolEnvRestTrack
 ; The -10h in this FM volume envelope appears to be erroneous:
 ; negative volume attenuations aren't supported, and instead
 ; trigger the code intended for byte 82h.
@@ -4535,69 +4547,69 @@ VolEnv_09:	db    1,   0,   0,   0,   0,   1,   1,   1,   2,   2,   2,   3,   3, 
 ; Oddly, this same envelope appears in Ristar (whose driver
 ; *does* support negative attenuations), despite SMPS 68k not
 ; supporting FM volume envelopes.
-VolEnv_0A:	db  10h, 20h, 30h, 40h, 30h, 20h, 10h,   0,-10h, 80h
-VolEnv_0B:	db    0,   0,   1,   1,   3,   3,   4,   5, 83h
-VolEnv_0C:	db    0, 81h
-VolEnv_0D:	db    2, 83h
+VolEnv_0A:	db  10h, 20h, 30h, 40h, 30h, 20h, 10h,   0,-10h, VolEnvReset
+VolEnv_0B:	db    0,   0,   1,   1,   3,   3,   4,   5, VolEnvStopTrack
+VolEnv_0C:	db    0, VolEnvRestTrack
+VolEnv_0D:	db    2, VolEnvStopTrack
 VolEnv_0F:	db    9,   9,   9,   8,   8,   8,   7,   7,   7,   6,   6,   6,   5,   5,   5,   4
-          	db    4,   4,   3,   3,   3,   2,   2,   2,   1,   1,   1,   0,   0,   0, 81h
-VolEnv_10:	db    1,   1,   1,   0,   0,   0, 81h
-VolEnv_11:	db    3,   0,   1,   1,   1,   2,   3,   4,   4,   5, 81h
-VolEnv_12:	db    0,   0,   1,   1,   2,   3,   4,   5,   5,   6,   8,   7,   7,   6, 81h
-VolEnv_13:	db  0Ah,   5,   0,   4,   8, 83h
+          	db    4,   4,   3,   3,   3,   2,   2,   2,   1,   1,   1,   0,   0,   0, VolEnvRestTrack
+VolEnv_10:	db    1,   1,   1,   0,   0,   0, VolEnvRestTrack
+VolEnv_11:	db    3,   0,   1,   1,   1,   2,   3,   4,   4,   5, VolEnvRestTrack
+VolEnv_12:	db    0,   0,   1,   1,   2,   3,   4,   5,   5,   6,   8,   7,   7,   6, VolEnvRestTrack
+VolEnv_13:	db  0Ah,   5,   0,   4,   8, VolEnvStopTrack
 VolEnv_14:	db    0,   0,   0,   2,   3,   3,   4,   5,   6,   7,   8,   9, 0Ah, 0Bh, 0Eh, 0Fh
-          	db  83h
-VolEnv_15:	db    3,   2,   1,   1,   0,   0,   1,   2,   3,   4, 81h
+          	db  VolEnvStopTrack
+VolEnv_15:	db    3,   2,   1,   1,   0,   0,   1,   2,   3,   4, VolEnvRestTrack
 VolEnv_16:	db    1,   0,   0,   0,   0,   1,   1,   1,   2,   2,   2,   3,   3,   3,   3,   4
-          	db    4,   4,   5,   5, 81h
-VolEnv_17:	db  10h, 20h, 30h, 40h, 30h, 20h, 10h,   0, 80h
-VolEnv_18:	db    0,   0,   1,   1,   3,   3,   4,   5, 83h
-VolEnv_19:	db    0,   2,   4,   6,   8, 16h, 83h
-VolEnv_1A:	db    0,   0,   1,   1,   3,   3,   4,   5, 83h
+          	db    4,   4,   5,   5, VolEnvRestTrack
+VolEnv_17:	db  10h, 20h, 30h, 40h, 30h, 20h, 10h,   0, VolEnvReset
+VolEnv_18:	db    0,   0,   1,   1,   3,   3,   4,   5, VolEnvStopTrack
+VolEnv_19:	db    0,   2,   4,   6,   8, 16h, VolEnvStopTrack
+VolEnv_1A:	db    0,   0,   1,   1,   3,   3,   4,   5, VolEnvStopTrack
 VolEnv_1B:	db    4,   4,   4,   4,   3,   3,   3,   3,   2,   2,   2,   2,   1,   1,   1,   1
-          	db  83h
+          	db  VolEnvStopTrack
 VolEnv_1C:	db    0,   0,   0,   0,   1,   1,   1,   1,   2,   2,   2,   2,   3,   3,   3,   3
           	db    4,   4,   4,   4,   5,   5,   5,   5,   6,   6,   6,   6,   7,   7,   7,   7
-          	db    8,   8,   8,   8,   9,   9,   9,   9, 0Ah, 0Ah, 0Ah, 0Ah, 81h
-VolEnv_1D:	db    0, 0Ah, 83h
-VolEnv_1E:	db    0,   2,   4, 81h
-VolEnv_1F:	db  30h, 20h, 10h,   0,   0,   0,   0,   0,   8, 10h, 20h, 30h, 81h
+          	db    8,   8,   8,   8,   9,   9,   9,   9, 0Ah, 0Ah, 0Ah, 0Ah, VolEnvRestTrack
+VolEnv_1D:	db    0, 0Ah, VolEnvStopTrack
+VolEnv_1E:	db    0,   2,   4, VolEnvRestTrack
+VolEnv_1F:	db  30h, 20h, 10h,   0,   0,   0,   0,   0,   8, 10h, 20h, 30h, VolEnvRestTrack
 VolEnv_20:	db    0,   4,   4,   4,   4,   4,   4,   4,   4,   4,   4,   6,   6,   6,   8,   8
-          	db  0Ah, 83h
-VolEnv_21:	db    0,   2,   3,   4,   6,   7, 81h
-VolEnv_22:	db    2,   1,   0,   0,   0,   2,   4,   7, 81h
-VolEnv_23:	db  0Fh,   1,   5, 83h
+          	db  0Ah, VolEnvStopTrack
+VolEnv_21:	db    0,   2,   3,   4,   6,   7, VolEnvRestTrack
+VolEnv_22:	db    2,   1,   0,   0,   0,   2,   4,   7, VolEnvRestTrack
+VolEnv_23:	db  0Fh,   1,   5, VolEnvStopTrack
 VolEnv_24:	db    8,   6,   2,   3,   4,   5,   6,   7,   8,   9, 0Ah, 0Bh, 0Ch, 0Dh, 0Eh, 0Fh
-          	db  10h, 83h
+          	db  10h, VolEnvStopTrack
 VolEnv_25:	db    0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   1,   1,   1,   1,   1,   1
           	db    1,   1,   1,   1,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   3,   3
           	db    3,   3,   3,   3,   3,   3,   3,   3,   4,   4,   4,   4,   4,   4,   4,   4
           	db    4,   4,   5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   6,   6,   6,   6
           	db    6,   6,   6,   6,   6,   6,   7,   7,   7,   7,   7,   7,   7,   7,   7,   7
           	db    8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   9,   9,   9,   9,   9,   9
-          	db    9,   9, 83h
-VolEnv_26:	db    0,   2,   2,   2,   3,   3,   3,   4,   4,   4,   5,   5, 83h
+          	db    9,   9, VolEnvStopTrack
+VolEnv_26:	db    0,   2,   2,   2,   3,   3,   3,   4,   4,   4,   5,   5, VolEnvStopTrack
 VolEnv_27:	db	  0,   0,   0,   1,   1,   1,   2,   2,   2,   3,   3,   3,   4,   4,   4,   5
-          	db	  5,   5,   6,   6,   6,   7, 81h
-VolEnv_28:	db    0,   2,   4,   6,   8, 10h, 81h
-VolEnv_29:	db	  0,   0,   1,   1,   2,   2,   3,   3,   4,   4,   5,   5,   6,   6,   7,   7, 81h
-VolEnv_2A:	db	  0,   0,   2,   3,   4,   4,   5,   5,   5,   6, 81h
-VolEnv_2C:	db	  3,   3,   3,   2,   2,   2,   2,   1,   1,   1,   0,   0,   0,   0, 81h
+          	db	  5,   5,   6,   6,   6,   7, VolEnvRestTrack
+VolEnv_28:	db    0,   2,   4,   6,   8, 10h, VolEnvRestTrack
+VolEnv_29:	db	  0,   0,   1,   1,   2,   2,   3,   3,   4,   4,   5,   5,   6,   6,   7,   7, VolEnvRestTrack
+VolEnv_2A:	db	  0,   0,   2,   3,   4,   4,   5,   5,   5,   6, VolEnvRestTrack
+VolEnv_2C:	db	  3,   3,   3,   2,   2,   2,   2,   1,   1,   1,   0,   0,   0,   0, VolEnvRestTrack
 VolEnv_2B:	db	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   1,   1
           	db	  1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   2,   2,   2,   2
-          	db	  2,   2,   2,   2,   3,   3,   3,   3,   3,   3,   3,   3,   4, 81h
+          	db	  2,   2,   2,   2,   3,   3,   3,   3,   3,   3,   3,   3,   4, VolEnvRestTrack
 VolEnv_2D:	db	  0,   0,   0,   0,   0,   0,   1,   1,   1,   1,   1,   2,   2,   2,   2,   2
-          	db	  3,   3,   3,   4,   4,   4,   5,   5,   5,   6,   7, 81h
+          	db	  3,   3,   3,   4,   4,   4,   5,   5,   5,   6,   7, VolEnvRestTrack
 VolEnv_2E:	db	  0,   0,   0,   0,   0,   1,   1,   1,   1,   1,   2,   2,   2,   2,   2,   2
           	db	  3,   3,   3,   3,   3,   4,   4,   4,   4,   4,   5,   5,   5,   5,   5,   6
-          	db	  6,   6,   6,   6,   7,   7,   7, 81h
-VolEnv_2F:	db	  0,   1,   2,   3,   4,   5,   6,   7,   8,   9, 0Ah, 0Bh, 0Ch, 0Dh, 0Eh, 0Fh, 81h
+          	db	  6,   6,   6,   6,   7,   7,   7, VolEnvRestTrack
+VolEnv_2F:	db	  0,   1,   2,   3,   4,   5,   6,   7,   8,   9, 0Ah, 0Bh, 0Ch, 0Dh, 0Eh, 0Fh, VolEnvRestTrack
 VolEnv_30:	db	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   1,   1,   1,   1,   1,   1
           	db	  1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1
           	db	  1,   1,   1,   1,   1,   1,   1,   1,   2,   2,   2,   2,   2,   2,   2,   2
-          	db	  2,   2,   3,   3,   3,   3,   3,   3,   3,   3,   3,   3,   4, 81h
+          	db	  2,   2,   3,   3,   3,   3,   3,   3,   3,   3,   3,   3,   4, VolEnvRestTrack
 VolEnv_31:	db	  4,   4,   4,   3,   3,   3,   2,   2,   2,   1,   1,   1,   1,   1,   1,   1
-          	db	  2,   2,   2,   2,   2,   3,   3,   3,   3,   3,   4, 81h
+          	db	  2,   2,   2,   2,   2,   3,   3,   3,   3,   3,   4, VolEnvRestTrack
 VolEnv_32:	db	  4,   4,   3,   3,   2,   2,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1
           	db	  1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   2,   2,   2,   2,   2,   2
           	db	  2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   2,   3,   3
@@ -4605,8 +4617,8 @@ VolEnv_32:	db	  4,   4,   3,   3,   2,   2,   1,   1,   1,   1,   1,   1,   1,  
           	db	  3,   3,   4,   4,   4,   4,   4,   4,   4,   4,   4,   4,   4,   4,   4,   4
           	db	  4,   4,   4,   4,   4,   4,   5,   5,   5,   5,   5,   5,   5,   5,   5,   5
           	db	  5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   6,   6,   6,   6,   6,   6
-          	db	  6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   7, 81h
-VolEnv_33:	db	0Eh, 0Dh, 0Ch, 0Bh, 0Ah,   9,   8,   7,   6,   5,   4,   3,   2,   1,   0, 81h
+          	db	  6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   6,   7, VolEnvRestTrack
+VolEnv_33:	db	0Eh, 0Dh, 0Ch, 0Bh, 0Ah,   9,   8,   7,   6,   5,   4,   3,   2,   1,   0, VolEnvRestTrack
 ; ---------------------------------------------------------------------------
 ; ===========================================================================
 ; MUSIC BANKS
