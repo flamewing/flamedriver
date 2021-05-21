@@ -619,7 +619,7 @@ bankswitchLoop macro
 		djnz	.bankloop
 		xor	a
 		ld	(zBankRegister), a
-   endm
+    endm
 
 bankswitchToMusic macro
 		ld	a, (zSongBank)
@@ -1384,10 +1384,11 @@ zDoFMVolEnv:
 
 .skip_track_vol:
 		add	a, c							; Add volume envelope
-		jp	po, .update_volume				; Branch if no overflow
-
+		call	zDoFMVolumeClamp			; Clamp if needed
+		jr	.update_volume
+; ---------------------------------------------------------------------------
 .do_clamp:
-		ld	a, 7Fh							; Clamp volume attenuation to minimum volume
+		sbc	a, a							; Clamp volume attenuation as it overflowed
 
 .update_volume:
 		push	bc							; Save bc
@@ -1532,8 +1533,9 @@ zDoModEnvelope_cont:
 		jr	z, zlocResetModEnvMod			; Branch if yes
 		cp	ModEnvAlterSens					; Is it a command to change sensibility?
 		jr	z, zlocModEnvIncMultiplier		; Branch if yes
-		ld	h, 0FFh							; h = 0FFh
+		ld	h, -1							; For sign-extending negative modulation envelope
 		jr	nc, zlocApplyModEnvMod			; Branch if more than 84h
+		; Only 81h and 83h can get here.
 		set	bitSustainFreq, (ix+zTrack.PlaybackControl)	; Set 'sustain frequency' bit
 		pop	hl								; Tamper with return location so as to not return to caller
 		ret
@@ -1543,7 +1545,7 @@ zDoModEnvelope_cont:
 zlocChangeModEnvIndex:
 		inc	bc								; Increment bc
 		ld	a, (bc)							; Get next byte from modulation envelope
-		jr	zModEnvSetIndex					; Set position to nonsensical value
+		jr	zModEnvSetIndex					; Set position to value read
 ; ---------------------------------------------------------------------------
 ;loc_44D
 ;zlocResetFlutterMod
@@ -3230,6 +3232,22 @@ cfSetVolume:
 		jr	zSendTL							; Begin using new volume immediately
 
 ; =============== S U B	R O U T	I N E =======================================
+; Clamps value of FM volume attenuation to [0, 7Fh] range if needed.
+;
+; Input:  a    Volume attenuation after being changed
+;         f    Flags for change of to volume attenuation
+; Output: a    Clamped volume attenuation
+zDoFMVolumeClamp:
+		ret	p								; Return if result is still positive
+		jp	pe, .overflowed					; Branch if addition overflowed into more than 127 positive
+		xor	a								; Set maximum volume
+		ret
+; ---------------------------------------------------------------------------
+.overflowed:
+		ld	a, 7Fh							; Set minimum volume
+		ret
+
+; =============== S U B	R O U T	I N E =======================================
 ; Change track volume for a FM track.
 ;
 ; Has two parameter bytes: the first byte is ignored, the second is the signed
@@ -3239,7 +3257,6 @@ cfSetVolume:
 cfChangeVolume2:
 		inc	de								; Advance pointer
 		ld	a, (de)							; Get change in volume then fall-through
-
 
 ; =============== S U B	R O U T	I N E =======================================
 ; Change track volume for a FM track.
@@ -3255,15 +3272,7 @@ cfChangeVolume:
 		bit	bitIsPSG, (ix+zTrack.VoiceControl)	; Is this a PSG track?
 		ret	nz								; Return if yes
 		add	a, (ix+zTrack.Volume)			; Add in track's current volume
-		jp	p, .set_vol						; Branch if result is still positive
-		jp	pe, .underflow					; Branch if addition overflowed into more than 127 positive
-		xor	a								; Set maximum volume
-		jp	.set_vol
-; ---------------------------------------------------------------------------
-.underflow:
-		ld	a, 7Fh							; Set minimum volume
-
-.set_vol:
+		call	zDoFMVolumeClamp			; Clamp if needed
 		ld	(ix+zTrack.Volume), a			; Store new volume
 
 ; =============== S U B	R O U T	I N E =======================================
@@ -3370,22 +3379,33 @@ cfChangePSGVolume:
 		ret	z								; Return if not
 		res	bitTrackAtRest, (ix+zTrack.PlaybackControl)	; Clear 'track is resting' flag
 		dec	(ix+zTrack.VolEnv)				; Decrement envelope index
-		add	a, (ix+zTrack.Volume)			; Add track's current volume
-		jp	p, .check_clamp					; Branch if result is positive
-		jp	pe, .do_clamp					; Branch if addition overflowed
-		xor	a								; Set maximum volume
-		jr	zStoreTrackVolume
-; ---------------------------------------------------------------------------
-.check_clamp:
-		cp	0Fh								; Is it 0Fh or more?
-		jr	c, zStoreTrackVolume			; Branch if not
-
-.do_clamp:
-		ld	a, 0Fh							; Limit to 0Fh (silence)
+		call	zDoPSGVolumeClamp			; Add track's current volume and clamp
 
 ;loc_D17
 zStoreTrackVolume:
 		ld	(ix+zTrack.Volume), a			; Store new volume
+		ret
+
+; =============== S U B	R O U T	I N E =======================================
+; Adds value to PSG volume attenuation and clamps to [0, 0Fh] range
+; if needed.
+;
+; Input:  a    Change in volume attenuation
+;         ix   Pointer to track data
+; Output: a    Clamped volume attenuation
+zDoPSGVolumeClamp:
+		add	a, (ix+zTrack.Volume)			; Add track's current volume
+		jp	p, .check_clamp					; Branch if result is positive
+		jp	pe, .do_clamp					; Branch if addition overflowed
+		xor	a								; Set maximum volume
+		ret
+; ---------------------------------------------------------------------------
+.check_clamp:
+		cp	0Fh								; Is it 0Fh or more?
+		ret	c								; Return if not
+
+.do_clamp:
+		ld	a, 0Fh							; Limit to 0Fh (silence)
 		ret
 
 ; =============== S U B	R O U T	I N E =======================================
@@ -4179,13 +4199,8 @@ zUpdatePSGTrack:
 .no_volenv:
 		bit	bitTrackAtRest, (ix+zTrack.PlaybackControl)	; Is track resting?
 		ret	nz								; Return if yes
-		ld	a, (ix+zTrack.Volume)			; Get track volume
-		add	a, c							; Add volume envelope to it
-		bit	4, a							; Is bit 4 set?
-		jr	z, .no_underflow				; Branch if not
-		ld	a, 0Fh							; Set silence on PSG track
-
-.no_underflow:
+		ld	a, c							; Copy volume attenuation
+		call	zDoPSGVolumeClamp			; Add track's current volume and clamp
 		or	(ix+zTrack.VoiceControl)		; Mask in the PSG channel bits
 		add	a, snPSGVol						; Flag to latch volume
 		bit	bitPSGNoise, (ix+zTrack.PlaybackControl)	; Is this a noise channel?
@@ -4224,18 +4239,14 @@ zDoVolEnv:
 		pop	hl								; Restore hl
 		bit	7, a							; Is it a terminator?
 		jr	z, zDoVolEnvAdvance				; Branch if not
-		cp	VolEnvStopTrack					; Is it a command to put PSG channel to rest?
-		jr	z, zDoVolEnvFullRest			; Branch if yes
 		cp	VolEnvRestTrack					; Is it a command to set rest flag on PSG channel?
 		jr	z, zDoVolEnvRest				; Branch if yes
 		cp	VolEnvReset						; Is it a command to reset envelope?
 		jr	z, zDoVolEnvReset				; Branch if yes
-
-		; NOTE: This code is meant for flag 82h, but can happen without it.
-		; In order to get here, the flutter value would have to be:
-		; (1) negative;
-		; (2) not 80h, 81h or 83h.
-		; VolEnv_0A contains such a value, but luckily isn't used by any songs or sounds.
+		cp	VolEnvStopTrack					; Is it a command to put PSG channel to rest?
+		jr	z, zDoVolEnvFullRest			; Branch if yes
+		jr	nc, zDoVolEnvAdvance			; Branch if more than 83h
+		; Only 82h can get here.
 		inc	bc								; Increment envelope position
 		ld	a, (bc)							; Get next byte from volume envelope
 		jr	zDoVolEnvSetValue				; Use this as new envelope index
@@ -4641,14 +4652,6 @@ VolEnv_07:	db    0,   0,   0,   2,   3,   3,   4,   5,   6,   7,   8,   9, 0Ah, 
 VolEnv_08:	db    3,   2,   1,   1,   0,   0,   1,   2,   3,   4, VolEnvRestTrack
 VolEnv_09:	db    1,   0,   0,   0,   0,   1,   1,   1,   2,   2,   2,   3,   3,   3,   3,   4
           	db    4,   4,   5,   5, VolEnvRestTrack
-; The -10h in this FM volume envelope appears to be erroneous:
-; negative volume attenuations aren't supported, and instead
-; trigger the code intended for byte 82h.
-; This envelope appears in many SMPS Z80 Type 2 DAC drivers,
-; suggesting it was some kind of poorly-thought-out example.
-; Oddly, this same envelope appears in Ristar (whose driver
-; *does* support negative attenuations), despite SMPS 68k not
-; supporting FM volume envelopes.
 VolEnv_0A:	db  10h, 20h, 30h, 40h, 30h, 20h, 10h,   0,-10h, VolEnvReset
 VolEnv_0B:	db    0,   0,   1,   1,   3,   3,   4,   5, VolEnvStopTrack
 VolEnv_0C:	db    0, VolEnvRestTrack
