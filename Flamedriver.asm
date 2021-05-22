@@ -662,7 +662,7 @@ zFastWriteFM macro reg, data, dataMacro
 		ld	(iy+1), a						; Send data to register
     endm
 
-zGetFMPartPointer macro reg
+zGetFMPartPointer macro
 		ld	c, (ix+zTrack.VoiceControl)		; Get voice control bits for future use
 		ld	iy, zYM2612_A0					; Point to part I
 		bit	ymPartII, c						; Is this the DAC channel or FM4 or FM5 or FM6?
