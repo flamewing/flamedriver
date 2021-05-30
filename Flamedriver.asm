@@ -350,7 +350,8 @@ zSFX_PSG1:		zTrack
 zSFX_PSG2:		zTrack
 zSFX_PSG3:		zTrack
 zTracksSFXEnd:
-	phase zTracksSFXStart
+		dephase
+		phase zTracksSFXStart
 zTracksSaveStart:
 zSaveSongDAC:	zTrack
 zSaveSongFM1:	zTrack
