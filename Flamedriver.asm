@@ -4779,7 +4779,7 @@ z80_MusicBanks:
 ; ---------------------------------------------------------------------------
 	if $ > z80_stack_top
 		fatal "Your Z80 tables won't fit before the z80 stack. It's \{$-z80_stack_top}h bytes past the start of the bottom of the stack, at \{z80_stack_top}h"
-	elseif MOMPASS=2
+	elseif MOMPASS>1
 		message "Z80 free space before stack: \{z80_stack_top-$}h bytes"
 	endif
 
@@ -4813,7 +4813,7 @@ DebugSoundbanks = 1
 finishBank macro
 	if * > soundBankStart + $8000
 		fatal "soundBank \{soundBankName} must fit in $8000 bytes but was $\{*-soundBankStart}. Try moving something to the other bank."
-	elseif (DebugSoundbanks<>0)&&(MOMPASS=1)
+	elseif (DebugSoundbanks<>0)&&(MOMPASS>1)
 		message "soundBank \{soundBankName} has $\{$8000+soundBankStart-*} bytes free at end, needed $\{soundBankPadding} bytes padding at start."
 	endif
 	endm

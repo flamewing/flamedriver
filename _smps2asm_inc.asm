@@ -200,7 +200,7 @@ CheckedChannelPointer macro loc
 	if SonicDriverVer<>1
 		dc.w	z80_ptr(loc)
 	else
-		if MOMPASS==2
+		if MOMPASS>1
 			if loc<songStart
 				fatal "Tracks for Sonic 1 songs must come after the start of the song"
 			endif
@@ -222,7 +222,7 @@ SourceDriver set ver
 
 songStart set *
 
-	if MOMPASS==2
+	if MOMPASS>1
 		if SMPS2ASMVer < SourceSMPS2ASM
 			message "Song at 0x\{songStart} was made for a newer version of SMPS2ASM (this is version \{SMPS2ASMVer}, but song wants at least version \{SourceSMPS2ASM})."
 		endif
@@ -246,7 +246,7 @@ smpsHeaderVoice macro loc
 	if SonicDriverVer<>1
 		dc.w	z80_ptr(loc)
 	else
-		if MOMPASS==2
+		if MOMPASS>1
 			if loc<songStart
 				fatal "Voice banks for Sonic 1 songs must come after the song"
 			endif
@@ -871,7 +871,7 @@ smpsVcTotalLevel macro op1,op2,op3,op4
 		set vcTL3,vcTL3&$7F
 		set vcTL4,vcTL4&$7F
 	elseif (SonicDriverVer<3)&&(SourceDriver>=3)&&((((vcTL1|vcTLMask1)&$80)<>$80)||(((vcTL2|vcTLMask2)&$80)<>((vcAlgorithm>=5)<<7))||(((vcTL3|vcTLMask3)&$80)<>((vcAlgorithm>=4)<<7))||(((vcTL4|vcTLMask4)&$80)<>((vcAlgorithm==7)<<7)))
-		if MOMPASS==2
+		if MOMPASS>1
 			message "Voice at 0x\{*} has TL bits that do not match its algorithm setting. This voice will not work in S1/S2 drivers."
 		endif
 	endif
