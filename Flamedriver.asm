@@ -612,7 +612,7 @@ bankswitch macro
 			ld	(hl), a
 		endm
 		ld	(hl), h							; The low bit of h is 0
-    endm
+	endm
 
 bankswitchLoop macro
 		ld	b, 8
@@ -622,12 +622,12 @@ bankswitchLoop macro
 		djnz	.bankloop
 		xor	a
 		ld	(zBankRegister), a
-    endm
+	endm
 
 bankswitchToMusic macro
 		ld	a, (zSongBank)
 		bankswitch
-    endm
+	endm
 
 ; macro to make a certain error message clearer should you happen to get it...
 rsttarget macro {INTLABEL}
@@ -637,11 +637,11 @@ rsttarget macro {INTLABEL}
 	if "__LABEL__"<>""
 __LABEL__ label $
 	endif
-    endm
+	endm
 
 setMaxAR macro
 		or	maxAttackRate					; Set AR to maximum
-    endm
+	endm
 
 calcVolume macro
 		or	a								; Is it positive?
@@ -650,7 +650,7 @@ calcVolume macro
 		jr	nc, .skip_track_vol
 		sbc	a, a							; Clamp volume attenuation as it overflowed
 .skip_track_vol:
-    endm
+	endm
 
 zFastWriteFM macro reg, data, dataMacro
 		ld	a, reg							; Get register to write to
@@ -661,7 +661,7 @@ zFastWriteFM macro reg, data, dataMacro
 			dataMacro
 		endif
 		ld	(iy+1), a						; Send data to register
-    endm
+	endm
 
 zGetFMPartPointer macro
 		ld	c, (ix+zTrack.VoiceControl)		; Get voice control bits for future use
@@ -671,7 +671,7 @@ zGetFMPartPointer macro
 		res	ymPartII, c						; Strip 'bound to part II regs' bit
 		ld	iy, zYM2612_A1					; Point to part II
 .notFMII:
-    endm
+	endm
 
 ; function to turn a 68k address into a word the Z80 can use to access it
 zmake68kPtr function addr,zROMWindow+(addr&7FFFh)
@@ -4800,13 +4800,13 @@ little_endian function x,((x)<<8)&$FF00|((x)>>8)&$FF
 k68z80Pointer function addr,little_endian((addr&$7FFF)+$8000)
 
 startBank macro {INTLABEL}
-soundBankDecl := *
+	set	soundBankDecl,*
 	align	$8000
 __LABEL__ label *
-soundBankStart := __LABEL__
-soundBankPadding := soundBankStart - soundBankDecl
-soundBankName := "__LABEL__"
-    endm
+	set	soundBankStart,__LABEL__
+	set	soundBankPadding,soundBankStart - soundBankDecl
+	set	soundBankName,"__LABEL__"
+	endm
 
 DebugSoundbanks = 1
 
@@ -4816,12 +4816,12 @@ finishBank macro
 	elseif (DebugSoundbanks<>0)&&(MOMPASS=1)
 		message "soundBank \{soundBankName} has $\{$8000+soundBankStart-*} bytes free at end, needed $\{soundBankPadding} bytes padding at start."
 	endif
-    endm
+	endm
 
 ; macro to declare an entry in an offset table rooted at a bank
 offsetBankTableEntry macro ptr
 	dc.ATTRIBUTE k68z80Pointer(ptr)
-    endm
+	endm
 
 ; Special BINCLUDE wrapper function
 DACBINCLUDE macro file,{INTLABEL}
@@ -4830,14 +4830,14 @@ __LABEL__ label *
 __LABEL___Len  = little_endian(*-__LABEL__)
 __LABEL___Ptr  = k68z80Pointer(__LABEL__-soundBankStart)
 __LABEL___Bank = soundBankStart
-    endm
+	endm
 
 ; Setup macro for DAC samples.
 DAC_Setup macro rate,dacptr
 	dc.b	rate
 	dc.w	dacptr_Len
 	dc.w	dacptr_Ptr
-    endm
+	endm
 
 ; Macro for printing the DAC master table
 DAC_Master_Table macro

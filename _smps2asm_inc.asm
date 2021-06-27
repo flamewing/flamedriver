@@ -215,17 +215,17 @@ smpsHeaderStartSong macro ver, sourcesmps2asmver
 SourceDriver set ver
 
 	if ("sourcesmps2asmver"<>"")
-SourceSMPS2ASM set sourcesmps2asmver
+		set SourceSMPS2ASM,sourcesmps2asmver
 	else
-SourceSMPS2ASM set 0
+		set SourceSMPS2ASM,0
 	endif
 
 songStart set *
 
 	if MOMPASS==2
-	if SMPS2ASMVer < SourceSMPS2ASM
-	message "Song at 0x\{songStart} was made for a newer version of SMPS2ASM (this is version \{SMPS2ASMVer}, but song wants at least version \{SourceSMPS2ASM})."
-	endif
+		if SMPS2ASMVer < SourceSMPS2ASM
+			message "Song at 0x\{songStart} was made for a newer version of SMPS2ASM (this is version \{SMPS2ASMVer}, but song wants at least version \{SourceSMPS2ASM})."
+		endif
 	endif
 
 	endm
@@ -247,9 +247,9 @@ smpsHeaderVoice macro loc
 		dc.w	z80_ptr(loc)
 	else
 		if MOMPASS==2
-		if loc<songStart
-			fatal "Voice banks for Sonic 1 songs must come after the song"
-		endif
+			if loc<songStart
+				fatal "Voice banks for Sonic 1 songs must come after the song"
+			endif
 		endif
 		dc.w	loc-songStart
 	endif
@@ -737,48 +737,48 @@ vcAlgorithm set val
 smpsVcUnusedBits macro val,d1r1,d1r2,d1r3,d1r4
 vcUnusedBits set val
 	if ("d1r1"<>"")&&("d1r2"<>"")&&("d1r3"<>"")&&("d1r4"<>"")
-vcD1R1Unk set d1r1<<5
-vcD1R2Unk set d1r2<<5
-vcD1R3Unk set d1r3<<5
-vcD1R4Unk set d1r4<<5
+		set vcD1R1Unk,d1r1<<5
+		set vcD1R2Unk,d1r2<<5
+		set vcD1R3Unk,d1r3<<5
+		set vcD1R4Unk,d1r4<<5
 	else
-vcD1R1Unk set 0
-vcD1R2Unk set 0
-vcD1R3Unk set 0
-vcD1R4Unk set 0
+		set vcD1R1Unk,0
+		set vcD1R2Unk,0
+		set vcD1R3Unk,0
+		set vcD1R4Unk,0
 	endif
 	endm
 
 ; Voices - Detune
 smpsVcDetune macro op1,op2,op3,op4
-vcDT1 set op1
-vcDT2 set op2
-vcDT3 set op3
-vcDT4 set op4
+	set vcDT1,op1
+	set vcDT2,op2
+	set vcDT3,op3
+	set vcDT4,op4
 	endm
 
 ; Voices - Coarse-Frequency
 smpsVcCoarseFreq macro op1,op2,op3,op4
-vcCF1 set op1
-vcCF2 set op2
-vcCF3 set op3
-vcCF4 set op4
+	set vcCF1,op1
+	set vcCF2,op2
+	set vcCF3,op3
+	set vcCF4,op4
 	endm
 
 ; Voices - Rate Scale
 smpsVcRateScale macro op1,op2,op3,op4
-vcRS1 set op1
-vcRS2 set op2
-vcRS3 set op3
-vcRS4 set op4
+	set vcRS1,op1
+	set vcRS2,op2
+	set vcRS3,op3
+	set vcRS4,op4
 	endm
 
 ; Voices - Attack Rate
 smpsVcAttackRate macro op1,op2,op3,op4
-vcAR1 set op1
-vcAR2 set op2
-vcAR3 set op3
-vcAR4 set op4
+	set vcAR1,op1
+	set vcAR2,op2
+	set vcAR3,op3
+	set vcAR4,op4
 	endm
 
 ; Voices - Amplitude Modulation
@@ -787,48 +787,48 @@ vcAR4 set op4
 ; According to several docs, however, it's actually the high bit.
 smpsVcAmpMod macro op1,op2,op3,op4
 	if SourceSMPS2ASM==0
-vcAM1 set op1<<5
-vcAM2 set op2<<5
-vcAM3 set op3<<5
-vcAM4 set op4<<5
+		set vcAM1,op1<<5
+		set vcAM2,op2<<5
+		set vcAM3,op3<<5
+		set vcAM4,op4<<5
 	else
-vcAM1 set op1<<7
-vcAM2 set op2<<7
-vcAM3 set op3<<7
-vcAM4 set op4<<7
+		set vcAM1,op1<<7
+		set vcAM2,op2<<7
+		set vcAM3,op3<<7
+		set vcAM4,op4<<7
 	endif
 	endm
 
 ; Voices - First Decay Rate
 smpsVcDecayRate1 macro op1,op2,op3,op4
-vcD1R1 set op1
-vcD1R2 set op2
-vcD1R3 set op3
-vcD1R4 set op4
+	set vcD1R1,op1
+	set vcD1R2,op2
+	set vcD1R3,op3
+	set vcD1R4,op4
 	endm
 
 ; Voices - Second Decay Rate
 smpsVcDecayRate2 macro op1,op2,op3,op4
-vcD2R1 set op1
-vcD2R2 set op2
-vcD2R3 set op3
-vcD2R4 set op4
+	set vcD2R1,op1
+	set vcD2R2,op2
+	set vcD2R3,op3
+	set vcD2R4,op4
 	endm
 
 ; Voices - Decay Level
 smpsVcDecayLevel macro op1,op2,op3,op4
-vcDL1 set op1
-vcDL2 set op2
-vcDL3 set op3
-vcDL4 set op4
+	set vcDL1,op1
+	set vcDL2,op2
+	set vcDL3,op3
+	set vcDL4,op4
 	endm
 
 ; Voices - Release Rate
 smpsVcReleaseRate macro op1,op2,op3,op4
-vcRR1 set op1
-vcRR2 set op2
-vcRR3 set op3
-vcRR4 set op4
+	set vcRR1,op1
+	set vcRR2,op2
+	set vcRR3,op3
+	set vcRR4,op4
 	endm
 
 ; Voices - Total Level
@@ -842,34 +842,34 @@ vcRR4 set op4
 ; an SMPS Z80 song to SMPS 68k. It will ignore the bits no matter
 ; what we do, so we just print a warning.
 smpsVcTotalLevel macro op1,op2,op3,op4
-vcTL1 set op1
-vcTL2 set op2
-vcTL3 set op3
-vcTL4 set op4
+	set vcTL1,op1
+	set vcTL2,op2
+	set vcTL3,op3
+	set vcTL4,op4
 	dc.b	(vcUnusedBits<<6)+(vcFeedback<<3)+vcAlgorithm
 ;   0     1     2     3     4     5     6     7
 ;%1000,%1000,%1000,%1000,%1010,%1110,%1110,%1111
 	if SourceSMPS2ASM==0
-vcTLMask4 set ((vcAlgorithm==7)<<7)
-vcTLMask3 set ((vcAlgorithm>=4)<<7)
-vcTLMask2 set ((vcAlgorithm>=5)<<7)
-vcTLMask1 set $80
+		set vcTLMask4,((vcAlgorithm==7)<<7)
+		set vcTLMask3,((vcAlgorithm>=4)<<7)
+		set vcTLMask2,((vcAlgorithm>=5)<<7)
+		set vcTLMask1,$80
 	else
-vcTLMask4 set 0
-vcTLMask3 set 0
-vcTLMask2 set 0
-vcTLMask1 set 0
+		set vcTLMask4,0
+		set vcTLMask3,0
+		set vcTLMask2,0
+		set vcTLMask1,0
 	endif
 
 	if (SonicDriverVer>=3)&&(SourceDriver<3)
-vcTLMask4 set ((vcAlgorithm==7)<<7)
-vcTLMask3 set ((vcAlgorithm>=4)<<7)
-vcTLMask2 set ((vcAlgorithm>=5)<<7)
-vcTLMask1 set $80
-vcTL1 set vcTL1&$7F
-vcTL2 set vcTL2&$7F
-vcTL3 set vcTL3&$7F
-vcTL4 set vcTL4&$7F
+		set vcTLMask4,((vcAlgorithm==7)<<7)
+		set vcTLMask3,((vcAlgorithm>=4)<<7)
+		set vcTLMask2,((vcAlgorithm>=5)<<7)
+		set vcTLMask1,$80
+		set vcTL1,vcTL1&$7F
+		set vcTL2,vcTL2&$7F
+		set vcTL3,vcTL3&$7F
+		set vcTL4,vcTL4&$7F
 	elseif (SonicDriverVer<3)&&(SourceDriver>=3)&&((((vcTL1|vcTLMask1)&$80)<>$80)||(((vcTL2|vcTLMask2)&$80)<>((vcAlgorithm>=5)<<7))||(((vcTL3|vcTLMask3)&$80)<>((vcAlgorithm>=4)<<7))||(((vcTL4|vcTLMask4)&$80)<>((vcAlgorithm==7)<<7)))
 		if MOMPASS==2
 			message "Voice at 0x\{*} has TL bits that do not match its algorithm setting. This voice will not work in S1/S2 drivers."
