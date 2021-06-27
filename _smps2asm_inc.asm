@@ -19,19 +19,21 @@ SMPS2ASMVer	= 1
 psgdelta	EQU 12
 ; ---------------------------------------------------------------------------
 ; Standard Octave Pitch Equates
-	enum smpsPitch10lo=$88,smpsPitch09lo=$94,smpsPitch08lo=$A0,smpsPitch07lo=$AC,smpsPitch06lo=$B8
-	enum smpsPitch05lo=$C4,smpsPitch04lo=$D0,smpsPitch03lo=$DC,smpsPitch02lo=$E8,smpsPitch01lo=$F4
-	enum smpsPitch00=$00,smpsPitch01hi=$0C,smpsPitch02hi=$18,smpsPitch03hi=$24,smpsPitch04hi=$30
-	enum smpsPitch05hi=$3C,smpsPitch06hi=$48,smpsPitch07hi=$54,smpsPitch08hi=$60,smpsPitch09hi=$6C
-	enum smpsPitch10hi=$78
+	enumconf	$C
+	enum		smpsPitch10lo=$88,smpsPitch09lo,smpsPitch08lo,smpsPitch07lo,smpsPitch06lo
+	nextenum	smpsPitch05lo,smpsPitch04lo,smpsPitch03lo,smpsPitch02lo,smpsPitch01lo
+	enum		smpsPitch00=$00,smpsPitch01hi,smpsPitch02hi,smpsPitch03hi,smpsPitch04hi
+	nextenum	smpsPitch05hi,smpsPitch06hi,smpsPitch07hi,smpsPitch08hi,smpsPitch09hi
+	nextenum	smpsPitch10hi
+	enumconf	1
 ; ---------------------------------------------------------------------------
 ; Note Equates
-	enum nRst=$80+0,nC0,nCs0,nD0,nEb0,nE0,nF0,nFs0,nG0,nAb0,nA0,nBb0,nB0,nC1,nCs1,nD1
-	enum nEb1=nD1+1,nE1,nF1,nFs1,nG1,nAb1,nA1,nBb1,nB1,nC2,nCs2,nD2,nEb2,nE2,nF2,nFs2
-	enum nG2=nFs2+1,nAb2,nA2,nBb2,nB2,nC3,nCs3,nD3,nEb3,nE3,nF3,nFs3,nG3,nAb3,nA3,nBb3
-	enum nB3=nBb3+1,nC4,nCs4,nD4,nEb4,nE4,nF4,nFs4,nG4,nAb4,nA4,nBb4,nB4,nC5,nCs5,nD5
-	enum nEb5=nD5+1,nE5,nF5,nFs5,nG5,nAb5,nA5,nBb5,nB5,nC6,nCs6,nD6,nEb6,nE6,nF6,nFs6
-	enum nG6=nFs6+1,nAb6,nA6,nBb6,nB6,nC7,nCs7,nD7,nEb7,nE7,nF7,nFs7,nG7,nAb7,nA7,nBb7
+	enum		nRst=$80,nC0,nCs0,nD0,nEb0,nE0,nF0,nFs0,nG0,nAb0,nA0,nBb0,nB0,nC1,nCs1,nD1
+	nextenum	nEb1,nE1,nF1,nFs1,nG1,nAb1,nA1,nBb1,nB1,nC2,nCs2,nD2,nEb2,nE2,nF2,nFs2
+	nextenum	nG2,nAb2,nA2,nBb2,nB2,nC3,nCs3,nD3,nEb3,nE3,nF3,nFs3,nG3,nAb3,nA3,nBb3
+	nextenum	nB3,nC4,nCs4,nD4,nEb4,nE4,nF4,nFs4,nG4,nAb4,nA4,nBb4,nB4,nC5,nCs5,nD5
+	nextenum	nEb5,nE5,nF5,nFs5,nG5,nAb5,nA5,nBb5,nB5,nC6,nCs6,nD6,nEb6,nE6,nF6,nFs6
+	nextenum	nG6,nAb6,nA6,nBb6,nB6,nC7,nCs7,nD7,nEb7,nE7,nF7,nFs7,nG7,nAb7,nA7,nBb7
 ; SMPS2ASM uses nMaxPSG for songs from S1/S2 drivers.
 ; nMaxPSG1 and nMaxPSG2 are used only for songs from S3/S&K/S3D drivers.
 ; The use of psgdelta is intended to undo the effects of PSGPitchConvert
@@ -47,90 +49,78 @@ nMaxPSG2			EQU nB6
 	endif
 ; ---------------------------------------------------------------------------
 ; PSG volume envelope equates
-	if SonicDriverVer==1
-		enum fTone_01=$01,fTone_02,fTone_03,fTone_04,fTone_05,fTone_06
-		enum fTone_07=fTone_06+1,fTone_08,fTone_09
-	elseif SonicDriverVer==2
-		enum fTone_01=$01,fTone_02,fTone_03,fTone_04,fTone_05,fTone_06
-		enum fTone_07=fTone_06+1,fTone_08,fTone_09,fTone_0A,fTone_0B,fTone_0C
-		enum fTone_0D=fTone_0C+1
-	else
-		enum sTone_01=$01,sTone_02,sTone_03,sTone_04,sTone_05,sTone_06
-		enum sTone_07=sTone_06+1,sTone_08,sTone_09,sTone_0A,sTone_0B,sTone_0C
-		enum sTone_0D=sTone_0C+1,sTone_0E,sTone_0F,sTone_10,sTone_11,sTone_12
-		enum sTone_13=sTone_12+1,sTone_14,sTone_15,sTone_16,sTone_17,sTone_18
-		enum sTone_19=sTone_18+1,sTone_1A,sTone_1B,sTone_1C,sTone_1D,sTone_1E
-		enum sTone_1F=sTone_1E+1,sTone_20,sTone_21,sTone_22,sTone_23,sTone_24
-		enum sTone_25=sTone_24+1,sTone_26,sTone_27
-		; For conversions:
-		if SonicDriverVer>=5
-			enum fTone_01=$28,fTone_02,fTone_03,fTone_04,fTone_05,fTone_06
-			enum fTone_07=fTone_06+1,fTone_08,fTone_09,fTone_0A,fTone_0B,fTone_0C
-			enum fTone_0D=fTone_0C+1
-		endif
-	endif
+	switch SonicDriverVer
+		case 1
+			enum		fTone_01=$01,fTone_02,fTone_03,fTone_04,fTone_05,fTone_06
+			nextenum	fTone_07,fTone_08,fTone_09
+		case 2
+			enum		fTone_01=$01,fTone_02,fTone_03,fTone_04,fTone_05,fTone_06
+			nextenum	fTone_07,fTone_08,fTone_09,fTone_0A,fTone_0B,fTone_0C
+			nextenum	fTone_0D
+		elsecase;SonicDriverVer>=3
+			enum		sTone_01=$01,sTone_02,sTone_03,sTone_04,sTone_05,sTone_06
+			nextenum	sTone_07,sTone_08,sTone_09,sTone_0A,sTone_0B,sTone_0C
+			nextenum	sTone_0D,sTone_0E,sTone_0F,sTone_10,sTone_11,sTone_12
+			nextenum	sTone_13,sTone_14,sTone_15,sTone_16,sTone_17,sTone_18
+			nextenum	sTone_19,sTone_1A,sTone_1B,sTone_1C,sTone_1D,sTone_1E
+			nextenum	sTone_1F,sTone_20,sTone_21,sTone_22,sTone_23,sTone_24
+			nextenum	sTone_25,sTone_26,sTone_27
+			; For conversions:
+			if SonicDriverVer>=5
+				nextenum	fTone_01,fTone_02,fTone_03,fTone_04,fTone_05,fTone_06
+				nextenum	fTone_07,fTone_08,fTone_09,fTone_0A,fTone_0B,fTone_0C
+				nextenum	fTone_0D
+			endif
+	endcase
 ; ---------------------------------------------------------------------------
 ; DAC Equates
-	if SonicDriverVer==1
-		enum dKick=$81,dSnare,dTimpani
-		enum dHiTimpani=$88,dMidTimpani,dLowTimpani,dVLowTimpani
-	elseif SonicDriverVer==2
-		enum dKick=$81,dSnare,dClap,dScratch,dTimpani,dHiTom,dVLowClap,dHiTimpani,dMidTimpani
-		enum dLowTimpani=dMidTimpani+1,dVLowTimpani,dMidTom,dLowTom,dFloorTom,dHiClap
-		enum dMidClap=dHiClap+1,dLowClap
-	else;if SonicDriverVer>=3
-		if (use_s3_samples<>0)||(use_sk_samples<>0)||(use_s3d_samples<>0)
-			enum dSnareS3=$81,dHighTom,dMidTomS3,dLowTomS3,dFloorTomS3,dKickS3,dMuffledSnare
-			enum dCrashCymbal=dMuffledSnare+1,dRideCymbal,dLowMetalHit,dMetalHit,dHighMetalHit
-			enum dHigherMetalHit=dHighMetalHit+1,dMidMetalHit,dClapS3,dElectricHighTom
-			enum dElectricMidTom=dElectricHighTom+1,dElectricLowTom,dElectricFloorTom
-			enum dTightSnare=dElectricFloorTom+1,dMidpitchSnare,dLooseSnare,dLooserSnare
-			enum dHiTimpaniS3=dLooserSnare+1,dLowTimpaniS3,dMidTimpaniS3,dQuickLooseSnare
-			enum dClick=dQuickLooseSnare+1,dPowerKick,dQuickGlassCrash
-		endif
-		if (use_s3_samples<>0)||(use_sk_samples<>0)
-			enum dGlassCrashSnare=dQuickGlassCrash+1,dGlassCrash,dGlassCrashKick,dQuietGlassCrash
-			enum dOddSnareKick=dQuietGlassCrash+1,dKickExtraBass,dComeOn,dDanceSnare,dLooseKick
-			enum dModLooseKick=dLooseKick+1,dWoo,dGo,dSnareGo,dPowerTom,dHiWoodBlock,dLowWoodBlock
-			enum dHiHitDrum=dLowWoodBlock+1,dLowHitDrum,dMetalCrashHit,dEchoedClapHit
-			enum dLowerEchoedClapHit=dEchoedClapHit+1,dHipHopHitKick,dHipHopHitPowerKick
-			enum dBassHey=dHipHopHitPowerKick+1,dDanceStyleKick,dHipHopHitKick2,dHipHopHitKick3
-			enum dReverseFadingWind=dHipHopHitKick3+1,dScratchS3,dLooseSnareNoise,dPowerKick2
-			enum dCrashingNoiseWoo=dPowerKick2+1,dQuickHit,dKickHey,dPowerKickHit
-			enum dLowPowerKickHit=dPowerKickHit+1,dLowerPowerKickHit,dLowestPowerKickHit
-		endif
-		; For conversions:
-		if (use_s2_samples<>0)
+	switch SonicDriverVer
+		case 1
+			enum		dKick=$81,dSnare,dTimpani
+			enum		dHiTimpani=$88,dMidTimpani,dLowTimpani,dVLowTimpani
+		case 2
+			enum		dKick=$81,dSnare,dClap,dScratch,dTimpani,dHiTom,dVLowClap,dHiTimpani,dMidTimpani
+			nextenum	dLowTimpani,dVLowTimpani,dMidTom,dLowTom,dFloorTom,dHiClap
+			nextenum	dMidClap,dLowClap
+		elsecase;SonicDriverVer>=3
+			if (use_s3_samples<>0)||(use_sk_samples<>0)||(use_s3d_samples<>0)
+				enum		dSnareS3=$81,dHighTom,dMidTomS3,dLowTomS3,dFloorTomS3,dKickS3,dMuffledSnare
+				nextenum	dCrashCymbal,dRideCymbal,dLowMetalHit,dMetalHit,dHighMetalHit
+				nextenum	dHigherMetalHit,dMidMetalHit,dClapS3,dElectricHighTom
+				nextenum	dElectricMidTom,dElectricLowTom,dElectricFloorTom
+				nextenum	dTightSnare,dMidpitchSnare,dLooseSnare,dLooserSnare
+				nextenum	dHiTimpaniS3,dLowTimpaniS3,dMidTimpaniS3,dQuickLooseSnare
+				nextenum	dClick,dPowerKick,dQuickGlassCrash
+			endif
 			if (use_s3_samples<>0)||(use_sk_samples<>0)
-				enum dKick=dLowestPowerKickHit+1
-			elseif (use_s3d_samples<>0)
-				enum dKick=dQuickGlassCrash+1
-			else
-				enum dKick=$81
+				nextenum	dGlassCrashSnare,dGlassCrash,dGlassCrashKick,dQuietGlassCrash
+				nextenum	dOddSnareKick,dKickExtraBass,dComeOn,dDanceSnare,dLooseKick
+				nextenum	dModLooseKick,dWoo,dGo,dSnareGo,dPowerTom,dHiWoodBlock,dLowWoodBlock
+				nextenum	dHiHitDrum,dLowHitDrum,dMetalCrashHit,dEchoedClapHit
+				nextenum	dLowerEchoedClapHit,dHipHopHitKick,dHipHopHitPowerKick
+				nextenum	dBassHey,dDanceStyleKick,dHipHopHitKick2,dHipHopHitKick3
+				nextenum	dReverseFadingWind,dScratchS3,dLooseSnareNoise,dPowerKick2
+				nextenum	dCrashingNoiseWoo,dQuickHit,dKickHey,dPowerKickHit
+				nextenum	dLowPowerKickHit,dLowerPowerKickHit,dLowestPowerKickHit
 			endif
-			enum dSnare=dKick+1,dClap,dScratch,dTimpani,dHiTom,dVLowClap,dHiTimpani,dMidTimpani
-			enum dLowTimpani=dMidTimpani+1,dVLowTimpani,dMidTom,dLowTom,dFloorTom,dHiClap
-			enum dMidClap=dHiClap+1,dLowClap
-		endif
-		if (use_s3d_samples<>0)
+			; For conversions:
 			if (use_s2_samples<>0)
-				enum dFinalFightMetalCrash=dLowClap+1,dIntroKick
-			elseif (use_s3_samples<>0)||(use_sk_samples<>0)
-				enum dFinalFightMetalCrash=dLowestPowerKickHit+1,dIntroKick
-			else
-				enum dFinalFightMetalCrash=dQuickGlassCrash+1,dIntroKick
+				if (use_s3_samples<>0)||(use_sk_samples<>0)||(use_s3d_samples<>0)
+					nextenum	dKick
+				else
+					enum		dKick=$81
+				endif
+				nextenum	dSnare,dClap,dScratch,dTimpani,dHiTom,dVLowClap,dHiTimpani,dMidTimpani
+				nextenum	dLowTimpani,dVLowTimpani,dMidTom,dLowTom,dFloorTom,dHiClap
+				nextenum	dMidClap,dLowClap
 			endif
-		endif
-		if (use_s3_samples<>0)
 			if (use_s3d_samples<>0)
-				enum dEchoedClapHit_S3=dIntroKick+1,dLowerEchoedClapHit_S3
-			elseif (use_s2_samples<>0)
-				enum dEchoedClapHit_S3=dLowClap+1,dLowerEchoedClapHit_S3
-			else
-				enum dEchoedClapHit_S3=dLowestPowerKickHit+1,dLowerEchoedClapHit_S3
+				nextenum	dFinalFightMetalCrash,dIntroKick
 			endif
-		endif
-	endif
+			if (use_s3_samples<>0)
+				nextenum	dEchoedClapHit_S3,dLowerEchoedClapHit_S3
+			endif
+	endcase
 ; ---------------------------------------------------------------------------
 ; Channel IDs for SFX
 cPSG1				EQU $80
