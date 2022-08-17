@@ -432,7 +432,7 @@ smpsChanTempoDiv macro val
 	if SonicDriverVer>=5
 		; New flag unique to Flamewing's modified S&K driver
 		dc.b	$FF,$08,val
-	elseif SonicDriverVer==3
+	elseif SonicDriverVer>=3
 		fatal "Coord. Flag to set tempo divider of a single channel does not exist in S3 driver. Use Flamewing's modified S&K sound driver instead."
 	else
 		dc.b	$E5,val
