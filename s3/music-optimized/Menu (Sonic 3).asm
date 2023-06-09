@@ -133,7 +133,7 @@ Snd_Menu_Jump03:
 	dc.b	nG3, $0C, nF3, $22, nFs3, $04, nG3, $08, nA3, nB3, nC4, nD4
 	dc.b	nEb4, $12, nG3, nBb3, $0C, nA3, $12, nG3, nA3, $0C, nBb3, $06
 	dc.b	nBb3, nBb3, $12, nBb3, $06, nBb3, nBb3, $3C
-	smpsSetvoice        $0D
+	smpsSetvoice        $1D
 	smpsAlterNote       $04
 	smpsModSet          $0F, $01, $FA, $05
 	smpsPan             panLeft, $00
@@ -146,7 +146,7 @@ Snd_Menu_Jump03:
 	smpsModSet          $0F, $01, $FA, $05
 	smpsPan             panLeft, $00
 	dc.b	nG3, $03, nRst, nA3, $06, nBb3, $0C
-	smpsSetvoice        $0D
+	smpsSetvoice        $1D
 	smpsAlterNote       $04
 	smpsModSet          $0F, $01, $FA, $05
 	smpsPan             panLeft, $00
@@ -156,7 +156,7 @@ Snd_Menu_Jump03:
 	smpsAlterNote       $04
 	smpsModSet          $0F, $01, $06, $05
 	dc.b	nBb4, $06, nA4, nF4, nD4, nBb3, nA3, nG3, $0C, nRst, $30
-	smpsSetvoice        $0D
+	smpsSetvoice        $1D
 	smpsAlterNote       $04
 	smpsModSet          $0F, $01, $FA, $05
 	smpsPan             panLeft, $00
@@ -169,7 +169,7 @@ Snd_Menu_Jump03:
 	smpsModSet          $0F, $01, $FA, $05
 	smpsPan             panLeft, $00
 	dc.b	nG3, $03, nRst, nA3, $06, nBb3, $0C
-	smpsSetvoice        $0D
+	smpsSetvoice        $1D
 	smpsAlterNote       $04
 	smpsModSet          $0F, $01, $FA, $05
 	smpsPan             panLeft, $00
@@ -232,7 +232,7 @@ Snd_Menu_Jump02:
 	dc.b	nG2, $0C, nF2, $22, nFs2, $04, nG2, $08, nA2, nB2, nC3, nD3
 	dc.b	nEb3, $12, nG2, nBb2, $0C, nA2, $12, nG2, nA2, $0C, nBb2, $06
 	dc.b	nBb2, nBb2, $12, nBb2, $06, nBb2, nBb2, $3C
-	smpsSetvoice        $0D
+	smpsSetvoice        $1D
 	smpsAlterNote       $FC
 	smpsModSet          $0F, $01, $06, $05
 	smpsPan             panRight, $00
@@ -245,7 +245,7 @@ Snd_Menu_Jump02:
 	smpsModSet          $0F, $01, $06, $05
 	smpsPan             panRight, $00
 	dc.b	nEb3, $03, nRst, nF3, $06, nG3, $0C
-	smpsSetvoice        $0D
+	smpsSetvoice        $1D
 	smpsAlterNote       $FC
 	smpsModSet          $0F, $01, $06, $05
 	smpsPan             panRight, $00
@@ -255,7 +255,7 @@ Snd_Menu_Jump02:
 	smpsAlterNote       $FC
 	smpsModSet          $0F, $01, $06, $05
 	dc.b	nG4, $06, nF4, nD4, nBb3, nG3, nF3, nD3, $0C, nRst, $30
-	smpsSetvoice        $0D
+	smpsSetvoice        $1D
 	smpsAlterNote       $FC
 	smpsModSet          $0F, $01, $06, $05
 	smpsPan             panRight, $00
@@ -268,7 +268,7 @@ Snd_Menu_Jump02:
 	smpsModSet          $0F, $01, $06, $05
 	smpsPan             panRight, $00
 	dc.b	nEb3, $03, nRst, nF3, $06, nG3, $0C
-	smpsSetvoice        $0D
+	smpsSetvoice        $1D
 	smpsAlterNote       $FC
 	smpsModSet          $0F, $01, $06, $05
 	smpsPan             panRight, $00
