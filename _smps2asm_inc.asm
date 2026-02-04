@@ -399,11 +399,12 @@ smpsDetune macro val
 	dc.b	$E1,val
 	endm
 
-; E2xx - Useless
+; E2xx - Used for setting a variable which can be read by the game, for synchonisation. Ristar does this.
 smpsNop macro val
-	if SonicDriverVer<3
-		dc.b	$E2,val
+	if (SonicDriverVer>=3) && ((val==$FF) || (val==$29))
+		warning "Values $FF and $29 are reserved in S3K's driver; use a different value or remove this command."
 	endif
+	dc.b	$E2,val
 	endm
 
 ; Return (used after smpsCall)
@@ -428,7 +429,8 @@ smpsFade macro val
 			smpsStop
 		endif
 	elseif (SourceDriver>=3) && ("val"<>"") && ("val"<>"$FF")
-		; This is one of those weird S3+ "fades" that we don't need
+		; This is actually a communication byte, not a fade.
+		smpsNop	val
 	else
 		dc.b	$E4
 	endif
@@ -437,10 +439,10 @@ smpsFade macro val
 ; E5xx - Set channel tempo divider to xx
 smpsChanTempoDiv macro val
 	if SonicDriverVer>=5
-		; New flag unique to Flamewing's modified S&K driver
+		; New flag unique to Flamedriver
 		dc.b	$FF,$08,val
-	elseif SonicDriverVer>=3
-		fatal "Coord. Flag to set tempo divider of a single channel does not exist in S3 driver. Use Flamewing's modified S&K sound driver instead."
+	elseif SonicDriverVer==3
+		fatal "Coord. Flag to set tempo divider of a single channel does not exist in S3 driver. Use Flamedriver instead."
 	else
 		dc.b	$E5,val
 	endif
@@ -457,7 +459,7 @@ smpsNoAttack	EQU $E7
 ; E8xx - Set note fill to xx
 smpsNoteFill macro val
 	if (SonicDriverVer>=5)&&(SourceDriver<3)
-		; Unique to Flamewing's modified driver
+		; Unique to Flamedriver
 		dc.b	$FF,$0A,val
 	else
 		if (SonicDriverVer>=3)&&(SourceDriver<3)
@@ -509,6 +511,15 @@ smpsSetVol macro val
 ; Works on all drivers
 smpsPSGAlterVol macro vol
 	dc.b	$EC,vol
+	endm
+
+smpsPSGAlterVolS2 macro vol
+	; Sonic 2's driver allows the FM command to be used on PSG channels, but others do not.
+	if SonicDriverVer==2
+		smpsAlterVol vol
+	else
+		smpsPSGAlterVol vol
+	endif
 	endm
 
 ; Clears pushing sound flag in S1
@@ -622,9 +633,16 @@ smpsCall macro loc
 ; ---------------------------------------------------------------------------
 ; Alter Volume
 smpsFMAlterVol macro val1,val2
-	if (SonicDriverVer>=3)&&("val2"<>"")
-		dc.b	$E5,val1,val2
+	if ("val2"<>"")
+		; S3K's nerfed 'PSG & FM volume' command with broken PSG support.
+		; The first value is completely unused, while the second is for FM tracks.
+		if (SonicDriverVer>=3)
+			dc.b	$E5,val1,val2
+		else
+			dc.b	$E6,val2
+		endif
 	else
+		; Normal, sane command.
 		dc.b	$E6,val1
 	endif
 	endm
@@ -898,7 +916,7 @@ smpsVcTotalLevel macro op1,op2,op3,op4
 		set vcTLMask4,((vcAlgorithm==7)<<7)
 		set vcTLMask3,((vcAlgorithm>=4)<<7)
 		set vcTLMask2,((vcAlgorithm>=5)<<7)
-		set vcTLMask1,$80
+		set vcTLMask1,128
 	else
 		set vcTLMask4,0
 		set vcTLMask3,0
@@ -910,12 +928,12 @@ smpsVcTotalLevel macro op1,op2,op3,op4
 		set vcTLMask4,((vcAlgorithm==7)<<7)
 		set vcTLMask3,((vcAlgorithm>=4)<<7)
 		set vcTLMask2,((vcAlgorithm>=5)<<7)
-		set vcTLMask1,$80
-		set vcTL1,vcTL1&$7F
-		set vcTL2,vcTL2&$7F
-		set vcTL3,vcTL3&$7F
-		set vcTL4,vcTL4&$7F
-	elseif (SonicDriverVer<3)&&(SourceDriver>=3)&&((((vcTL1|vcTLMask1)&$80)<>$80)||(((vcTL2|vcTLMask2)&$80)<>((vcAlgorithm>=5)<<7))||(((vcTL3|vcTLMask3)&$80)<>((vcAlgorithm>=4)<<7))||(((vcTL4|vcTLMask4)&$80)<>((vcAlgorithm==7)<<7)))
+		set vcTLMask1,128
+		set vcTL1,vcTL1&127
+		set vcTL2,vcTL2&127
+		set vcTL3,vcTL3&127
+		set vcTL4,vcTL4&127
+	elseif (SonicDriverVer<3)&&(SourceDriver>=3)&&((((vcTL1|vcTLMask1)&128)<>128)||(((vcTL2|vcTLMask2)&128)<>((vcAlgorithm>=5)<<7))||(((vcTL3|vcTLMask3)&128)<>((vcAlgorithm>=4)<<7))||(((vcTL4|vcTLMask4)&128)<>((vcAlgorithm==7)<<7)))
 		if MOMPASS=1
 			message "Voice at 0x\{*} has TL bits that do not match its algorithm setting. This voice will not work in S1/S2 drivers."
 		endif
