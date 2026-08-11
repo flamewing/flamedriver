@@ -286,7 +286,6 @@ zSoundQueue0:		ds.b 1
 zSoundQueue1:		ds.b 1
 zSoundQueue2:		ds.b 1
 zTempoSpeedup:		ds.b 1
-zTempoSpeedupReq:	ds.b 1
 zNextSound:			ds.b 1
 ; The following 3 variables are used for M68K input
 zMusicNumber:		ds.b 1	; Play_Sound
@@ -816,7 +815,7 @@ zInitAudioDriver:
 		dec	c								; c--
 		jr	z, .loop						; Loop if c = 0
 
-		call	zMusicFade					; Stop all music
+		call	zMusicFadeFull				; Stop all music
 		ld	a, zmake68kBank(DacBank2)		; Set song bank to second DAC bank (default value)
 		ld	(zSongBank), a					; Store it
 		xor	a								; a = 0
@@ -1848,9 +1847,9 @@ zPlaySoundByIndex:
 		cp	MusID__End						; Is this a music?
 		jp	c, zPlayMusic					; Branch if yes
 		cp	FadeID__First					; Is it before the first fade effect?
-		jp	c, zMusicFade					; Branch if yes
+		jp	c, zMusicFadeFull				; Branch if yes
 		cp	FadeID__End						; Is this after the last fade effect?
-		jp	nc, zMusicFade					; Branch if yes
+		jp	nc, zMusicFadeFull				; Branch if yes
 		sub	FadeID__First					; If none of the checks passed, do fade effects.
 		ld	hl, zFadeEffects				; hl = switch table pointer
 		rst	PointerTableOffset				; Get address of function that handles the fade effect
@@ -1860,7 +1859,7 @@ zPlaySoundByIndex:
 ;loc_524
 zFadeEffects:
 		dw	zFadeOutMusic					; E1h
-		dw	zMusicFade						; E2h
+		dw	zMusicFadeFull					; E2h
 		dw	zPSGSilenceAll					; E3h
 		dw	zStopSFX						; E4h
 		dw	zFadeOutMusic					; E5h
@@ -2602,7 +2601,15 @@ zMusicFadeKeepSFX:
 		jp	zMusicFade.common
 
 ; =============== S U B	R O U T	I N E =======================================
-; Wipes music data and fades all FM, PSG and DAC channels.
+; Wipes music data and fades all FM, PSG and DAC channels. Resets tempo.
+;sub_944
+zMusicFadeFull:
+		xor	a								; a = 0
+		ld	(zTempoSpeedup), a				; Fade in normal speed
+		; FALLTHROUGH
+
+; =============== S U B	R O U T	I N E =======================================
+; Wipes music data and fades all FM, PSG and DAC channels. Preserves tempo.
 ;sub_944
 zMusicFade:
 		; The following block sets to zero the z80 RAM that keeps music and SFX state
@@ -2614,14 +2621,6 @@ zMusicFade:
 		xor	a								; a = 0
 		ld	(hl), a							; Initial value of zero
 		ldir								; while (--length) *de++ = *hl++
-		ld	a, (zTempoSpeedupReq)			; Get flag indicating if tempo is to be kept
-		or	a								; Is it set?
-		jr	nz, .keep_tempo					; Branch if yes
-		ld	(zTempoSpeedup), a				; Fade in normal speed
-
-.keep_tempo:
-		xor	a								; a = 0
-		ld	(zTempoSpeedupReq), a			; Clear for next time around
 
 zMusicFadeSimple:
 		ld	ix, zFMDACInitBytes				; Initialization data for channels
@@ -2848,7 +2847,7 @@ zFMOperatorWriteLoop:
 ; ---------------------------------------------------------------------------
 ;loc_A16
 zPlaySegaSound:
-		call	zMusicFade					; Fade music before playing the sound
+		call	zMusicFadeFull				; Fade music before playing the sound
 		xor	a								; a = 0
 		ld	(zMusicNumber), a				; Clear M68K input queue...
 		ld	(zSFXNumber0), a				; ... including SFX slot 0...
