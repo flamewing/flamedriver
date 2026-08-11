@@ -1,0 +1,4 @@
+interface:
+  display_name: "Z80 Assembly"
+  short_description: "Write and review correct Z80 assembly"
+  default_prompt: "Use $write-z80-assembly to audit this Z80 routine for register, flag, stack, and instruction side effects."

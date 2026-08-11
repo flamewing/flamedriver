@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mega Drive Z80"
+  short_description: "Program the Mega Drive Z80 subsystem"
+  default_prompt: "Use $program-mega-drive-z80 to implement or review this Mega Drive Z80 sound-driver change safely."
