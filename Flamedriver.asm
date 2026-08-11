@@ -2239,6 +2239,17 @@ zSFXTrackInitLoop:
 		inc	hl								; hl = pointer to channel identifier
 		ld	c, (hl)							; c = channel identifier
 		call	zGetSFXChannelPointers		; Get track pointers for track RAM (ix) and overridden song track (hl)
+		ld	a, (zContinuousSFXFlag)			; Is a continuous SFX currently active?
+		or	a								; Is it set?
+		jr	z, .init_track					; Branch if not
+		bit	bitTrackPlaying, (ix+zTrack.PlaybackControl)	; Is this SFX channel already in use?
+		jr	z, .init_track					; Suppress conflicting channel if so
+		pop	hl								; Restore hl
+		ld	bc, 6							; Each SFX channel is 6 bytes in the header
+		add hl, bc							; Skip to next channel
+		jr	.restore_and_continue
+
+.init_track:
 		set	bitSFXOverride, (hl)			; Set 'SFX is overriding this track' bit
 		push	ix							; Save pointer to SFX track data in RAM
 
@@ -2268,6 +2279,8 @@ zSFXTrackInitLoop:
 		call	z, zFMClearSSGEGOps			; Clear SSG-EG operators for track's channels if not
 		call	zSilencePSGChannel			; Silence PSG channel
 		pop		hl							; Restore hl
+
+.restore_and_continue:
 		pop		bc							; Restore bc
 		djnz	zSFXTrackInitLoop			; Loop for all SFX tracks
 		jp	zClearNextSound
