@@ -2435,18 +2435,7 @@ zPauseUnpause:
 		ld	ix, zSongDAC					; Start with DAC instead
 
 .song_loop:
-		ld	a, (zHaltFlag)					; Get halt flag
-		or	a								; Is song halted?
-		jr	nz, .set_pan					; Branch if yes
-		bit	bitTrackPlaying, (ix+zTrack.PlaybackControl)	; Is track playing?
-		jr	z, .skip_song_track				; Branch if not
-
-.set_pan:
-		ld	c, (ix+zTrack.AMSFMSPan)		; Get track AMS/FMS/panning
-		ld	a, ymPanningAMSensFMSens		; Command to select AMS/FMS/panning register
-		call	zWriteFMIorII				; Write data to YM2612
-
-.skip_song_track:
+		call	zResumeChannelFromPause
 		ld	de, zTrack.len					; Spacing between tracks
 		add	ix, de							; Advance to next track
 		djnz	.song_loop					; Loop for all tracks
@@ -2455,21 +2444,27 @@ zPauseUnpause:
 		ld	b, zNumSFXTracks				; Number of tracks
 
 .sfx_loop:
-		bit	bitTrackPlaying, (ix+zTrack.PlaybackControl)	; Is track playing?
-		jr	z, .skip_sfx_track				; Branch if not
-		bit	bitIsPSG, (ix+zTrack.VoiceControl)	; Is this a PSG track?
-		jr	nz, .skip_sfx_track				; Branch if yes
-		ld	c, (ix+zTrack.AMSFMSPan)		; Get track AMS/FMS/panning
-		ld	a, ymPanningAMSensFMSens		; Command to select AMS/FMS/panning register
-		call	zWriteFMIorII				; Write data to YM2612
-
-.skip_sfx_track:
+		call	zResumeChannelFromPause
 		ld	de, zTrack.len					; Spacing between tracks
 		add	ix, de							; Go to next track
 		djnz	.sfx_loop					; Loop for all tracks
 
 		ret
 ; End of function zPauseUnpause
+
+; =============== S U B	R O U T	I N E =======================================
+; Forces FM note-on after unpause.
+zResumeChannelFromPause:
+		ld	a, (zHaltFlag)					; Get halt flag
+		or	a								; Is song halted?
+		ret	nz								; Return if yes
+		bit	bitIsPSG, (ix+zTrack.VoiceControl)	; Is this a PSG track?
+		ret	nz								; Return if PSG track
+		ld	c, (ix+zTrack.AMSFMSPan)		; Get track AMS/FMS/panning
+		ld	a, ymPanningAMSensFMSens		; Command to select AMS/FMS/panning register
+		call	zWriteFMIorII				; Write data to YM2612
+		res	bitNoAttack, (ix+zTrack.PlaybackControl)	; Clear 'no attack' bit
+		jp	zFMNoteOn
 
 ; =============== S U B	R O U T	I N E =======================================
 ; Fades out music.
