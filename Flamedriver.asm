@@ -128,7 +128,7 @@ bitTrackAtRest    = 4
 bitPitchSlide     = 5
 bitSustainFreq    = 6
 bitTrackPlaying   = 7
-maskSkipFMNoteOn  = (1<<bitNoAttack)|(1<<bitSFXOverride)|(1<<bitNoAttack)
+maskSkipFMNoteOn  = (1<<bitTrackAtRest)|(1<<bitSFXOverride)|(1<<bitNoAttack)
 maskSkipFMNoteOff = (1<<bitSFXOverride)|(1<<bitNoAttack)
 maskPlayRest      = (1<<bitTrackPlaying)|(1<<bitTrackAtRest)
 maskFM6Unused     = (1<<bitSFXOverride)|(1<<bitTrackAtRest)
@@ -2455,6 +2455,8 @@ zPauseUnpause:
 ; =============== S U B	R O U T	I N E =======================================
 ; Forces FM note-on after unpause.
 zResumeChannelFromPause:
+		bit	bitTrackPlaying, (ix+zTrack.PlaybackControl)	; Is this track playing?
+		ret	z								; Return if not
 		ld	a, (zHaltFlag)					; Get halt flag
 		or	a								; Is song halted?
 		ret	nz								; Return if yes
