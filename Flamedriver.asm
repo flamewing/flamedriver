@@ -80,6 +80,8 @@ zTrack STRUCT DOTS
 	; ---------------------------------
 	FreqHigh:			ds.b 1	; S&K: 0Eh		; For FM/PSG channels
 	VoiceSongID:		ds.b 1	; S&K: 0Fh		; For using voices from a different song
+	; Nonzero while a DAC SFX owns FM6/DAC; prevents the music DAC track
+	; from queueing samples until the SFX releases the channel.
 	DACSFXPlaying:
 	Detune:				ds.b 1	; S&K: 10h/11h	; In S&K, some places used 11h instead of 10h
 	VolEnv:				ds.b 1	; S&K: 17h		; Used for dynamic volume adjustments
@@ -2600,6 +2602,7 @@ zMusicFadeKeepSFX:
 ; =============== S U B	R O U T	I N E =======================================
 ; Wipes music data and fades all FM, PSG and DAC channels. Resets tempo.
 ;sub_944
+;zStopAllSound
 zMusicFadeFull:
 		xor	a								; a = 0
 		ld	(zTempoSpeedup), a				; Fade in normal speed
@@ -3944,6 +3947,7 @@ cfSetTempo:
 ; will wreak havok with the track update.
 ;
 ;loc_F3A:
+;cfPlaySoundByIndex (S&K; split into SFX and music variants here)
 cfPlaySFXByIndex:
 		push	ix							; Save track pointer
 		call	zPlaySFXByIndex				; Play sound specified by parameter
