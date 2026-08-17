@@ -2626,7 +2626,7 @@ zStopAllSound2:
 		; The following block sets to zero the z80 RAM that keeps music and SFX state
 		ld	hl, zContinuousSFX				; Starting source address for copy
 		ld	de, zContinuousSFXFlag			; Starting destination address for copy
-		ld	bc, zTracksSaveEnd-zFadeDelay	; Length of copy
+		ld	bc, zTracksSaveEnd-zContinuousSFXFlag	; Length of copy
 
 .common:
 		xor	a								; a = 0
