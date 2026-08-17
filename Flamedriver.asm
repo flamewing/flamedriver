@@ -388,6 +388,18 @@ zNumMusicFM2Tracks = (zSongPSG1-zSongFM4)/zTrack.len
 zNumMusicPSGTracks = (zTracksEnd-zSongPSG1)/zTrack.len
 zNumSFXTracks = (zTracksSFXEnd-zTracksSFXStart)/zTrack.len
 zNumSaveTracks = (zTracksSaveEnd-zTracksSaveStart)/zTrack.len
+zNumSpecialFreqCommands = zSpecialFreqCommands_End-zSpecialFreqCommands
+zNumFMInstrumentTLCommands = zFMInstrumentTLTable_End-zFMInstrumentTLTable
+zNumFMInstrumentSSGEGCommands = zFMInstrumentSSGEGTable_End-zFMInstrumentSSGEGTable
+zNumFMInstrumentOperatorCommands = zFMInstrumentOperatorTable_End-zFMInstrumentOperatorTable
+zNumFMInstrumentRSARCommands = zFMInstrumentRSARTable-zFMInstrumentOperatorTable
+zNumFMInstrumentAMD1RCommands = zFMInstrumentAMD1RTable-zFMInstrumentRSARTable
+zNumFMInstrumentOperatorAfterAMD1RCommands = zFMInstrumentOperatorTable_End-zFMInstrumentAMD1RTable
+zNumBytesSave = zTracksSaveEnd-zTracksSaveStart
+zNumBytesKeepSFX = zTracksEnd-zFadeOutTimeout
+zNumBytesStopSFX = zTracksSaveEnd-zContinuousSFX
+zPSGChannelDelta = snPSG2-snPSG1
+zNumBytesSEGA_PCM = SEGA_PCM_End-SEGA_PCM
 ; ---------------------------------------------------------------------------
 		!org z80_SoundDriverStart
 z80_SoundDriver:
@@ -1070,7 +1082,7 @@ zFMSendFreq:
 		cp	ymFM3							; Is this FM3?
 		jr	nz, .not_fm3					; Branch if not
 		call	zGetSpecialFM3DataPointer	; de = pointer to saved FM3 frequency shifts
-		ld	b, zSpecialFreqCommands_End-zSpecialFreqCommands	; Number of entries
+		ld	b, zNumSpecialFreqCommands		; Number of entries
 		ld	hl, zSpecialFreqCommands		; Lookup table
 
 .loop:
@@ -1379,7 +1391,7 @@ zDoFMVolEnv:
 		ld	h, (ix+zTrack.TLPtrHigh)			; h = high byte to TL data pointer
 		ld	l, (ix+zTrack.TLPtrLow)			; l = low byte to TL data pointer
 		ld	de, zFMInstrumentTLTable		; de = pointer to FM TL register table
-		ld	b, zFMInstrumentTLTable_End-zFMInstrumentTLTable	; Number of entries
+		ld	b, zNumFMInstrumentTLCommands	; Number of entries
 		ld	c, a							; Save volume envelope
 		ld	a, (ix+zTrack.FMVolEnvMask)		; a = envelope bitmask
 
@@ -1679,9 +1691,9 @@ zGetFMInstrumentOffset:
 
 ; ---------------------------------------------------------------------------
 ;loc_49C
-zFMInstrumentRegTable:
-		db ymAlgorithmFeedback				; Feedback/Algorithm
 zFMInstrumentOperatorTable:
+		db ymAlgorithmFeedback				; Feedback/Algorithm
+zFMInstrumentDetuneMultiplyTable:
 		db ymDetuneMultiply1				; Detune/multiple operator 1
 		db ymDetuneMultiply3				; Detune/multiple operator 3
 		db ymDetuneMultiply2				; Detune/multiple operator 2
@@ -1730,7 +1742,7 @@ zSendFMInstrument:
 		bit	bitSFXOverride, (ix+zTrack.PlaybackControl)	; Is SFX overriding this track?
 		jr	z, .active						; Is so, quit
 
-		ld	c, zFMInstrumentOperatorTable_End-zFMInstrumentRegTable
+		ld	c, zNumFMInstrumentTLCommands
 		ld	b, 0
 		add	hl, bc							; Point hl to TL data
 		ld	(ix+zTrack.TLPtrLow), l			; Save low byte of pointer to (not yet uploaded) TL data
@@ -1740,25 +1752,25 @@ zSendFMInstrument:
 .active:
 		push	iy							; Save iy
 		zGetFMPartPointer					; Point iy to appropriate FM part
-		ld	de, zFMInstrumentRegTable		; de = pointer to register output table
+		ld	de, zFMInstrumentOperatorTable	; de = pointer to register output table
 		zFastWriteFM ymPanningAMSensFMSens, (ix+zTrack.AMSFMSPan)
-		ld	b, zFMInstrumentOperatorTable_End-zFMInstrumentRegTable	; Number of commands to issue
+		ld	b, zNumFMInstrumentOperatorCommands	; Number of commands to issue
 		ld	a, (ix+zTrack.HaveSSGEGFlag)	; Get custom SSG-EG flag
 		or	a								; Does track have custom SSG-EG data?
 		jp	p, .sendinstrument				; Branch if not
 
 		; Handle case of SSG-EG
 		; Start with detune/multiplier operators
-		ld	b, zFMInstrumentRSARTable-zFMInstrumentRegTable	; Number of commands to issue
+		ld	b, zNumFMInstrumentRSARCommands	; Number of commands to issue
 		call	zSendFMInstrData			; Send FM instrument data
 
 		; Now for rate scaling/attack rate. The attack rate must be 1Fh if using
 		; SSG-EG, which is the reason for the split.
-		ld	b, zFMInstrumentAMD1RTable-zFMInstrumentRSARTable	; Number of commands to issue
+		ld	b, zNumFMInstrumentAMD1RCommands	; Number of commands to issue
 		call	zSendFMInstrDataRSAR		; Send FM instrument data
 
 		; Finalize with all the other operators.
-		ld	b, zFMInstrumentOperatorTable_End-zFMInstrumentAMD1RTable	; Number of commands to issue
+		ld	b, zNumFMInstrumentOperatorAfterAMD1RCommands	; Number of commands to issue
 
 .sendinstrument:
 		call	zSendFMInstrData			; Send FM instrument data
@@ -1951,7 +1963,7 @@ zPlayMusic:
 		ld	(zContSFXLoopCnt), a			; Clear continuous SFX counter
 		ld	hl, zTracksStart				; hl = pointer to song RAM
 		ld	de, zTracksSaveStart			; de = pointer to RAM area to save the song data to
-		ld	bc, zTracksSaveEnd-zTracksSaveStart		; Number of bytes to copy
+		ld	bc, zNumBytesSave				; Number of bytes to copy
 		ldir								; while (bc-- > 0) *de++ = *hl++;
 		ld	hl, zTracksSaveStart			; hl = pointer to saved song's RAM area
 		ld	de, zTrack.len					; Spacing between tracks
@@ -2606,7 +2618,7 @@ zStopAllMusic:
 		; The following block sets to zero the z80 RAM that keeps music and SFX state
 		ld	hl, zFadeOutTimeout				; Starting source address for copy
 		ld	de, zFadeDelay					; Starting destination address for copy
-		ld	bc, zTracksEnd-zFadeDelay		; Length of copy
+		ld	bc, zNumBytesKeepSFX-1			; Length of copy
 		jp	zStopAllSound2.common
 
 ; =============== S U B	R O U T	I N E =======================================
@@ -2626,7 +2638,7 @@ zStopAllSound2:
 		; The following block sets to zero the z80 RAM that keeps music and SFX state
 		ld	hl, zContinuousSFX				; Starting source address for copy
 		ld	de, zContinuousSFXFlag			; Starting destination address for copy
-		ld	bc, zTracksSaveEnd-zContinuousSFXFlag	; Length of copy
+		ld	bc, zNumBytesStopSFX-1			; Length of copy
 
 .common:
 		xor	a								; a = 0
@@ -2750,7 +2762,7 @@ zPSGSilenceAll:
 
 .loop:
 		ld	(zPSG), a						; Write command
-		add	a, snPSG2-snPSG1				; Next channel
+		add	a, zPSGChannelDelta				; Next channel
 		djnz	.loop						; Loop for all PSG channels
 		pop	bc								; Restore bc
 		jp	zClearNextSound
@@ -2889,13 +2901,13 @@ zFadeInToPrevious:
 		bankswitch							; Bank switch to previous song's bank
 		ld	hl, zTracksSaveStart			; Start of saved track data
 		ld	de, zTracksStart				; Start of track data
-		ld	bc, zTracksSaveEnd-zTracksSaveStart	; Number of bytes to copy
+		ld	bc, zNumBytesSave				; Number of bytes to copy
 		ldir								; while (bc-- > 0) *de++ = *hl++;
 		xor	a								; a = 0
 		ld	hl, zTracksSaveStart			; Start of saved track data
 		ld	de, zTracksSaveStart+1			; Start of track data
 		ld	(hl), a							; Prepare to zero-fill save RAM
-		ld	bc, zTracksSaveEnd-zTracksSaveStart-1	; Number of bytes to copy
+		ld	bc, zNumBytesSave-1				; Number of bytes to copy-1
 		ldir								; while (bc-- > 0) *de++ = *hl++;
 		ld	a, (zDACEnableSave)				; Get saved DAC enable
 		ld	(zDACEnable), a					; Restore it
@@ -3325,7 +3337,7 @@ zSendTL:
 		ld	h, (ix+zTrack.TLPtrHigh)		; h = high byte of pointer to instrument's TL data
 
 .got_pointers:
-		ld	b, zFMInstrumentTLTable_End-zFMInstrumentTLTable	; Number of entries
+		ld	b, zNumFMInstrumentTLCommands	; Number of entries
 
 .loop:
 		zFastWriteFM (de), (hl), calcVolume
@@ -4098,11 +4110,11 @@ zSendSSGEGData:
 		; we preserve rate scaling, whereas that driver sets it to 0.
 		ld	l, (ix+zTrack.TLPtrLow)			; l = low byte of pointer to TL data
 		ld	h, (ix+zTrack.TLPtrHigh)		; hl = pointer to TL data
-		ld	bc, zFMInstrumentRSARTable-zFMInstrumentTLTable	; bc = -10h
+		ld	bc, zNumFMInstrumentTLCommands	; bc = -10h
 		add	hl, bc							; hl = pointer to RS/AR data
 		push	hl							; Save hl (**)
 		ld	hl, zFMInstrumentSSGEGTable		; hl = pointer to registers for SSG-EG data
-		ld	b, zFMInstrumentSSGEGTable_End-zFMInstrumentSSGEGTable	; Number of entries
+		ld	b, zNumFMInstrumentSSGEGCommands	; Number of entries
 
 .loop:
 		ld	a, (de)							; Get data to sent to SSG-EG register
@@ -4237,7 +4249,7 @@ zUpdatePSGTrack:
 		add	a, snPSGVol						; Flag to latch volume
 		bit	bitPSGNoise, (ix+zTrack.PlaybackControl)	; Is this a noise channel?
 		jr	z, .not_noise					; Branch if not
-		add	a, snNoise-snPSG3				; Change to noise channel
+		add	a, zPSGChannelDelta				; Change to noise channel
 
 .not_noise:
 		ld	(zPSG), a						; Set channel volume
@@ -4487,7 +4499,7 @@ zPlaySEGAPCM:
 		ld	a, zmake68kBank(SEGA_PCM)		; a = sound bank index
 		bankswitchLoop						; Bank switch to sound bank
 		ld	hl, zmake68kPtr(SEGA_PCM)		; hl = pointer to SEGA PCM
-		ld	de, SEGA_PCM_End-SEGA_PCM		; de = length of SEGA PCM
+		ld	de, zNumBytesSEGA_PCM			; de = length of SEGA PCM
 		ld	a, ymDACPCM						; DAC channel register
 		ld	(zYM2612_A0), a					; Send to YM2612
 		nop									; Delay
