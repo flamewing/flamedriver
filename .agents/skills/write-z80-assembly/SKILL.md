@@ -29,6 +29,8 @@ Write the physical relationship explicitly:
 AF = A:F    BC = B:C    DE = D:E    HL = H:L
 ```
 
+Also keep the hidden 16-bit MEMPTR state in mind when a routine depends on undocumented Z80 behavior. The public Z80 manual does not document it, but real CPUs keep a shadow register that is updated by several instructions and can leak into flag bits after `BIT n,(HL)`: bits 3 and 5 of `F` reflect bits 11 and 13 of that internal 16-bit pointer. This is not a general-purpose programming feature, but it matters for emulation, hardware validation, and any code that depends on undocumented instruction side effects.
+
 Apply these invariants:
 
 - Writing `B` changes the high byte of `BC`; writing `C` changes its low byte.
@@ -50,6 +52,21 @@ instruction | reads | writes | flags written/preserved | SP/memory/I/O effects
 
 Expand pair writes to their halves and half writes to their pair. Track implicit operands, including `A` in arithmetic, `B` in `DJNZ`, `BC/DE/HL` in block instructions, `SP` in stack/control-flow instructions, and `F` in conditional logic.
 
+For undocumented instructions and side effects, keep a second ledger for hidden state:
+
+```text
+instruction | MEMPTR delta | depends on previous MEMPTR? | hardware/clone caveat
+```
+
+Examples from real Z80 behavior include:
+- `CPI` and `CPD` increment/decrement the hidden pointer.
+- `LDIR`/`LDDR` can update the hidden pointer depending on the remaining byte count.
+- `INI`/`IND` and `OUTI`/`OUTD` change it based on pre/post decrement of `B`/`C`.
+- `LD A,(addr)`, `LD A,(BC)`, `LD A,(DE)`, `IN A,(port)`, and `IN A,(C)` set it to a derived address plus one.
+- `JP`/`CALL` and interrupt entry also set it to the target address.
+
+This is not a promise that every undocumented effect is safe to rely on in portable code, but it is important when emulating the CPU or comparing against a real machine.
+
 At every conditional jump, identify the exact instruction that most recently defined the tested flag on every incoming path. Do not rely on a descriptive comment such as “test A” when an intervening instruction changes flags.
 
 ## Design the edit
@@ -67,6 +84,7 @@ At every conditional jump, identify the exact instruction that most recently def
 2. Inspect the assembler listing or disassembly when opcode selection, displacement, branch range, or undocumented syntax is relevant.
 3. Re-run the alias-expanded audit on the final code, including unchanged instructions whose inputs changed.
 4. Test boundary values: zero, carry/borrow, signed overflow, byte wrap, counter wrap, pointer page crossings, `BC=0` block-count behavior, and interrupts where applicable.
-5. State what was verified and what remains hardware- or emulator-dependent.
+5. For undocumented behavior, verify against a reference emulator or a real device instead of assuming the public manual is complete.
+6. State what was verified and what remains hardware- or emulator-dependent.
 
-Do not approve code based only on assembly success. Assembly proves encoding, not preservation of live state.
+Do not approve code based only on assembly success. Assembly proves encoding, not preservation of live state or undocumented CPU semantics.

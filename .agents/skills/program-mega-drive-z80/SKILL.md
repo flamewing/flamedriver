@@ -32,6 +32,8 @@ executing CPU | CPU-visible address | selected bank | physical target | access w
 
 Never treat a Z80 pointer in `$8000-$FFFF` as a complete 68000 address. Its target depends on the bank latch. Never change the bank while code still has live pointers or assumptions tied to the previous window.
 
+Also remember that the underlying Z80 can expose undocumented hidden state. In practice, the Mega Drive Z80 is still a Z80-class CPU, so MEMPTR-like behaviors can appear in emulators and debugging tools; the hidden pointer can be updated by block-transfer and port-transfer instructions, and flag bits can reflect internal pointer bits after `BIT n,(HL)`. Use this for emulator fidelity and diagnosis, not as a project-wide contract unless the target hardware and code path are explicitly validated.
+
 ## Design shared-state changes
 
 - Make the 68000 request the Z80 bus and wait for acknowledgement before accessing Z80 RAM or Z80-side devices through the Z80 area.
@@ -54,6 +56,7 @@ Never treat a Z80 pointer in `$8000-$FFFF` as a complete 68000 address. Its targ
 2. Test bank-boundary and window-boundary cases, including `$7FFF/$8000`, `$FFFF`, and targets whose low 15 bits wrap.
 3. Test command races, bus requests, reset/reload, music plus SFX load, PCM plus FM writes, pause/resume, and PAL/NTSC timing where relevant.
 4. Test in at least one accurate emulator, but do not call timing-sensitive behavior hardware-safe from emulator results alone.
-5. Prefer real-hardware validation for YM2612 timing, bus arbitration, and PCM cadence. State explicitly when it was not performed.
+5. Prefer real-hardware validation for YM2612 timing, bus arbitration, PCM cadence, and any undocumented instruction side effects that affect flags or pointers.
+6. State explicitly when a behavior was not validated on hardware or when it depends on emulator-specific Z80 quirks.
 
-Reject changes that write plausible bytes to an incorrectly derived address, rely on an unstated bank, touch Z80 RAM without ownership, or silently replace a known-good chip-write delay.
+Reject changes that write plausible bytes to an incorrectly derived address, rely on an unstated bank, touch Z80 RAM without ownership, silently replace a known-good chip-write delay, or treat undocumented Z80 flags as if they were part of the public contract.
