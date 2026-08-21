@@ -244,6 +244,17 @@ zWriteFMII:
 zUpdateEverything:
 		call	zPauseUnpause				; Pause/unpause according to M68K input
 		call	zUpdateSFXTracks			; Do SFX tracks
+		; BUG: In the original driver, the double-update timer is executed:
+		; - Once at the end of zUpdateSFXTracks
+		; - Once at the end of zUpdateMusic
+		; - If it expired in either of those times, it would call zUpdateMusic
+		; So it was guaranteed to run twice per frame, and could run a third
+		; time; and depending on the exact speedup value used, it could run a
+		; fourth time.
+		; With this call here, I guarantee the call from the SFX tracks.
+		; Inside zUpdateMusic, it is called as normal, but without polluting
+		; the workings of zUpdateSFXTracks with extra calls.
+		call	zRunDoubleUpdateTimer		; Run double-update timer
 
 ;loc_121
 zUpdateMusic:
@@ -290,7 +301,7 @@ zUpdateMusic:
 
 .update_music:
 		bankswitchToMusic
-		xor	a								; a = 0
+		xor	a								; a = flagMusicUpdate
 		ld	(zUpdatingSFX), a				; Updating music
 		ld	a, (zFadeToPrevFlag)			; Get fade-to-previous flag
 		cp	0FFh							; Is it 0FFh?
@@ -300,30 +311,13 @@ zUpdateMusic:
 		call	nz, zUpdateDACTrack			; Branch if yes
 		ld	b, zNumMusicFMorPSGTracks		; Number of FM+PSG tracks
 		ld	ix, zSongFM1					; ix = FM1 track RAM
-		jr	zTrackUpdLoop					; Play all tracks
+		call	zTrackUpdLoop	; Play all tracks
+		; FALLTHROUGH
 
 ; =============== S U B	R O U T	I N E =======================================
-;
-;sub_19E
-zUpdateSFXTracks:
-		ld	a, 1							; a = 1
-		ld	(zUpdatingSFX), a				; Updating SFX
-		ld	a, zmake68kBank(SndBank)		; Get SFX bank ID
-		bankswitch							; Bank switch to SFX
-		ld	ix, zTracksSFXStart				; ix = start of SFX track RAM
-		ld	b, zNumSFXTracks				; Number of channels
-
-zTrackUpdLoop:
-		push	bc							; Save bc
-		bit	bitTrackPlaying, (ix+zTrack.PlaybackControl)	; Is track playing?
-		call	nz, zUpdateFMorPSGTrack		; Call routine if yes
-		ld	de, zTrack.len					; Spacing between tracks
-		add	ix, de							; Advance to next track
-		pop	bc								; Restore bc
-		djnz	zTrackUpdLoop				; Loop for all tracks
-
-		; BUG: This code is ran by both zUpdateSFXTracks and zUpdateMusic,
-		; causing it to execute multiple times per frame.
+; This function runs the double-update timer. If a double-update is needed,
+; it calls zUpdateMusic.
+zRunDoubleUpdateTimer:
 		ld	a, (zTempoSpeedup)				; Get tempo speed-up value
 		or	a								; Is music sped up?
 		ret	z								; Return if not
@@ -332,13 +326,46 @@ zTrackUpdLoop:
 		jp	nz, .no_dbl_update				; Branch if not
 		ld	a, (zTempoSpeedup)				; Get master tempo speed-up value
 		ld	(zSpeedupTimeout), a			; Reset extra tempo timeout to it
-		jp	zUpdateMusic					; Update music again
+		jp	zUpdateMusic
 ; ---------------------------------------------------------------------------
 .no_dbl_update:
 		dec	a								; Decrement timeout...
 		ld	(zSpeedupTimeout), a			; ... then store new value
 		ret
 ; End of function zUpdateSFXTracks
+
+
+; =============== S U B	R O U T	I N E =======================================
+;
+;sub_19E
+zUpdateSFXTracks:
+		ld	a, flagSfxUpdate
+		ld	ix, zTracksSFXStart				; ix = start of SFX track RAM
+		ld	b, zNumSFXTracks				; Number of channels
+		call	.common
+		ld	a, flagContinuousSfxUpdate
+		ld	ix, zTracksContSFXStart			; ix = start of continuous SFX track RAM
+		ld	b, zNumContSFXTracks			; Number of channels
+		; FALLTHROUGH
+
+.common:
+		ld	(zUpdatingSFX), a				; Updating SFX
+		ld	a, zmake68kBank(SndBank)		; Get SFX bank ID
+		bankswitch							; Bank switch to SFX
+		; FALLTHROUGH
+
+; =============== S U B	R O U T	I N E =======================================
+;
+zTrackUpdLoop:
+		push	bc							; Save bc
+		bit	bitTrackPlaying, (ix+zTrack.PlaybackControl)	; Is track playing?
+		call	nz, zUpdateFMorPSGTrack		; Call routine if yes
+		ld	de, zTrack.len					; Spacing between tracks
+		add	ix, de							; Advance to next track
+		pop	bc								; Restore bc
+		djnz	zTrackUpdLoop				; Loop for all tracks
+		ret
+; ---------------------------------------------------------------------------
 
 
 ; =============== S U B	R O U T	I N E =======================================
@@ -456,6 +483,8 @@ zGetSpecialFM3DataPointer:
 		or	a								; Is this a SFX track?
 		ret	z								; Return if not
 		ld	de, zSpecFM3FreqsSFX			; de = pointer to saved FM3 frequency shifts
+		ret	p								; Return if regular SFX
+		ld	de, zSpecFM3FreqsContSFX		; de = pointer to saved FM3 frequency shifts
 		ret
 ; End of function zGetSpecialFM3DataPointer
 
@@ -1155,7 +1184,7 @@ zPlaySFXByIndex:
 		ret	c								; Return if yes
 	endif
 		cp	zSFX__End						; Is this a sound effect?
-		jp	c, zPlaySound_CheckRing			; Branch if yes
+		jp	c, zPlaySound					; Branch if yes
 		cp	zPCM__First
 		ret	c
 		cp	zPCM__End
@@ -1215,12 +1244,22 @@ zFadeEffects:
 		dw	zPSGSilenceAll					; E3h
 		dw	zStopSFX						; E4h
 		dw	zFadeOutMusic					; E5h
+		dw	zStopContSFX					; E6h
 ; ---------------------------------------------------------------------------
+;sub_52E
+zStopContSFX:
+		ld	ix, zTracksContSFXStart			; ix = pointer to SFX track memory
+		ld	b, zNumContSFXTracks			; Number of channels
+		ld	a, flagContinuousSfxUpdate		; a = 80h
+		jr	zStopSFX.common
+
 ;sub_52E
 zStopSFX:
 		ld	ix, zTracksSFXStart				; ix = pointer to SFX track memory
 		ld	b, zNumSFXTracks				; Number of channels
-		ld	a, 1							; a = 1
+		ld	a, flagSfxUpdate				; a = 1
+
+.common:
 		ld	(zUpdatingSFX), a				; Set flag to update SFX
 
 .loop:
@@ -1495,14 +1534,21 @@ zPSGInitBytes:
 		db (1<<bitTrackPlaying), snPSG3
 ; ---------------------------------------------------------------------------
 ;loc_6A9
-zPlaySound_CheckRing:
+zPlaySound:
 		sub	zSFX__First						; Make it a 0-based index
+		cp	SndID__FirstContinuous-SndID__First
+		jr	c, .check_ring
+		ex	af, af'							; Save af
+		ld	a, flagContinuousSfxInit
+		jr	.bank_switch
+; ---------------------------------------------------------------------------
+.check_ring:
 	if zSFX_Ring==zSFX__First
 		or	a								; Is it the ring sound?
 	else
 		cp	zSFX_Ring-zSFX__First			; Is it the ring sound?
 	endif
-		jp	nz, zPlaySound_Bankswitch		; Branch if not
+		jp	nz, .not_ring					; Branch if not
 	if RingSoundsAdjacent==0
 		ld	c, a							; Save SFX ID
 	endif
@@ -1522,23 +1568,26 @@ zPlaySound_CheckRing:
 	endif
 
 ;loc_6B7
-zPlaySound_Bankswitch:
+.not_ring:
 		ex	af, af'							; Save af
+		xor	a								; a = flagSFXInit
+
+.bank_switch:
+		ld	(zUpdatingSFX), a				; Set flag to initialize continuous/normal SFX
 		ld	a, zmake68kBank(SndBank)		; Load SFX sound bank address
 		bankswitch							; Bank switch to it
 		xor	a								; a = 0
 		ld	c, zID_SFXPointers				; SFX table index
-		ld	(zUpdatingSFX), a				; Clear flag to update SFX
 		ex	af, af'							; Restore af
 		cp	zSFX_Spindash-zSFX__First		; Is this the spindash sound?
-		jp	z, zPlaySound					; Branch if yes
+		jp	z, .play					; Branch if yes
 		cp	zSFX__FirstContinuous-zSFX__First	; Is this before sound 0BCh?
-		jp	c, zPlaySound_Normal			; Branch if yes
+		jp	c, .not_continuous			; Branch if yes
 		push	af							; Save af
 		ld	b, a							; b = sound index
 		ld	a, (zContinuousSFX)				; Load last continuous SFX played
 		sub	b								; Is this the same continuous sound that was playing?
-		jp	nz, zPlaySound_NotCont			; Branch if not
+		jp	nz, .new_continuous_sfx			; Branch if not
 		; If we got here, a is zero.
 		inc	a								; a = 1
 		ld	(zContinuousSFXFlag), a			; Flag continuous SFX as being extended
@@ -1552,22 +1601,22 @@ zPlaySound_Bankswitch:
 		jp	zClearNextSound
 ; ---------------------------------------------------------------------------
 ;loc_6FB
-zPlaySound_NotCont:
+.new_continuous_sfx:
 		xor	a								; a = 0
 		ld	(zContinuousSFXFlag), a			; Clear continue continuous SFX flag
 		pop	af								; Restore af
 		ld	(zContinuousSFX), a				; Store SFX index
-		jp	zPlaySound
+		jp	.play
 ; ---------------------------------------------------------------------------
 ;loc_706
-zPlaySound_Normal:
+.not_continuous:
 		push	af							; Save af
 		xor	a								; a = 0
 		ld	(zSpindashRev), a				; Reset spindash rev
 		pop		af							; Restore af
 
 ;loc_70C
-zPlaySound:
+.play:
 		rst	GetPointerTable					; hl = pointer to SFX data
 		push	hl							; Save hl
 		rst	ReadPointer						; hl = voice table pointer
@@ -1580,30 +1629,28 @@ zPlaySound:
 		ld	de, 4							; de = 4
 		add	hl, de							; hl = pointer to SFX track data
 		ld	b, (iy+3)						; b = number of tracks (FM + PSG) used by SFX
+		ld	a, (zUpdatingSFX)				; a = flag values
+		or	a								; Is this a continuous SFX?
+		jr	z, .track_loop					; Branch if not
 		ld	a, b							; Copy to a
 		ld	(zContSFXLoopCnt), a			; Save to RAM (loop counter for continuous SFX)
 
 ;loc_72C
-zSFXTrackInitLoop:
+.track_loop:
 		push	bc							; Save bc; damaged by ldi instructions below
 		push	hl							; Save hl
 		inc	hl								; hl = pointer to channel identifier
 		ld	c, (hl)							; c = channel identifier
 		call	zGetSFXChannelPointers		; Get track pointers for track RAM (ix) and overridden song track (hl)
-		ld	a, (zContinuousSFXFlag)			; Is a continuous SFX currently active?
-		or	a								; Is it set?
-		jr	z, .init_track					; Branch if not
-		bit	bitTrackPlaying, (ix+zTrack.PlaybackControl)	; Is this SFX channel already in use?
-		jr	z, .init_track					; Suppress conflicting channel if so
-		pop	hl								; Restore hl
-		ld	bc, 6							; Each SFX channel is 6 bytes in the header
-		add hl, bc							; Skip to next channel
-		jr	.restore_and_continue
-
-.init_track:
 		set	bitSFXOverride, (hl)			; Set 'SFX is overriding this track' bit
 		push	ix							; Save pointer to SFX track data in RAM
+		ld	a, (zUpdatingSFX)				; a = flag values
+		or	a								; Is this a continuous SFX?
+		jr	z, .normal_sfx1					; Branch if not
+		pop	hl								; Pop from stack
+		push	iy							; Push continuous SFX track instead
 
+.normal_sfx1:
 		pop		de							; de = pointer to SFX track data in RAM (unless you consider the above effectively dead code)
 		pop		hl							; hl = pointer to SFX track data
 		ldi									; *de++ = *hl++ (initial playback control)
@@ -1620,9 +1667,27 @@ zSFXTrackInitLoop:
 		ldi									; *de++ = *hl++ (channel volume)
 		call	zInitFMDACTrack				; Init the remainder of the track RAM
 
+		bit	bitTrackPlaying, (iy+zTrack.PlaybackControl)	; Is SFX track playing?
+		jr	z, .dont_override				; Branch if not
+		ld	a, (ix+zTrack.VoiceControl)		; Fetch channel assignment byte
+		cp	(iy+zTrack.VoiceControl)		; Is it equal to that of a continuous SFX?
+		jr	nz, .dont_override				; Branch if not
+		; set	bitSFXOverride, (iy+zTrack.PlaybackControl)	; Override continuous SFX track
+		res	bitTrackPlaying, (ix+zTrack.PlaybackControl)	; Is SFX track playing?
+		ld	a, (zUpdatingSFX)				; a = flag values
+		or	a								; Is this a continuous SFX?
+		jr	z, .restore_and_continue		; Branch if not
+
+.dont_override:
 		push	hl							; Save hl
 		ld	hl, (zSFXVoiceTblPtr)			; hl = pointer to voice data
+		ld	a, (zUpdatingSFX)				; a = flag values
+		or	a								; Is this a continuous SFX?
+		jr	z, .normal_sfx2					; Branch if not
+		push	iy							; Push continuous SFX track instead
+		pop	ix								; ix = continuous SFX track
 
+.normal_sfx2:
 		ld	(ix+zTrack.VoicesLow), l		; Low byte of voice pointer
 		ld	(ix+zTrack.VoicesHigh), h		; High byte of voice pointer
 		call	zKeyOffIfActive				; Kill channel notes
@@ -1633,7 +1698,7 @@ zSFXTrackInitLoop:
 
 .restore_and_continue:
 		pop		bc							; Restore bc
-		djnz	zSFXTrackInitLoop			; Loop for all SFX tracks
+		djnz	.track_loop					; Loop for all SFX tracks
 		jp	zClearNextSound
 
 ; =============== S U B	R O U T	I N E =======================================
@@ -1662,23 +1727,32 @@ zGetSFXChannelIndex:
 ; Gets SFX channel and overridden channel for given channel assignment bits
 ;
 ; Input:  c     Channel assignment bits
-; Output: ix    SFX channel
-;         hl    Overridden channel
+; Output: ix    SFX channel corresponding to channel assignment
+;         iy    Continuous SFX channel corresponding to channel assignment
+;         hl    Music channel corresponding to channel assignment
 ;sub_78F
 zGetSFXChannelPointers:
 		ld	a, c							; a = channel identifier
+
+zGetSFXChannelPointers2:
 		call	zGetSFXChannelIndex			; Get channel index
 		ret	m								; Return if FM1 or FM2
 		push	af							; Save af
-		ld	hl, zSFXChannelData				; Pointer table for track RAM
-		rst	PointerTableOffset				; hl = track RAM
+		ld	hl, zSFXChannelData				; Pointer table for SFX tracks
+		rst	PointerTableOffset				; hl = Pointer to SFX track RAM
 		push	hl							; Save hl
-		pop	ix								; ix = track RAM
+		pop	ix								; ix = Pointer to SFX track RAM
 		pop	af								; Restore af
-		; This is where there is code in other drivers to load the special SFX
-		; channel pointers to iy
-		ld	hl, zMusicChannelData			; Pointer table for the overridden music track
-		jp	PointerTableOffset				; hl = RAM destination to mark as overridden
+		push	af							; Save af
+		ld	hl, zContSFXChannelData			; Pointer table for continuous SFX tracks
+		rst	PointerTableOffset				; hl = Pointer to continuous SFX track RAM
+		push	hl							; Save hl
+		pop	iy								; iy = Pointer to continuous SFX track RAM
+		pop	af								; Restore af
+		ld	hl, zMusicChannelData			; Pointer table for music tracks
+		rst	PointerTableOffset				; hl = Pointer to corresponding music track RAM
+		xor	a
+		ret
 ; End of function zGetSFXChannelPointers
 
 ; =============== S U B	R O U T	I N E =======================================
@@ -1687,16 +1761,33 @@ zGetSFXChannelPointers:
 ; Input:  ix    Pointer to channel data
 ; Output: a     Playback control byte of matching SFX track or 0 for FM1/FM2
 ;         f     m if matching SFX track is playing, 0 otherwise
+; SFX or normal SFX is overriding the track.
 zIsSFXTrackOverriding:
 		ld	a, (ix+zTrack.VoiceControl)		; Fetch channel assignment byte
 
 zIsSFXTrackOverriding_Part2:
+		ld	(zSFXSaveIndex), a				; Save channel assignment byte
 		call	zGetSFXChannelIndex			; Get channel index
 		jp	m, .is_fm1fm2					; Return if FM1 or FM2
+		push	af							; Save channel index
+		ld	hl, zContSFXChannelData			; Pointer table for track RAM
+		rst	PointerTableOffset				; hl = track RAM
+		bit	bitTrackPlaying, (hl)			; Is continuous SFX track playing?
+		jr	z, .check_sfx					; Branch if not
+		inc	hl
+		ld	a, (zSFXSaveIndex)				; Fetch channel assignment byte
+		sub	(hl)							; Does it match that of the continuous SFX?
+		jr	nz, .check_sfx					; Branch if not
+		dec	a								; Set flags
+		pop	hl								; Restore stack
+		ret
+; ---------------------------------------------------------------------------
+.check_sfx:
+		pop	af
 		ld	hl, zSFXChannelData				; Pointer table for track RAM
 		rst	PointerTableOffset				; hl = track RAM
 		ld	a, (hl)							; Get playback control byte for SFX track
-		or	a								; Is SFX track overriding this?
+		or	a								; Is SFX track playing?
 		ret
 ; ---------------------------------------------------------------------------
 .is_fm1fm2:
@@ -1736,6 +1827,15 @@ zZeroFillTrackRAM:
 		ret
 ; End of function zInitFMDACTrack
 ; ---------------------------------------------------------------------------
+zContSFXChannelData:
+		dw zContSFX_FM3					; FM3
+		dw zContSFX_FM4					; FM4
+		dw zContSFX_FM3					; FM5
+		dw zContSFX_FM4					; FM6
+		dw zContSFX_PSG3				; PSG1
+		dw zContSFX_PSG3				; PSG2
+		dw zContSFX_PSG3				; PSG3
+		dw zContSFX_PSG3				; PSG3/Noise
 ;zloc_7DF
 zSFXChannelData:
 		dw zSFX_FM3						; FM3
@@ -1793,7 +1893,7 @@ zPauseUnpause:
 		djnz	.song_loop					; Loop for all tracks
 
 		ld	ix, zTracksSFXStart				; Start at the start of SFX track data
-		ld	b, zNumSFXTracks				; Number of tracks
+		ld	b, zNumAllSFXTracks				; Number of tracks
 
 .sfx_loop:
 		call	zResumeChannelFromPause
@@ -2932,14 +3032,30 @@ cfStopTrack:
 		res	bitTrackPlaying, (ix+zTrack.PlaybackControl)	; Clear 'track playing' flag
 		call	zKeyOffIfActive				; Send key off for track channel
 		call	zSilencePSGChannel			; Silence PSG channel
-		ld	c, (ix+zTrack.VoiceControl)		; c = voice control bits
 		push	ix							; Save track pointer
-		call	zGetSFXChannelPointers		; ix = track pointer, hl = overridden track pointer
 		ld	a, (zUpdatingSFX)				; Get flag
 		or	a								; Are we updating SFX?
 		jp	z, zStopCleanExit				; Exit if not
+		ld	c, (ix+zTrack.VoiceControl)		; c = voice control bits
+		call	zGetSFXChannelPointers		; ix = track pointer, hl = overridden track pointer
+		; hl = pointer to corresponding music track
+		; ix = pointer to corresponding SFX track
+		; iy = pointer to corresponding continuous SFX track
+		bit	bitTrackPlaying, (iy+zTrack.PlaybackControl)	; Is track playing?
+		jr	z, .use_music_voice				; Branch if not
+		ld	a, (ix+zTrack.VoiceControl)		; Fetch current track's channel assignment
+		cp	(iy+zTrack.VoiceControl)		; Does it match the continuous SFX?
+		jr	nz, .use_music_voice			; Branch if not
+		push	iy							; Save pointer to continuous SFX track
+		ld	l, (iy+zTrack.VoicesLow)
+		ld	h, (iy+zTrack.VoicesHigh)		; hl = pointer to voice table
+		jr	.common
+; ---------------------------------------------------------------------------
+.use_music_voice:
 		push	hl							; Save hl
 		ld	hl, (zVoiceTblPtr)				; hl = pointer to voice table
+
+.common:
 		pop	ix								; ix = overridden track's pointer
 		res	bitSFXOverride, (ix+zTrack.PlaybackControl)	; Clear 'SFX is overriding' bit
 		bit	bitIsPSG, (ix+zTrack.VoiceControl)	; Is this a PSG channel?

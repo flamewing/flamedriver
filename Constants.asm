@@ -174,27 +174,40 @@ VolEnvRestTrack     = $81
 VolEnvJumpTo        = $82
 VolEnvStopTrack     = $83
 ; ---------------------------------------------------------------------------
+; Values for zUpdatingSFX
+; During zUpdateEverything and related functions
+flagMusicUpdate = 0
+flagSfxUpdate = 1
+flagContinuousSfxUpdate = $80
+
+; During zPlaySoundByIndex and related functions
+flagSFXInit = 0
+flagContinuousSfxInit = $80
+; ---------------------------------------------------------------------------
 ; z80 RAM:
-zDataStart			=	$1C1A
+zDataStart				=	$1C10
 		phase zDataStart
-z80_stack_top:		ds.b $60
+z80_stack_top:			ds.b $60
 z80_stack:
-zDACEnable:			ds.b 1
-zDACEnableSave:		ds.b 1
-zSpecFM3Freqs:		ds.b 8
-zSpecFM3FreqsSFX:	ds.b 8
+zSFXSaveIndex:			ds.b 1
+						ds.b 1
+zDACEnable:				ds.b 1
+zDACEnableSave:			ds.b 1
+zSpecFM3Freqs:			ds.b 8
+zSpecFM3FreqsSFX:		ds.b 8
+zSpecFM3FreqsContSFX:	ds.b 8
 zQueueVariables:
-zPalFlag:			ds.b 1
-zPalDblUpdCounter:	ds.b 1
-zSoundQueue0:		ds.b 1
-zSoundQueue1:		ds.b 1
-zSoundQueue2:		ds.b 1
-zTempoSpeedup:		ds.b 1
-zNextSound:			ds.b 1
+zPalFlag:				ds.b 1
+zPalDblUpdCounter:		ds.b 1
+zSoundQueue0:			ds.b 1
+zSoundQueue1:			ds.b 1
+zSoundQueue2:			ds.b 1
+zTempoSpeedup:			ds.b 1
+zNextSound:				ds.b 1
 ; The following 3 variables are used for M68K input
-zMusicNumber:		ds.b 1	; Play_Sound
-zSFXNumber0:		ds.b 1	; Play_Sound_2
-zSFXNumber1:		ds.b 1	; Play_Sound_2
+zMusicNumber:			ds.b 1	; Play_Sound
+zSFXNumber0:			ds.b 1	; Play_Sound_2
+zSFXNumber1:			ds.b 1	; Play_Sound_2
 	shared zQueueVariables,zMusicNumber,zSFXNumber0,zSFXNumber1
 	if (zQueueVariables&1)<>0
 		fatal "zQueueVariables must be at an even address."
@@ -256,7 +269,14 @@ zSFX_PSG1:		zTrack
 zSFX_PSG2:		zTrack
 zSFX_PSG3:		zTrack
 zTracksSFXEnd:
+
+zTracksContSFXStart:
+zContSFX_FM3:		zTrack
+zContSFX_FM4:		zTrack
+zContSFX_PSG3:		zTrack
+zTracksContSFXEnd:
 		dephase
+
 		phase zTracksSFXStart
 zTracksSaveStart:
 zSaveSongDAC:	zTrack
@@ -289,6 +309,8 @@ zNumMusicFM1Tracks = (zSongFM4-zSongFM1)/zTrack.len
 zNumMusicFM2Tracks = (zSongPSG1-zSongFM4)/zTrack.len
 zNumMusicPSGTracks = (zTracksEnd-zSongPSG1)/zTrack.len
 zNumSFXTracks = (zTracksSFXEnd-zTracksSFXStart)/zTrack.len
+zNumContSFXTracks = (zTracksContSFXEnd-zTracksContSFXStart)/zTrack.len
+zNumAllSFXTracks = zNumSFXTracks + zNumContSFXTracks
 zNumSaveTracks = (zTracksSaveEnd-zTracksSaveStart)/zTrack.len
 zNumSpecialFreqCommands = zSpecialFreqCommands_End-zSpecialFreqCommands
 zNumFMInstrumentTLCommands = zFMInstrumentTLTable_End-zFMInstrumentTLTable
@@ -319,8 +341,9 @@ zID_VolEnvPointers = 6
 	enum     {fade_prefix}__First=$E1,{cmd_prefix}_FadeOut={fade_prefix}__First
 	nextenum {cmd_prefix}_MusicFade,{cmd_prefix}_Stop={cmd_prefix}_MusicFade
 	nextenum {cmd_prefix}_PSGSilenceAll,{cmd_prefix}_MutePSG={cmd_prefix}_PSGSilenceAll
-	nextenum {cmd_prefix}_StopSFX,{cmd_prefix}_zFadeOutMusic2,{cmd_prefix}_zFadeOut2
-	nextenum {fade_prefix}__End
+	nextenum {cmd_prefix}_StopSFX,{cmd_prefix}_zFadeOutMusic2
+	nextenum {cmd_prefix}_zFadeOut2={cmd_prefix}_zFadeOutMusic2
+	nextenum {cmd_prefix}_StopContSFX,{fade_prefix}__End
 {cmd_prefix}_StopSega  = $FE
 {cmd_prefix}_SegaSound = $FF
 ; ---------------------------------------------------------------------------
