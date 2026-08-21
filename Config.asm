@@ -19,42 +19,38 @@
 ; ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 ; OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ; ===========================================================================
-; ---------------------------------------------------------------------------
-; Subroutine to load the sound driver
-; ---------------------------------------------------------------------------
-SoundDriverLoad:
-SndDrvInit:
-	zHaltZ80
-	zReleaseZ80Reset
-	lea	Snd_Driver(pc),a0
-	lea	(Z80_RAM).l,a1
-	jsr	(KosDec).w
-	lea	(Z80_RAM+z80_stack).l,a1
-	moveq	#0,d1
-	move.w	#bytesToXcnt(zTracksStart-z80_stack, 8),d0
-
-.loop:
-	movep.l	d1,0(a1)
-	movep.l	d1,1(a1)
-	addq.w	#8,a1
-	dbf	d0,.loop
-	btst	#6,(Graphics_Flags).w
-	beq.s	.not_pal
-	move.b	#1,(Z80_RAM+zPalFlag).l		; set PAL mode flag
-
-.not_pal:
-	zResetZ80
-	zStartZ80
-	rts
-; End of function SndDrvInit
+; Configuration
 ; ===========================================================================
-; The driver itself
-Snd_Driver:
-	include "Sound/Z80Driver.a80"
-Snd_Driver_End:
+
 ; ---------------------------------------------------------------------------
-; DAC, music, and SFX banks.
-	include "Sound/DACBanks.asm"
-	include "Sound/SFXBanks.asm"
-	include "Sound/MusicBanks.asm"
+; Used by SMPS2ASM include file.
+SonicDriverVer			= 5
+; Set the following to non-zero to use all S2 DAC samples, or to zero otherwise.
+; The S1 samples are a subset of this.
+use_s2_samples			= 1
+; Set the following to non-zero to use all S3D DAC samples, or to zero
+; otherwise. Most of the S3D samples are also present in S3/S&K, but
+; there are two samples specific to S3D.
+use_s3d_samples			= 1
+; Set the following to non-zero to use all S3 DAC samples,
+; or to zero otherwise.
+use_s3_samples			= 1
+; Set the following to non-zero to use all S&K DAC samples,
+; or to zero otherwise.
+use_sk_samples			= 1
+; Don't define constants for DAC samples and use those from the DAC table.
+skip_sample_equates		= 1
+; ---------------------------------------------------------------------------
+; The prefixes for music, SFX, and driver command IDs.
+; For S2 use "MusID", "SndID", "FadeID", and "MusID".
+; For S3 use "mus", "sfx", "cmd", and "cmd".
+mus_prefix = "MusID"
+sfx_prefix = "SndID"
+fade_prefix = "FadeID"
+cmd_prefix = "MusID"
+; New thing in Flamedriver: play a sample as an SFX. Currently, no way to really
+; specify any, but you can specify the prefix.
+pcm_prefix = "PCMID"
+; ---------------------------------------------------------------------------
+	include "Sound/_smps2asm_inc.asm"
 ; ---------------------------------------------------------------------------

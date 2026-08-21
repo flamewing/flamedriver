@@ -19,42 +19,56 @@
 ; ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 ; OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ; ===========================================================================
-; ---------------------------------------------------------------------------
-; Subroutine to load the sound driver
-; ---------------------------------------------------------------------------
-SoundDriverLoad:
-SndDrvInit:
-	zHaltZ80
-	zReleaseZ80Reset
-	lea	Snd_Driver(pc),a0
-	lea	(Z80_RAM).l,a1
-	jsr	(KosDec).w
-	lea	(Z80_RAM+z80_stack).l,a1
-	moveq	#0,d1
-	move.w	#bytesToXcnt(zTracksStart-z80_stack, 8),d0
 
-.loop:
-	movep.l	d1,0(a1)
-	movep.l	d1,1(a1)
-	addq.w	#8,a1
-	dbf	d0,.loop
-	btst	#6,(Graphics_Flags).w
-	beq.s	.not_pal
-	move.b	#1,(Z80_RAM+zPalFlag).l		; set PAL mode flag
-
-.not_pal:
-	zResetZ80
+; ||||||||||||||| S U B R O U T I N E |||||||||||||||||||||||||||||||||||||||
+PlayMusic:
+Play_Music:
+	zStopZ80
+	move.b	d0,(Z80_RAM+zMusicNumber).l
 	zStartZ80
 	rts
-; End of function SndDrvInit
+; End of function PlayMusic
 ; ===========================================================================
-; The driver itself
-Snd_Driver:
-	include "Sound/Z80Driver.a80"
-Snd_Driver_End:
+
+; ||||||||||||||| S U B R O U T I N E |||||||||||||||||||||||||||||||||||||||
+PlaySoundLocal:
+Play_SFX_Local:
+	tst.b	render_flags(a0)
+	bpl.s	PlaySound.done
+
+PlaySoundStereo:
+Play_SFX:
+PlaySound:
+	zStopZ80
+	cmp.b	(Z80_RAM+zSFXNumber0).l,d0
+	beq.s	.startz80
+	tst.b	(Z80_RAM+zSFXNumber0).l
+	bne.s	.slot1
+	move.b	d0,(Z80_RAM+zSFXNumber0).l
+	zStartZ80
+	rts
 ; ---------------------------------------------------------------------------
-; DAC, music, and SFX banks.
-	include "Sound/DACBanks.asm"
-	include "Sound/SFXBanks.asm"
-	include "Sound/MusicBanks.asm"
-; ---------------------------------------------------------------------------
+.slot1:
+	move.b	d0,(Z80_RAM+zSFXNumber1).l
+
+.startz80:
+	zStartZ80
+
+.done:
+	rts
+; End of function PlaySound
+; ===========================================================================
+
+; =============== S U B R O U T I N E =======================================
+; Changes music tempo. This is usually either 0 (normal tempo) or 8 (speed
+; shoes tempo), but Blue Spheres uses more values.
+;
+; Input: d0 = new tempo value
+; Output: none
+Change_Music_Tempo:
+	zStopZ80
+	move.b	d0,(Z80_RAM+zTempoSpeedup).l
+	zStartZ80
+	rts
+; End of function Change_Music_Tempo
+; ===========================================================================

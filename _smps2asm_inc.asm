@@ -83,8 +83,10 @@ nMaxPSG2			EQU nB6
 				nextenum	fTone_0D
 			endif
 	endcase
+	nextenum fNumPsgVolumeEnvs
 ; ---------------------------------------------------------------------------
 ; DAC Equates
+	ifndef skip_sample_equates
 	switch SonicDriverVer
 		case 1
 			enum		dKick=$81,dSnare,dTimpani
@@ -166,6 +168,8 @@ nMaxPSG2			EQU nB6
 				nextenum	dEchoedClapHit_S3,dLowerEchoedClapHit_S3
 			endif
 	endcase
+	nextenum dNumDacSamples
+	endif
 ; ---------------------------------------------------------------------------
 ; Channel IDs for SFX
 cPSG1				EQU $80

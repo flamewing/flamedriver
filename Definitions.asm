@@ -19,42 +19,12 @@
 ; ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 ; OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ; ===========================================================================
-; ---------------------------------------------------------------------------
-; Subroutine to load the sound driver
-; ---------------------------------------------------------------------------
-SoundDriverLoad:
-SndDrvInit:
-	zHaltZ80
-	zReleaseZ80Reset
-	lea	Snd_Driver(pc),a0
-	lea	(Z80_RAM).l,a1
-	jsr	(KosDec).w
-	lea	(Z80_RAM+z80_stack).l,a1
-	moveq	#0,d1
-	move.w	#bytesToXcnt(zTracksStart-z80_stack, 8),d0
-
-.loop:
-	movep.l	d1,0(a1)
-	movep.l	d1,1(a1)
-	addq.w	#8,a1
-	dbf	d0,.loop
-	btst	#6,(Graphics_Flags).w
-	beq.s	.not_pal
-	move.b	#1,(Z80_RAM+zPalFlag).l		; set PAL mode flag
-
-.not_pal:
-	zResetZ80
-	zStartZ80
-	rts
-; End of function SndDrvInit
+; Includes
 ; ===========================================================================
-; The driver itself
-Snd_Driver:
-	include "Sound/Z80Driver.a80"
-Snd_Driver_End:
+; This should be included at the top of your disassembly file.
 ; ---------------------------------------------------------------------------
-; DAC, music, and SFX banks.
-	include "Sound/DACBanks.asm"
-	include "Sound/SFXBanks.asm"
-	include "Sound/MusicBanks.asm"
+	include "Sound/Config.asm"
+	include "Sound/Macros.asm"
+	include "Sound/Structs.asm"
+	include "Sound/Constants.asm"
 ; ---------------------------------------------------------------------------
