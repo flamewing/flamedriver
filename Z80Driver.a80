@@ -1156,12 +1156,12 @@ zPlaySFXByIndex:
 	endif
 		cp	zSFX__End						; Is this a sound effect?
 		jp	c, zPlaySound_CheckRing			; Branch if yes
-		cp	{pcm_prefix}__First
+		cp	zPCM__First
 		ret	c
-		cp	{pcm_prefix}__End
+		cp	zPCM__End
 		ret	nc
 		; "PlayVoice/PlayDACSFX" in ValleyBell's SMPS disassemblies
-		sub	{pcm_prefix}__First-1
+		sub	zPCM__First-1
 		; We should probably have a table of PCM IDs that can be used by this
 		; method and translate it here, instead of having bare PCM IDs.
 		ld	(zDACIndex), a
@@ -1194,7 +1194,7 @@ zCycleMusicQueue:
 ; TypeCheck:
 ;sub_4FB
 zPlaySoundByIndex:
-		cp	zCmd_StopSega					; Is this the SEGA sound?
+		cp	zCmd_SegaSound					; Is this the SEGA sound?
 		jp	z, zPlaySegaSound				; Branch if yes
 		cp	zMus__End						; Is this a music?
 		jp	c, zPlayMusic					; Branch if yes

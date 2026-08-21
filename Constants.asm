@@ -340,8 +340,8 @@ zSFX_RingLeft         = {sfx_prefix}_RingLeft
 zSFX_Spindash         = {sfx_prefix}_Spindash
 zPCM__First           = {pcm_prefix}__First
 zPCM__End             = {pcm_prefix}__End
-zCmd__First           = {cmd_prefix}__First
-zCmd__End             = {cmd_prefix}__End
+zCmd__First           = {fade_prefix}__First
+zCmd__End             = {fade_prefix}__End
 zCmd_StopSega         = $FE
 zCmd_SegaSound        = $FF
 	if MOMPASS>1
