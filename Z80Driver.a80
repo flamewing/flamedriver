@@ -1536,7 +1536,7 @@ zPSGInitBytes:
 ;loc_6A9
 zPlaySound:
 		sub	zSFX__First						; Make it a 0-based index
-		cp	SndID__FirstContinuous-SndID__First
+		cp	zSFX__FirstContinuous-zSFX__First
 		jr	c, .check_ring
 		ex	af, af'							; Save af
 		ld	a, flagContinuousSfxInit
