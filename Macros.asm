@@ -728,11 +728,6 @@ Gen_Sample_Table macro declsample
 		declsample $16,DAC_D8_D9_Data,dEchoedClapHit_S3
 		declsample $20,DAC_D8_D9_Data,dLowerEchoedClapHit_S3
 	endif
-	declsample $01,DAC_DA_Data,dSoftKick
-	declsample $01,DAC_DB_Data,dSnareMega
-	declsample $01,DAC_DC_Data,dKickMega
-	declsample $01,DAC_DD_Data,dScratch_Pull
-	declsample $01,DAC_DE_Data,dScratch_Push
 	endm
 ; ---------------------------------------------------------------------------
 ; MACRO Gen_Music_Table
