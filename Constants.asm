@@ -357,7 +357,7 @@ zPCM__First           = {pcm_prefix}__First
 zPCM__End             = {pcm_prefix}__End
 ; ---------------------------------------------------------------------------
 ; See definitions of fade_prefix and cmd_prefix in "Config.asm".
-	enum     {fade_prefix}__First=zPCM__End,{cmd_prefix}_FadeOut={fade_prefix}__First
+	enum     {fade_prefix}__First=zMus__End,{cmd_prefix}_FadeOut={fade_prefix}__First
 	nextenum {cmd_prefix}_MusicFade,{cmd_prefix}_Stop={cmd_prefix}_MusicFade
 	nextenum {cmd_prefix}_PSGSilenceAll,{cmd_prefix}_MutePSG={cmd_prefix}_PSGSilenceAll
 	nextenum {cmd_prefix}_StopSFX,{cmd_prefix}_zFadeOutMusic2
@@ -373,7 +373,7 @@ zCmd_StopSega         = {cmd_prefix}_StopSega
 zCmd_SegaSound        = {cmd_prefix}_SegaSound
 	if MOMPASS>1
 		if zCmd__End > zCmd_StopSega
-			fatal "You have too many SFX/PCMs. zCmd__End ($\{zCmd__End}) can't exceed zCmd_StopSega ($\{zCmd_StopSega})."
+			fatal "You have too many songs: zCmd__End ($\{zCmd__End}) can't exceed zCmd_StopSega ($\{zCmd_StopSega})."
 		endif
 	endif
 ; ---------------------------------------------------------------------------
