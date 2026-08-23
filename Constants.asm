@@ -315,19 +315,6 @@ zID_VolEnvPointers = 6
 	GenMusicIDs
 	GenSndIDs
 ; ---------------------------------------------------------------------------
-; See definitions of fade_prefix and cmd_prefix in "Config.asm".
-	enum     {fade_prefix}__First=$E1,{cmd_prefix}_FadeOut={fade_prefix}__First
-	nextenum {cmd_prefix}_MusicFade,{cmd_prefix}_Stop={cmd_prefix}_MusicFade
-	nextenum {cmd_prefix}_PSGSilenceAll,{cmd_prefix}_MutePSG={cmd_prefix}_PSGSilenceAll
-	nextenum {cmd_prefix}_StopSFX,{cmd_prefix}_zFadeOutMusic2,{cmd_prefix}_zFadeOut2
-	nextenum {fade_prefix}__End
-{cmd_prefix}_StopSega  = $FE
-{cmd_prefix}_SegaSound = $FF
-; ---------------------------------------------------------------------------
-; Definitions for playable PCMs. This needs work.
-{pcm_prefix}__First = {sfx_prefix}__End
-{pcm_prefix}__End   = {sfx_prefix}__End
-; ---------------------------------------------------------------------------
 ; Internal equates for use in the driver.
 zMus__First           = {mus_prefix}__First
 zMus_ExtraLife        = {mus_prefix}_ExtraLife
@@ -338,15 +325,32 @@ zSFX__End             = {sfx_prefix}__End
 zSFX_Ring             = {sfx_prefix}_Ring
 zSFX_RingLeft         = {sfx_prefix}_RingLeft
 zSFX_Spindash         = {sfx_prefix}_Spindash
+; ---------------------------------------------------------------------------
+; Definitions for playable PCMs. This needs work.
+{pcm_prefix}__First = zSFX__End
+{pcm_prefix}__End   = zSFX__End
+; ---------------------------------------------------------------------------
+; Internal equates for use in the driver.
 zPCM__First           = {pcm_prefix}__First
 zPCM__End             = {pcm_prefix}__End
+; ---------------------------------------------------------------------------
+; See definitions of fade_prefix and cmd_prefix in "Config.asm".
+	enum     {fade_prefix}__First=zPCM__End,{cmd_prefix}_FadeOut={fade_prefix}__First
+	nextenum {cmd_prefix}_MusicFade,{cmd_prefix}_Stop={cmd_prefix}_MusicFade
+	nextenum {cmd_prefix}_PSGSilenceAll,{cmd_prefix}_MutePSG={cmd_prefix}_PSGSilenceAll
+	nextenum {cmd_prefix}_StopSFX,{cmd_prefix}_zFadeOutMusic2,{cmd_prefix}_zFadeOut2
+	nextenum {fade_prefix}__End
+{cmd_prefix}_StopSega  = $FE
+{cmd_prefix}_SegaSound = $FF
+; ---------------------------------------------------------------------------
+; Internal equates for use in the driver.
 zCmd__First           = {fade_prefix}__First
 zCmd__End             = {fade_prefix}__End
-zCmd_StopSega         = $FE
-zCmd_SegaSound        = $FF
+zCmd_StopSega         = {cmd_prefix}_StopSega
+zCmd_SegaSound        = {cmd_prefix}_SegaSound
 	if MOMPASS>1
-		if zSFX__End > MusID_StopSFX
-			fatal "You have too many SndPtrs. MusID__End ($\{MusID__End}) can't exceed MusID_StopSFX ($\{MusID_StopSFX})."
+		if zCmd__End > zCmd_StopSega
+			fatal "You have too many SFX/PCMs. zCmd__End ($\{zCmd__End}) can't exceed zCmd_StopSega ($\{zCmd_StopSega})."
 		endif
 	endif
 ; ---------------------------------------------------------------------------
