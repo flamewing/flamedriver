@@ -23,6 +23,8 @@
 ; ===========================================================================
 
 ; ---------------------------------------------------------------------------
+; Approximate size of compressed sound driver.
+Size_of_Snd_driver_guess = $1200
 ; Used by SMPS2ASM include file.
 SonicDriverVer			= 5
 ; Set the following to non-zero to use all S2 DAC samples, or to zero otherwise.
@@ -42,6 +44,7 @@ use_sk_samples			= 1
 skip_sample_equates		= 1
 ; ---------------------------------------------------------------------------
 ; The prefixes for music, SFX, and driver command IDs.
+; For S1 use "bgm", "sfx", "cmd", and "cmd".
 ; For S2 use "MusID", "SndID", "FadeID", and "MusID".
 ; For S3 use "mus", "sfx", "cmd", and "cmd".
 mus_prefix = "MusID"

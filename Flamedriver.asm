@@ -27,20 +27,21 @@ SndDrvInit:
 	zHaltZ80
 	zReleaseZ80Reset
 	lea	Snd_Driver(pc),a0
-	lea	(Z80_RAM).l,a1
+	lea	(fZ80_RAM).l,a1
 	jsr	(KosDec).w
-	lea	(Z80_RAM+z80_stack).l,a1
+	lea	(fZ80_RAM+z80_stack).l,a1
 	moveq	#0,d1
-	move.w	#bytesToXcnt(zTracksStart-z80_stack, 8),d0
+	move.w	#(zTracksStart-z80_stack)/8-1,d0
 
 .loop:
 	movep.l	d1,0(a1)
 	movep.l	d1,1(a1)
 	addq.w	#8,a1
 	dbf	d0,.loop
-	btst	#6,(Graphics_Flags).w
+
+	btst	#6,(fHW_Version).l
 	beq.s	.not_pal
-	move.b	#1,(Z80_RAM+zPalFlag).l		; set PAL mode flag
+	move.b	#1,(fZ80_RAM+zPalFlag).l		; set PAL mode flag
 
 .not_pal:
 	zResetZ80
