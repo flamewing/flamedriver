@@ -1,0 +1,45 @@
+    	  NTSC  	  PAL
+MCLK	53693175	53203424
+68K 	 7670453	 7600489
+Z80 	 3579545	 3546894
+
+S3&K-like DAC rates
+	NTSC sample rate = 3579545 × 2 / (297 + 26 × (rate−1))
+	PAL sample rate  = 3546894 × 2 / (297 + 26 × (rate−1))
+
+
+State	Description
+A		Filling DAC buffer
+B		Keeping DAC buffer full
+C		Emptying DAC buffer
+
+State A
+	1. Read bytes from ROM into buffer
+		a. If buffer full, goto state B.X
+		b. If DAC entry was read fully, goto state C.2 with M = 256 [0]
+		c. Otherwise, loop at 1 for N bytes
+	2. Read byte to play from buffer
+	3. Play high-nibble sample
+	4. Read bytes from ROM into buffer
+		a. If buffer full, goto state B.Y
+		b. If DAC entry was read fully, goto state C.3 with M = 256 [0]
+		c. Otherwise, loop at 4 for N bytes
+	5. Play low-nibble sample
+	6. Goto item 1
+
+State B
+	1. Read byte to play from buffer
+	2. Read byte from ROM into buffer
+		a. If DAC entry was read fully, goto state C.2 with M depending on DAC sample rate (enough to last through vblank)
+	3. Play high-nibble sample
+	4. Play low-nibble sample
+	5. Goto item 1
+
+State C
+	1. Read byte to play from buffer
+	2. Play high-nibble sample
+	3. Play low-nibble sample
+		a. If M iterations have elapsed, goto state A.1 (vblank is done)
+		b. If buffer is empty, DAC sample is done, so quit
+	4. Goto item 1
+

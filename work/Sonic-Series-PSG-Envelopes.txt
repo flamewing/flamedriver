@@ -1,0 +1,38 @@
+S3K <-> SC Differences
+----------------------
+Envelope 02 is shorter in SC (S3K has 18h, SC 07h bytes)
+Envelope 03 is completely different
+
+SC has only 0Ch Envelopes, S3K has 27h
+
+
+S3K <-> S3D Differences
+-----------------------
+Envelope 04 is longer in S3D (S3K has 0Bh, S3D 23h bytes)
+Envelope 26 is shorter in S3D (S3K has 64h, S3D 62h bytes)
+S3D has an additional envelope 28
+
+
+S1 <-> S2 Differences
+---------------------
+S2 has 3 additional envelopes (S1 has 0Ah, S2 has 0Dh envelopes)
+
+
+S2 <-> S3K
+----------
+The envelopes are completely different, so they aren't compareable.
+Here is a conversion table:
+S2	S3K
+01	0A (close, but shorter and with small fade-in)
+02	02
+03	0C?
+04	27 (close)
+05	1C (close)
+06	26 (S3K one is longer)
+07	1D (S3K one is longer)
+08	1D (more is less close)
+09	08/15 (close)
+0A	-
+0B	-
+0C	-
+

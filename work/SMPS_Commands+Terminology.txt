@@ -1,0 +1,169 @@
+Commands/Coordination Flags
+---------------------------
+ID		Name			Notes
+E0		Pan				Stereo effect. Formerly Pan/AMS/FMS, but it is intended for Pan only. AMS/FMS have a separate flag.
+E1		Detune			Alters the raw frequency value sent to the chip. This allows fine steps between notes.
+E2		SetComm			Set Communication byte. Sets an often unused byte that can be used to synchronize the game with the music. (see Ristar, Round 4-1 "Du-Di-Da!!)
+E3		SilenceTrk		Mutes the Track (preventing fading sounds) and stops it then.
+E4		PanAnim			Set or disable the Pan Animation effect.
+						68k: 1 or 5 parameters. If the first parameter is nonzero, 4 additional bytes follow.
+						Z80: takes always 5 parameters.
+E5		ChgPFMVol		Changes the Track's volume by adding a value to it. Has 2 parameter bytes: volPSG and volFM
+						68k: volPSG is used on PSG tracks, volFM is used on FM tracks.
+						Z80: The track volume is changed by volPSG on PSG tracks and by (volPSG + volFM) on FM tracks.
+E6		ChgFMVol		Changes the Track's volume by adding the parameter to it. Should be used by FM tracks only.
+E7		Hold			Prevents the next note from being restarted. (also known as "No Attack")
+						In most cases, this causes a current note to be hold for a longer time.
+E8		NoteTimeout		Stops the note after a certain number of frames.
+E9		SetLFO			Enables the LFO, optionally forces Amp. Mod. Enable for all operators and sets the Amplitude and Frequency Modulation bits.
+EA		SetUpdateRate	Sets the sound driver's frame rate, based on YM2612 Timer A. [SMPS Z80 Type 1]
+						Note: This affects the speed of music and sound effects.
+EA		PlayDAC			Plays a DAC sound. [SMPS Z80 Type 2]
+EA		SetTempo		Sets the Music Tempo. [SMPS 68k]
+EB		ChgUpdateRate	Change the sound driver's frame rate by adding the parameter to the current value. [SMPS Z80 Type 1]
+EB		LoopExit		Conditional jump that is taken if the Loop Counter of the given ID is exactly 1. [SMPS Z80 Type 2]
+						Used to exit loops early during the last repeat phase.
+EB		cfQueueSound	Puts a Sound ID into the sound queue, making it play in one of the next frames. [SMPS 68k]
+EC		ChgPSGVol		Changes the Track's volume by adding the parameter to it. Should be used by PSG tracks only.
+ED		FMChnWrite		Writes data to a register of the YM2612. Depending on the current FM channel, port 0 or 1 is used.
+EE		FM1Write		Writes data to a register of the YM2612. Always uses port 0.
+EF		SetIns			Set FM Instrument
+						68k: Should not be used on PSG tracks.
+						Z80: If the instrument number is >= 80h, the instrument of another song is used.
+						     The song ID is an additional parameter. (used by Dyna Brothers 1)
+						     If the instrument number is >= 80h, the second parameter is skipped.
+F0		ModSetup		Sets the Modulation Type to 80h (custom parameters) and copies 4 parameter bytes to the track RAM that will be used for modulation.
+F1		ModTypePFM		Set the Modulation Type. Takes 2 parameters. The first one is used on PSG, the second one on FM tracks.
+F1		ModulatOn		Enables Modulation [SMPS 68k without Modulation Type]
+F2		StopTrk			Stops the track.
+F3		PSGNoise		Sends the given parameter byte to the PSG chip and puts the track into PSG Noise mode.
+						Z80: If the parameter is 00, the PSG noise mode is disabled.
+F4		ModType			Set the Modulation Type.
+F4		ModulatOff		Disables Modulation [SMPS 68k without Modulation Type]
+						For drivers with Modulation Type setting, this clears bit 7 of the Modulation Type.
+F5		SetPSGIns		Set PSG instrument
+F6		GoTo			Jump to an offset and continue reading data there.
+						68k: This is a relative pointer. It is relative to (OffsetOfPointer+1)
+						     Ristar: It is relative to (OffsetOfPointer+2)
+						Z80: The pointer is absolute.
+F7		Loop			Jumps back to an offset for a certain number of times. Nested loops are possible with varying loop indices.
+F8		GoSub			Subroutine call. Puts the current address on the track's stack and jumps to an offset.
+F9		Return			Return from Subroutine. Jumps back to the last address on the track's stack.
+FA		TickMult		Set Tick Multiplier. All notes on the current track will get multiplied with this value.
+						68k: In most cases, this doesn't affect the Note Timeout effect.
+						Z80: The value for the Note Timeout effect is multiplied with this as well.
+FB		ChgTransp		Change Transposition. Moves all following notes up or down by a given amount of semitones.
+FC		PitchSlide		Enables or disables the "Pitch Slide" effect.
+						While enabled, there is an additional "Slide Speed" byte after every note. This byte uses the scale of the E1 Detune command.
+						In every frame the note is playing, the "Slide Speed" is added to the raw note frequency.
+						This causes a raising or falling tone.
+FC		ModulatOn		Set bit 7 of the Modulation Type. [SMPS 68k with Modulation Type]
+						This enables modulation via custom parameters. (see F0 ModSetup)
+FD		RawFrqMode		Enables or disables the "Raw Frequency" mode.
+						While enabled, every note consists of 2 bytes that give the raw frequency value of the next note.
+FD		ModulatOff		Clear bit 7 of the Modulation Type. [SMPS 68k with Modulation Type]
+						If Modulation Type was 80h, this disables modulation. Else it reactivates a previously chosen Modulation Envelope.
+FE		SpcFM3Mode		Enables or disables the YM2612's Special FM3 mode. Takes a varying amount of parameters, depending on the driver version.
+FF 00	SetTempo		Sets the Music Tempo. [common in SMPS Z80]
+FF 01	PlaySnd			Puts a Sound ID into the sound queue, making it play in one of the next frames.
+FF 02	MusPause		Stops or resumes the music.
+FF 03	CopyMem			Copies a certain number of bytes into the track data.
+FF 04	TickMultAll		Set Tick Multiplier for all music tracks.
+FF 05	SSGEG			Sets the SSG-EG operators for the current channel.
+FF 06	FMVolEnv		Sets the Volume Envelope for FM channels. This uses the same envelope data as the PSG for its instruments.
+
+
+Terminology
+-----------
+Volume Envelope:	An effect that changes the volume of the current channel every frame.
+			This is often used to make PSG instruments. (formerly "Volume Flutter")
+Modulation Type:	Sort of Modulation that is enabled on the current channel.
+			This is software modulation and not to be confused with the hardware modulation with AMS/FMS that uses an LFO.
+	00 - Modulation Off
+	01-7F - Modulation Envelope (works similar to the Volume Envelope)
+	80-FF - Custom Modulation Data (set by F0 ModSetup)
+Tempo Divider/Tick Multiplier:	All notes (and Note Timeout values on all Z80 drivers and some 68k ones) are multiplies with this value.
+				Back in the days of SMPS Arcade, this controlled the music tempo.
+Pan Animation:
+	When enabled, the driver loops through a table of Stereo settings each frame or note (depending on the current setting).
+
+Tempo:	In order to get a certain tempo, the SMPS driver delays all music tracks by 1 frame after a certain amount of time.
+	There are 2 variants:
+		Variant 1:	The delay happens every N frames. (originates in preSMPS)
+		Variant 2:	On every frame the Tempo value is added to the Tempo Counter. The delay happens when it overflows, i.e. the addition results in a value >= 100h.
+
+Frame Rate vs. Tempo:
+	The frame rate is a value that determines, how often the sound driver processes all tracks.
+	This doesn't only affect the speed of the music, but the speed of the modulation effects and sound effects, too.
+	
+	For SMPS 68k and Z80 Type 2, this is once every frame (i.e. 60 times per second) and can not be changed.
+	For SMPS Z80 Type 1, this is controlled by YM2612 Timer A and it can be (and often is) changed by the songs.
+	
+	It is possible to combine Frame Rate and Tempo to get a desired music speed.
+	
+	SMPS Z80 Type 1 can be put into a mode where the music and SFX frame rate are controlled independently.
+	In this case, the music frame rate is controlled by YM2612 Timer A and the sound effect frame rate is controlled by Timer B.
+
+
+
+SMPS driver attributes
+----------------------
+Things that differ between SMPS drivers.
+
+- Pointer Format
+	68k	header: relative to song header, commands: relative to Ptr+1
+	Ristar	like 68k, but commands are relative to Ptr+2
+	Z80	absolute
+- Command Flags
+	They differ slightly in almost every SMPS driver.
+- Tempo
+	preSMPS/68k	delay on Timeout
+	Z80 Type 2	delay on overflow
+- Instrument Format/Operator Order
+	normal	40 48 44 4C
+	HW mode	40 44 48 4C
+- FM frequencies
+	68k	table begins with B [25Eh..47Ch]
+	Z80	table begins with C [284h..4C0h]
+- PSG frequencies
+	68k	table begins with C4 [356h..011h, 000h]
+	Z80	table begins with C3 [3FFh..010h, 000h]
+	68k/32x	table begins with C4 and has additional high frequencies [356h..001h, 000h]
+- Note-Rest-Delay-Delay behaviour
+	68k	plays Note Rest Rest
+	Z80	plays Note Rest Note (on all but the Drum channel, which does Note Rest Rest)
+- Modulation
+	SMPS 68k and Z80 have differently working Modulation algorithms
+- Tick Multiplier
+	68k	affects Note Length only
+	Z80	affects Note Length and Note Timeout effect
+- Envelope Multiplier
+	preSMPS	unsigned multiplier, Envelope Value is multiplied not modified if the multiplier is 0
+	68k	signed multiplier, Envelope Value can be multiplied with 0
+	Z80	unsigned multiplier, Envelope Value is multiplied with (Multiplier + 1)
+- Envelope commands
+	80h	reset envelope (jump back to index to 0, loops from the beginning)
+	81h	hold envelope (keep looping the current value) [often *v]
+	82h xx  loop envelope (jump back to index xx) [often *m]
+	83h	stop envelope and note [often *v]
+	84h xx	add xx to Envelope Multiplier *m
+	85h	preSMPS equivalent of 82h *m
+	
+	*m	Modulation Envelope only
+	*v	Volume Envelope only
+	
+	Some games use drivers with a modified set of commands:
+	    Sonic 1/2
+			80h, equals 81h
+	    OutRunners
+			83h, equals 81h
+	    Virtua Racing
+			80h, works as usual
+	    Golden Axe II, Battle Golfer Yui, MJ's Moonwalker, Nekketsu Koukou Dodgeball Bu
+			80h, works as usual
+			83h, equals 81h
+			85h, equals 82h
+- FM Volume/Operator Total Level
+    The channel volume is added to:
+	68k	"output operators" specified by a mask (based on the current Algorithm/Reg B0 setting)
+	Z80	TL values with Bit 7 (80h) set
