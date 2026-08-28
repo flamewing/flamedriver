@@ -744,95 +744,65 @@ Gen_Sample_Table macro declsample
 ; Output:
 ;    None
 Gen_Music_Table macro declsong
-	; S1 Songs
-	declsong GHZ
-	declsong LZ
-	declsong SBZ
-	; SMS Songs
-	declsong GHZSMS
-	declsong Bridge
-	declsong AquaLZ
-	; SCD Songs
-	declsong SCDPPPresent
-	declsong SCDPPPresentUS
-	declsong SCDCCPresent
-	declsong SCDCCGF
-	declsong SCDTTPresent
-	declsong SCDTTGF
-	declsong SCDSpStage
-	declsong SCDSpStageUS
-	declsong SCDQQPast
-	declsong SCDQQPresent
-	declsong SCDSSPast
-	declsong SCDSSPresent
-	declsong SCDMMPresent
-	declsong SCDMMGF
-	; S2 Songs
-	declsong EHZ
-	declsong EHZ_2P
-	declsong CPZ
-	declsong ARZ
-	declsong HTZ
-	declsong MCZ
-	declsong MCZ_2P
-	declsong HPZ
-	declsong SCZ
-	declsong WFZ
-	; S3&K Songs
-	declsong ALZ
-	declsong AIZ1
-	declsong AIZ2
-	declsong HCZ1
-	declsong HCZ2
-	declsong CNZ1
-	declsong CNZ2
-	declsong ICZ1
-	declsong ICZ2
-	declsong LBZ1
-	declsong LBZ2
-	declsong SOZ1
-	declsong SOZ2
-	declsong LRZ2
-	declsong SSZ
-	declsong DDZ
-	declsong FinalBoss
-	; S3D Songs
-	declsong GrGZ1
-	declsong GrGZ2
-	declsong RRZ1
-	declsong RRZ2
-	declsong DiDZ1
-	declsong VVZ2
-	declsong SpSZ1
-	declsong SpSZ2
-	declsong GeGZ1
-	declsong GeGZ2
-	declsong PanPZ1
-	declsong PanPZ2
-	; S4 Songs
-	declsong SylvaniaCastle1
-	declsong SylvaniaCastle3
-	declsong SkyFortress2
-	; Advance Songs
-	declsong NeoGreenHill
-	declsong IceParadise
-	; Extra songs
-	declsong Emerald
-	declsong Invincible
-	declsong BFD_BigInv
-	declsong BFD_EggInv
-	declsong BFD_NeuInv
-	declsong SuperSonic
-	declsong ExtraLife
-	declsong Miniboss
-	declsong ZoneBoss
-	declsong GameOver
-	; Interface Songs
-	declsong BigTheme
-	declsong Title
-	declsong 2PMenu
-	declsong Results2p
-	declsong Credits
+		declsong AIZ1
+		declsong AIZ2
+		declsong HCZ1
+		declsong HCZ2
+		declsong MGZ1
+		declsong MGZ2
+		declsong CNZ1
+		declsong CNZ2
+		declsong FBZ1
+		declsong FBZ2
+		declsong ICZ1
+		declsong ICZ2
+		declsong LBZ1
+		declsong LBZ2
+		declsong MHZ1
+		declsong MHZ2
+
+		declsong SOZ1
+		declsong SOZ2
+		declsong LRZ1
+		declsong LRZ2
+		declsong SSZ
+		declsong DEZ1
+		declsong DEZ2
+		declsong Minib_SK
+		declsong Boss
+		declsong DDZ
+		declsong PachBonus
+		declsong SpecialS
+		declsong SlotBonus
+		declsong GumBonus
+		declsong Knux
+		declsong ALZ
+
+		declsong BPZ
+		declsong DPZ
+		declsong CGZ
+		declsong EMZ
+		declsong Title
+		declsong S3Credits
+		declsong GameOver
+		declsong Continue
+		declsong Results
+		declsong 1UP
+		declsong Emerald
+		declsong Invic
+		declsong 2PMenu
+	if SonicDriverVer==3
+		declsong Minib
+	else
+		declsong Minib_SK
+	endif
+		declsong Menu
+		declsong FinalBoss
+		declsong Drown
+		declsong PresSega
+	if SonicDriverVer<>3
+		declsong SKCredits
+	endif
 	endm
 ; ---------------------------------------------------------------------------
 ; MACRO Gen_Sound_Table
