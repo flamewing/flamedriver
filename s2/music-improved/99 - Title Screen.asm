@@ -31,7 +31,6 @@ Title_screen_FM1:
 ; FM2 Data
 Title_screen_FM2:
 	smpsSetvoice        $03
-	smpsNop             $01
 	dc.b	nRst, $30, nA3, $06, nRst, nA3, nRst, nE3, nRst, nE3, nRst, nG3
 	dc.b	$12, nB3, nD4, $0C, nA3, $06, nRst, nA3, nRst, nE3, nRst, nE3
 	dc.b	nRst, nD4, $12, nCs4, nB3, $0C, nRst, nA3, nRst, nA3, nRst, $06
@@ -39,7 +38,6 @@ Title_screen_FM2:
 	smpsSetvoice        $01
 	smpsAlterVol        $02
 	dc.b	nA2, $6C
-	smpsNop             $01
 	smpsStop
 
 ; FM3 Data

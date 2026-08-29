@@ -209,7 +209,7 @@ Snd_SKCredits_Call01:
 	dc.b	$04, nRst, $02, nF4, $0A, nRst, $02, nEb4, $04, nRst, $08, nAb4
 	dc.b	$04, nRst, $0E, nC5, $04, nRst, $08, nC5, $04, nRst, $08, nC5
 	dc.b	$04, nRst, $02, nC5, $0A, nRst, $02, nB4, $04, $F9
-	
+
 ; FM2 Data
 Snd_SKCredits_FM2:
 	smpsSetvoice        $1F
@@ -1088,7 +1088,7 @@ Snd_SKCredits_Loop34:
 
 ; DAC Data
 Snd_SKCredits_DAC:
-	smpsFade            $00
+	smpsSetCommByte     $00
 	dc.b	nRst, $02, dElectricHighTom, $04, $04, $04, dElectricMidTom, $05, dElectricMidTom, $06, dElectricLowTom, nRst
 	dc.b	nRst, nRst, $05, dCrashCymbal, $12, dKickS3, dKickS3, $18, $06, $06, dSnareS3, $0C
 	dc.b	dCrashCymbal, nRst, dKickS3, nRst, $06, dKickS3, nRst, $0C, dKickS3, $18, dSnareS3, dCrashCymbal
@@ -1199,7 +1199,7 @@ Snd_SKCredits_Loop06:
 	dc.b	$06, $06, nRst, nRst, dKickS3, $18, dSnareS3, dKickS3, $06, dKickS3, dKickS3, $0C
 	dc.b	dSnareS3, $18, dKickS3, $18, dSnareS3, $12, dKickS3, $06, dKickS3, dKickS3, dKickS3, $0C
 	dc.b	dSnareS3, dCrashCymbal, $60, nRst, $60
-	smpsFade            $01
+	smpsSetCommByte     $01
 	smpsStop
 
 Snd_SKCredits_Voices:

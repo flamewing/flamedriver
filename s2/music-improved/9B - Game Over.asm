@@ -44,12 +44,10 @@ GOver_FM3:
 ; FM4 Data
 GOver_FM4:
 	smpsSetvoice        $02
-	smpsNop             $01
 	dc.b	nA3, $06, nRst, nA3, nRst, nE3, nRst, nE3, nRst, nG3, $15, nFs3
 	dc.b	$0C, nG3, $03, nFs3, $0C, nA3, $06, nRst, nA3, nRst, nE3, nRst
 	dc.b	nE3, nRst, nD4, $15, nCs4, $0C, nD4, $03, nCs4, $0C, nA3, $04
 	dc.b	nRst, nA3, nAb3, $06, nRst, nG3, nRst, nFs3, nRst, nFs3, $60
-	smpsNop             $01
 	smpsStop
 
 ; FM5 Data

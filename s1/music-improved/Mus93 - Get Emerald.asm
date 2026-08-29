@@ -61,7 +61,6 @@ Mus93_Get_Emerald_Loop01:
 
 ; PSG1 Data
 Mus93_Get_Emerald_PSG1:
-	smpsNop             $01
 	dc.b	nRst, $02, nRst, $2D
 
 Mus93_Get_Emerald_Loop00:
@@ -73,7 +72,6 @@ Mus93_Get_Emerald_Loop00:
 Mus93_Get_Emerald_DAC:
 ; PSG3 Data
 Mus93_Get_Emerald_PSG3:
-	smpsNop             $01
 	smpsStop
 
 Mus93_Get_Emerald_Voices:

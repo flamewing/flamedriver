@@ -36,11 +36,9 @@ ExtraLife_Jump01:
 ExtraLife_FM2:
 	smpsSetvoice        $01
 	smpsNoteFill        $06
-	smpsNop             $01
 	dc.b	nCs7, $06, $03, $03, $06, $06
 	smpsNoteFill        $00
 	dc.b	nD7, $09, nB6, nA6, $06, nCs7, $18
-	smpsNop             $01
 	smpsStop
 
 ; FM5 Data

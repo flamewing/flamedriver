@@ -33,7 +33,7 @@ Continue_FM2:
 	smpsSetvoice        $01
 	smpsAlterVol        $02
 	smpsAlterPitch      $F4
-	smpsNop             $01
+	smpsSetCommByte     $01
 	dc.b	nA5, $0C, nAb5, nG5, nFs5
 	smpsAlterVol        $FE
 	smpsAlterPitch      $0C
@@ -47,7 +47,7 @@ Continue_Loop03:
 	smpsAlterPitch      $FD
 	dc.b	nB4, $06, nRst, nB4, nRst, nFs4, nRst, nFs4, nRst, nE5, $0C, nRst
 	dc.b	$06, nEb5, $4E
-	smpsNop             $01
+	smpsSetCommByte     $01
 	smpsStop
 
 ; FM3 Data

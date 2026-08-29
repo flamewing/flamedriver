@@ -61,7 +61,7 @@ Emerald_Loop01:
 
 ; PSG1 Data
 Emerald_PSG1:
-	smpsNop             $01
+	smpsSetCommByte     $01
 	dc.b	nRst, $02, nRst, $2D
 
 Emerald_Loop00:
@@ -73,7 +73,7 @@ Emerald_Loop00:
 Emerald_DAC:
 ; PSG3 Data
 Emerald_PSG3:
-	smpsNop             $01
+	smpsSetCommByte     $01
 	smpsStop
 
 Emerald_Voices:

@@ -14,7 +14,6 @@ Mus92_Drowning_Header:
 ; FM1 Data
 Mus92_Drowning_FM1:
 	smpsSetvoice        $00
-	smpsNop             $01
 	smpsNoteFill        $05
 	smpsCall            Mus92_Drowning_Call01
 	smpsSetTempoMod     $03
@@ -26,7 +25,6 @@ Mus92_Drowning_FM1:
 	smpsSetTempoMod     $0A
 	smpsCall            Mus92_Drowning_Call01
 	dc.b	nC5, $06
-	smpsNop             $01
 	smpsStop
 
 ; FM2 Data

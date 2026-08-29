@@ -1004,7 +1004,6 @@ Snd_SKCredits_Loop20:
 
 ; DAC Data
 Snd_SKCredits_DAC:
-	smpsFade            $00
 	dc.b	nRst, $02, dElectricHighTom, $04, $04, $04, dElectricMidTom, $05, dElectricMidTom, $06, dElectricLowTom, nRst
 	dc.b	nRst, nRst, $05, dCrashCymbal, $12, dKickS3, dKickS3, $18, $06, $06, dSnareS3, $0C
 	dc.b	dCrashCymbal, nRst, dKickS3, nRst, $06, dKickS3, nRst, $0C, dKickS3, $18, dSnareS3, dCrashCymbal
@@ -1115,7 +1114,6 @@ Snd_SKCredits_Loop06:
 	dc.b	$06, $06, nRst, nRst, dKickS3, $18, dSnareS3, dKickS3, $06, dKickS3, dKickS3, $0C
 	dc.b	dSnareS3, $18, dKickS3, $18, dSnareS3, $12, dKickS3, $06, dKickS3, dKickS3, dKickS3, $0C
 	dc.b	dSnareS3, dCrashCymbal, $60, nRst, $60
-	smpsFade            $01
 	smpsStop
 
 Snd_SKCredits_Voices:

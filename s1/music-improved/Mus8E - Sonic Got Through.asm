@@ -30,12 +30,10 @@ Mus8E_Sonic_Got_Through_PSG1:
 Mus8E_Sonic_Got_Through_FM2:
 	smpsSetvoice        $01
 	smpsNoteFill        $0B
-	smpsNop             $01
 	dc.b	nG5, $03, nG5, nG4, $06, nG4, nG5, $03, nG5, nG4, $06, nG4
 	dc.b	nG5, $03, nG5, nRst, $06, nRst, $0C, nG4, $09
 	smpsNoteFill        $00
 	dc.b	nA4, $33
-	smpsNop             $01
 	smpsStop
 
 ; FM3 Data

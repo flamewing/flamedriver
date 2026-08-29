@@ -37,7 +37,7 @@ Invincible_Loop07:
 
 ; FM2 Data
 Invincible_FM2:
-	smpsNop             $01
+	smpsSetCommByte     $01
 	smpsSetvoice        $01
 	dc.b	nRst, $30
 
@@ -52,7 +52,7 @@ Invincible_Loop06:
 	smpsLoop            $00, $02, Invincible_Loop06
 	dc.b	nA2, $0C, nB2, nCs3, nEb3, nB2, $06, nCs3, nEb3, nF3, nCs3, nEb3
 	dc.b	nF3, nFs3
-	smpsNop             $01
+	smpsSetCommByte     $01
 	smpsJump            Invincible_Loop05
 
 ; FM3 Data

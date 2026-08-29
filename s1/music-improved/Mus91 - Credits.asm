@@ -16,7 +16,6 @@ Mus91_Credits_Header:
 
 ; FM1 Data
 Mus91_Credits_FM1:
-	smpsNop             $01
 	dc.b	nRst, $60
 	smpsSetvoice        $1C
 	smpsAlterVol        $F8
@@ -34,7 +33,6 @@ Mus91_Credits_FM1:
 	dc.b	$0C, nF5, $18, nA5, $0C, nG5, $18, nA5, $0C, nG5, $18, nC5
 	dc.b	$24, nRst, $60, nRst, nRst, nRst
 	smpsModOff
-	smpsNop             $01
 	smpsSetTempoMod     $0F
 	smpsSetvoice        $05
 	smpsAlterVol        $02
@@ -52,16 +50,13 @@ Mus91_Credits_FM1:
 	dc.b	nRst, $0C, nG5, nA5, nG6
 	smpsCall            Mus91_Credits_Call0D
 	dc.b	nE6, $1E, nE7, $06, nC7, $18, nRst, $24
-	smpsNop             $01
 	smpsSetTempoMod     $0A
 	smpsSetvoice        $0F
 	smpsAlterPitch      $0C
 	smpsAlterVol        $0B
 	smpsCall            Mus91_Credits_Call0E
-	smpsNop             $01
 	smpsSetTempoMod     $07
 	dc.b	nRst, $60
-	smpsNop             $01
 	smpsSetTempoMod     $03
 	dc.b	nRst, $30
 	smpsSetvoice        $17
@@ -70,7 +65,6 @@ Mus91_Credits_FM1:
 	dc.b	nRst, nC6, $04, nA5, nRst, $02, nBb5, nRst, $04, nBb5, $08, nC6
 	dc.b	$03, nRst, nBb5, nRst, nA5, $04, nBb5, nRst, $02, nC6, $0E, nRst
 	dc.b	$06, nE6, $02, nRst, $04, nE6, $0C, nF6, nE6, $0A, nD6, $02
-	smpsNop             $01
 	smpsSetTempoMod     $04
 	smpsAlterVol        $F5
 	smpsSetvoice        $1A
@@ -85,7 +79,6 @@ Mus91_Credits_FM1:
 	smpsSetvoice        $1B
 	smpsAlterNote       $02
 	dc.b	nA1, $6C, smpsNoAttack, $60
-	smpsNop             $01
 	smpsStop
 
 Mus91_Credits_Call12:
