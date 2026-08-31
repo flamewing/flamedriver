@@ -14,29 +14,41 @@ Credits_Header:
 	smpsHeaderPSG       Credits_PSG2,	$DC, $07, $00, fTone_0B
 	smpsHeaderPSG       Credits_PSG3,	$00, $02, $00, fTone_03
 
+; Section boundaries are marked per channel. Adjacent labels mean that a
+; sustained or repeated passage crosses a boundary without a unique source position.
+
 ; FM1 Data
 Credits_FM1:
+	; Credits intro
 	smpsAlterPitch      $F4
 	smpsAlterVol        $FE
 	smpsCall            Credits_Call03
 	smpsAlterPitch      $0C
 	smpsAlterVol        $02
 
+	; Metropolis Zone
 Credits_Loop24:
 	dc.b	nRst, $30
 	smpsLoop            $00, $08, Credits_Loop24
+
+	; Emerald Hill Zone
 	smpsSetvoice        $03
 	smpsCall            Credits_Call21
 	dc.b	nA3, $06, nA2
 	smpsCall            Credits_Call21
 	smpsAlterVol        $FD
 
+	; Chemical Plant Zone
 Credits_Loop25:
 	smpsSetvoice        $00
 	dc.b	nFs4, $06, nA4
 	smpsCall            Credits_Call22
 	smpsLoop            $00, $02, Credits_Loop25
+
+	; Transition: Chemical Plant Zone to Mystic Cave Zone (2-player)
 	dc.b	nRst, $06, nRst, nRst, $30, nRst
+
+	; Mystic Cave Zone (2-player)
 	smpsSetvoice        $0B
 	smpsAlterPitch      $18
 	smpsAlterVol        $02
@@ -45,7 +57,11 @@ Credits_Loop26:
 	dc.b	nG1, $0C, nD1, nF1, nD1, $06, nG1, $05, nG1, $07, $06, nD1
 	dc.b	$0C, nF1, nD1
 	smpsLoop            $00, $05, Credits_Loop26
+
+	; Transition: Mystic Cave Zone (2-player) to Aquatic Ruin Zone
 	dc.b	nRst, $30, nRst
+
+	; Aquatic Ruin Zone
 	smpsSetvoice        $0E
 	smpsAlterVol        $FF
 	smpsAlterPitch      $E8
@@ -56,13 +72,18 @@ Credits_Loop26:
 	smpsCall            Credits_Call23
 	dc.b	nRst, $12, nE2, nCs2, $08, nRst, $16, nA1, $12, nE2, $08, nRst
 	dc.b	$04
+
+	; Mystic Cave Zone
 	smpsSetvoice        $12
 	smpsModSet          $18, $01, $0A, $04
 	dc.b	nRst, $30, nRst
 	smpsCall            Credits_Call24
 	dc.b	smpsNoAttack, $24, smpsNoAttack, nAb5, $01, smpsNoAttack, nG5, smpsNoAttack, nFs5, smpsNoAttack, nF5, smpsNoAttack
 	dc.b	nE5, smpsNoAttack, nEb5, smpsNoAttack, nD5, smpsNoAttack, nCs5, smpsNoAttack, nC5, smpsNoAttack, nB4, smpsNoAttack
-	dc.b	nBb4, smpsNoAttack, nA4, nRst, $60
+	dc.b	nBb4, smpsNoAttack, nA4
+
+	; Transition: Mystic Cave Zone to Emerald Hill Zone (2-player)
+	dc.b	nRst, $60
 	smpsSetvoice        $01
 	smpsAlterPitch      $F4
 	smpsAlterVol        $FA
@@ -71,6 +92,8 @@ Credits_Loop26:
 	dc.b	nC4, $03
 	smpsCall            Credits_Call25
 	dc.b	nRst, $03, nRst, $60
+
+	; Emerald Hill Zone (2-player)
 	smpsAlterVol        $04
 	smpsAlterNote       $01
 	smpsSetvoice        $1B
@@ -103,7 +126,12 @@ Credits_Loop26:
 	smpsNoteFill        $06
 	dc.b	nF5, $06, nF5, nRst, nF5, nRst, nF5
 	smpsNoteFill        $00
-	dc.b	nFs5, $0C, nG5, $06, nRst, nRst, $24, nRst, $30, nRst
+	dc.b	nFs5, $0C, nG5, $06, nRst
+
+	; Transition: Emerald Hill Zone (2-player) to Hill Top Zone
+	dc.b	nRst, $24, nRst, $30, nRst
+
+	; Hill Top Zone
 	smpsSetvoice        $1F
 	smpsAlterPitch      $18
 	smpsAlterVol        $F7
@@ -121,7 +149,12 @@ Credits_Loop26:
 	smpsAlterPitch      $F4
 	smpsSetvoice        $00
 	dc.b	nRst, $06, nBb3, $12, nA3, $06, nRst, $12, nBb3, $06, nRst, nA3
-	dc.b	nRst, nBb3, nC4, nRst, nC4, nRst, $30, nRst
+	dc.b	nRst, nBb3, nC4, nRst, nC4
+
+	; Transition: Hill Top Zone to Casino Night Zone
+	dc.b	nRst, $30, nRst
+
+	; Casino Night Zone
 	smpsSetvoice        $21
 	smpsAlterPitch      $0C
 	dc.b	nRst, $30, nRst, $08, nG2, $04, nF2, $0C, nE2, nD2, nC2, $08
@@ -138,6 +171,8 @@ Credits_Loop26:
 	smpsAlterVol        $FC
 	smpsCall            Credits_Call26
 	dc.b	nF2, $08, nC2, $04
+
+	; Credits outro
 	smpsSetvoice        $23
 	smpsAlterPitch      $E8
 	smpsAlterVol        $07
@@ -222,6 +257,7 @@ Credits_Call03:
 
 ; FM2 Data
 Credits_FM2:
+	; Credits intro
 	dc.b	nRst, $60
 	smpsSetvoice        $01
 	smpsNoteFill        $06
@@ -245,6 +281,8 @@ Credits_Loop19:
 	smpsAlterVol        $FC
 	dc.b	nA0, nBb0, nB0
 	smpsAlterVol        $04
+
+	; Metropolis Zone
 	smpsNoteFill        $09
 
 Credits_Loop1A:
@@ -261,12 +299,16 @@ Credits_Loop1B:
 	smpsNoteFill        $00
 	dc.b	nA0, $0C, nBb0, nB0
 	smpsAlterPitch      $E8
+
+	; Emerald Hill Zone
 	smpsAlterVol        $0C
 	smpsSetvoice        $04
 
 Credits_Loop1C:
 	smpsCall            Credits_Call14
 	smpsLoop            $00, $02, Credits_Loop1C
+
+	; Chemical Plant Zone
 	smpsAlterVol        $F9
 	smpsSetvoice        $08
 
@@ -287,10 +329,16 @@ Credits_Loop1F:
 	dc.b	nEb2, $04, nRst, $08, nEb2, $0C
 	smpsLoop            $00, $02, Credits_Loop1F
 	smpsLoop            $01, $02, Credits_Loop20
+
+	; Transition: Chemical Plant Zone to Mystic Cave Zone (2-player)
+	; Mystic Cave Zone (2-player)
 	dc.b	nRst, $60, nRst, $48
 	smpsSetvoice        $0C
 	smpsAlterVol        $13
 	smpsCall            Credits_Call06
+
+	; Transition: Mystic Cave Zone (2-player) to Aquatic Ruin Zone
+	; Aquatic Ruin Zone
 	dc.b	$24, nRst, $60
 	smpsSetvoice        $0F
 	smpsAlterVol        $F3
@@ -298,6 +346,8 @@ Credits_Loop1F:
 	smpsCall            Credits_Call16
 	dc.b	nG5, $18, nFs5, $30, smpsNoAttack, $18, nRst, $0C
 	smpsCall            Credits_Call16
+
+	; Mystic Cave Zone
 	dc.b	nCs5
 	smpsSetvoice        $13
 	smpsAlterVol        $F5
@@ -310,6 +360,8 @@ Credits_Loop21:
 	smpsCall            Credits_Call1C
 	dc.b	nEb3, $08, nE3, $04, nRst, $18
 	smpsLoop            $00, $02, Credits_Loop21
+
+	; Transition: Mystic Cave Zone to Emerald Hill Zone (2-player)
 	dc.b	nRst, $60
 	smpsSetvoice        $17
 	smpsAlterNote       $02
@@ -322,6 +374,8 @@ Credits_Loop21:
 	smpsAlterNote       $00
 	smpsNoteFill        $06
 	dc.b	nRst, $3C, nG4, $06, $06, nA4, nC5, nC5, nA4
+
+	; Emerald Hill Zone (2-player)
 	smpsSetvoice        $1D
 	smpsAlterVol        $FA
 	smpsNoteFill        $00
@@ -332,7 +386,11 @@ Credits_Loop21:
 	smpsSetvoice        $1C
 	dc.b	nC5
 	smpsSetvoice        $1D
+
+	; Transition: Emerald Hill Zone (2-player) to Hill Top Zone
 	smpsCall            Credits_Call1E
+
+	; Hill Top Zone
 	dc.b	nRst, $30, nRst
 	smpsSetvoice        $01
 	smpsAlterPitch      $18
@@ -344,6 +402,9 @@ Credits_Loop22:
 	dc.b	nA1, $0C, nA2, $06, nRst, nBb1, $0C, nBb2, $06, nRst, nB1, $0C
 	dc.b	nB2, $06, nRst
 	smpsLoop            $00, $02, Credits_Loop22
+
+	; Transition: Hill Top Zone to Casino Night Zone
+	; Casino Night Zone
 	dc.b	nRst, $60
 	smpsSetvoice        $22
 	smpsAlterPitch      $E8
@@ -363,6 +424,8 @@ Credits_Loop22:
 	dc.b	nD4, $0C
 	smpsAlterVol        $FC
 	smpsCall            Credits_Call1F
+
+	; Credits outro
 	dc.b	nD4, $14, nC4, $04
 	smpsAlterVol        $FF
 	smpsSetvoice        $24
@@ -443,13 +506,18 @@ Credits_Call1A:
 
 ; FM3 Data
 Credits_FM3:
+	; Credits intro
 	dc.b	nRst, $60
 	smpsCall            Credits_Call0C
+
+	; Metropolis Zone
 	smpsAlterPitch      $18
 	smpsSetvoice        $02
 	smpsCall            Credits_Call13
 	dc.b	nG4, $3C
 	smpsCall            Credits_Call13
+
+	; Emerald Hill Zone
 	dc.b	nC5, $3C
 	smpsAlterPitch      $E8
 	smpsAlterVol        $02
@@ -460,6 +528,8 @@ Credits_FM3:
 Credits_Loop12:
 	smpsCall            Credits_Call14
 	smpsLoop            $00, $02, Credits_Loop12
+
+	; Chemical Plant Zone
 	smpsSetvoice        $09
 	smpsAlterPitch      $0C
 	smpsAlterVol        $FD
@@ -474,6 +544,9 @@ Credits_Loop13:
 	dc.b	nE2, $0C, nE3, $06, nRst, nEb3, nRst, nE3, nEb2, nRst, nEb2, nEb3
 	dc.b	nRst, nCs3, nRst, nEb3, $0C
 	smpsLoop            $01, $02, Credits_Loop13
+
+	; Transition: Chemical Plant Zone to Mystic Cave Zone (2-player)
+	; Mystic Cave Zone (2-player)
 	dc.b	nRst, $60
 	smpsSetvoice        $0D
 	smpsAlterVol        $FB
@@ -483,7 +556,11 @@ Credits_Loop13:
 
 Credits_Loop14:
 	smpsCall            Credits_Call15
+
+	; Transition: Mystic Cave Zone (2-player) to Aquatic Ruin Zone
 	smpsLoop            $00, $02, Credits_Loop14
+
+	; Aquatic Ruin Zone
 	dc.b	nRst, $60
 	smpsSetvoice        $0F
 	smpsPan             panLeft, $00
@@ -491,6 +568,8 @@ Credits_Loop14:
 	smpsCall            Credits_Call16
 	dc.b	nG5, $18, nFs5, $48, nRst, $0C
 	smpsCall            Credits_Call16
+
+	; Mystic Cave Zone
 	dc.b	nCs5, $0C
 	smpsModSet          $18, $01, $03, $04
 	smpsAlterVol        $F3
@@ -502,6 +581,8 @@ Credits_Loop14:
 Credits_Loop15:
 	dc.b	nRst, $30
 	smpsLoop            $00, $0A, Credits_Loop15
+
+	; Transition: Mystic Cave Zone to Emerald Hill Zone (2-player)
 	smpsSetvoice        $18
 	smpsAlterPitch      $F4
 	smpsAlterVol        $08
@@ -509,6 +590,8 @@ Credits_Loop15:
 	smpsPan             panRight, $00
 	dc.b	nRst, $60, nRst, $30, nA5, $06, nRst, nF5, $0C, nG5, $09, nF5
 	dc.b	$03, nD5, $0C, nRst, $60, nRst, $3C, nRst, $60
+
+	; Emerald Hill Zone (2-player)
 	smpsSetvoice        $1B
 	smpsAlterVol        $FB
 	smpsPan             panCenter, $00
@@ -532,14 +615,21 @@ Credits_Loop15:
 	dc.b	nE6, $0C
 	smpsNoteFill        $06
 	dc.b	nC6, $06, nA5, nC6, $0C
+
+	; Transition: Emerald Hill Zone (2-player) to Hill Top Zone
 	smpsNoteFill        $00
 	smpsSetvoice        $1C
 	dc.b	nRst, $1E, nF5, $0C, nF5, nC5, $06, nRst, $60, nRst, $60
+
+	; Hill Top Zone
 	smpsSetvoice        $00
 	smpsAlterPitch      $18
 	dc.b	nRst, $60, nRst, $0C, nG3, $06, nA3, nC4, nRst, $12, nG3, $06
 	dc.b	nA3, nC4, nRst, nEb4, nC4, nRst, nC4, nRst, $60, nRst, $06, nBb3
 	dc.b	$12, nA3, $06, nRst, $12, nBb3, $06, nRst, nA3, nRst, nBb3, nC4
+
+	; Transition: Hill Top Zone to Casino Night Zone
+	; Casino Night Zone
 	dc.b	nRst, nC4, nRst, $60
 	smpsSetvoice        $22
 	smpsAlterPitch      $DC
@@ -553,6 +643,8 @@ Credits_Loop15:
 	smpsCall            Credits_Call18
 	smpsAlterVol        $FC
 	dc.b	nRst, nG5, nRst, nG5, nRst, nA5, $18, $08, nG5, $04
+
+	; Credits outro
 	smpsAlterPitch      $0C
 	smpsAlterVol        $FF
 	smpsPan             panCenter, $00
@@ -612,16 +704,21 @@ Credits_Call0C:
 
 ; FM4 Data
 Credits_FM4:
+	; Credits intro
 	dc.b	nRst, $60
 	smpsAlterPitch      $FB
 	smpsAlterVol        $FE
 	smpsCall            Credits_Call0C
+
+	; Metropolis Zone
 	smpsAlterPitch      $1D
 	smpsAlterVol        $02
 	smpsSetvoice        $02
 	smpsCall            Credits_Call0D
 	dc.b	nE4, $3C
 	smpsCall            Credits_Call0D
+
+	; Emerald Hill Zone
 	dc.b	nG4, $3C
 	smpsAlterVol        $06
 	smpsSetvoice        $05
@@ -631,6 +728,8 @@ Credits_Loop0D:
 	dc.b	nE5, $30, smpsNoAttack, $30, nFs5, smpsNoAttack, $30, nD5, smpsNoAttack, $30, nC5, smpsNoAttack
 	dc.b	$30
 	smpsLoop            $00, $02, Credits_Loop0D
+
+	; Chemical Plant Zone
 	smpsSetvoice        $0A
 	smpsAlterPitch      $F4
 	smpsAlterVol        $F7
@@ -643,6 +742,9 @@ Credits_Loop0E:
 	smpsCall            Credits_Call0E
 	dc.b	nRst, $31, nRst, $60
 	smpsLoop            $00, $02, Credits_Loop0E
+
+	; Transition: Chemical Plant Zone to Mystic Cave Zone (2-player)
+	; Mystic Cave Zone (2-player)
 	dc.b	nRst, $60, nRst, $48
 	smpsSetvoice        $0C
 	smpsAlterVol        $05
@@ -650,6 +752,9 @@ Credits_Loop0E:
 	smpsAlterNote       $02
 	smpsPan             panLeft, $00
 	smpsCall            Credits_Call06
+
+	; Transition: Mystic Cave Zone (2-player) to Aquatic Ruin Zone
+	; Aquatic Ruin Zone
 	dc.b	$24, nRst, $0C, nRst, $60
 	smpsSetvoice        $10
 	smpsAlterVol        $F7
@@ -658,6 +763,8 @@ Credits_Loop0E:
 	smpsCall            Credits_Call0F
 	dc.b	nD4, nFs4, $06, nA3, $0C, nC4, nD4, nFs4, $06, nRst, nFs4, nA3
 	dc.b	$0C, nC4
+
+	; Mystic Cave Zone
 	smpsCall            Credits_Call0F
 	smpsSetvoice        $15
 	smpsAlterVol        $01
@@ -672,6 +779,8 @@ Credits_Loop0F:
 	smpsSetvoice        $16
 	dc.b	nRst, $30, nRst, $06, nA4, $08, nAb4, $04, nG4, $08, nFs4, $04
 	dc.b	nF4, $08, nE4, $04
+
+	; Transition: Mystic Cave Zone to Emerald Hill Zone (2-player)
 	smpsLoop            $00, $02, Credits_Loop0F
 	dc.b	nRst, $60
 	smpsSetvoice        $17
@@ -683,6 +792,8 @@ Credits_Loop0F:
 Credits_Loop10:
 	smpsCall            Credits_Call10
 	smpsLoop            $00, $02, Credits_Loop10
+
+	; Emerald Hill Zone (2-player)
 	dc.b	nRst, $60
 	smpsSetvoice        $1E
 	smpsPan             panRight, $00
@@ -701,7 +812,11 @@ Credits_Loop10:
 	smpsSetvoice        $1E
 	smpsPan             panRight, $00
 	dc.b	nF5, $06, $12, $18, nG5, $06, $12, $18, nE5, $06, $12, $18
+
+	; Transition: Emerald Hill Zone (2-player) to Hill Top Zone
 	dc.b	nG5, $06, $12, $0C
+
+	; Hill Top Zone
 	smpsSetvoice        $1A
 	smpsPan             panCenter, $00
 	smpsAlterPitch      $0C
@@ -719,6 +834,9 @@ Credits_Loop10:
 	smpsPan             panCenter, $00
 	smpsNoteFill        $00
 	dc.b	nEb4, $03, smpsNoAttack, nF4, $5D, nD4, $03, smpsNoAttack, nE4, $5D, nC4, $03
+
+	; Transition: Hill Top Zone to Casino Night Zone
+	; Casino Night Zone
 	dc.b	smpsNoAttack, nD4, $5D, nD4, $03, smpsNoAttack, nE4, $5D, nRst, $60
 	smpsSetvoice        $22
 	smpsPan             panRight, $00
@@ -730,6 +848,8 @@ Credits_Loop10:
 	dc.b	nE5, nRst, nE5, nRst, nF5, nRst, nF5
 	smpsAlterVol        $04
 	dc.b	nRst, nE5, nRst, nE5, nRst, nF5, nRst, nF5
+
+	; Credits outro
 	smpsAlterVol        $FC
 	dc.b	nRst, nE5, nRst, nE5, nRst, nF5, $18, $08, nE5, $04
 	smpsAlterPitch      $0C
@@ -796,10 +916,13 @@ Credits_Call0F:
 
 ; FM5 Data
 Credits_FM5:
+	; Credits intro
 	smpsAlterPitch      $E8
 	smpsAlterVol        $F8
 	smpsAlterNote       $05
 	smpsCall            Credits_Call03
+
+	; Metropolis Zone
 	smpsAlterPitch      $18
 	smpsAlterVol        $08
 	smpsAlterNote       $00
@@ -809,6 +932,8 @@ Credits_FM5:
 	dc.b	nC4, $3C
 	smpsCall            Credits_Call04
 	dc.b	nE4, $3C
+
+	; Emerald Hill Zone
 	smpsAlterPitch      $F4
 	smpsAlterVol        $07
 	smpsModSet          $30, $01, $04, $04
@@ -818,6 +943,8 @@ Credits_Loop0A:
 	dc.b	nG5, $30, smpsNoAttack, $30, nA5, smpsNoAttack, $30, nF5, smpsNoAttack, $30, nE5, smpsNoAttack
 	dc.b	$30
 	smpsLoop            $00, $02, Credits_Loop0A
+
+	; Chemical Plant Zone
 	smpsSetvoice        $0A
 	smpsAlterVol        $F6
 	smpsModSet          $0C, $01, $05, $04
@@ -830,6 +957,9 @@ Credits_Loop0B:
 	smpsCall            Credits_Call05
 	dc.b	nRst, $31, nRst, $60
 	smpsLoop            $00, $02, Credits_Loop0B
+
+	; Transition: Chemical Plant Zone to Mystic Cave Zone (2-player)
+	; Mystic Cave Zone (2-player)
 	dc.b	nRst, $60, nRst, $48
 	smpsAlterVol        $05
 	smpsModOff
@@ -838,6 +968,9 @@ Credits_Loop0B:
 	smpsAlterNote       $FE
 	smpsPan             panRight, $00
 	smpsCall            Credits_Call06
+
+	; Transition: Mystic Cave Zone (2-player) to Aquatic Ruin Zone
+	; Aquatic Ruin Zone
 	dc.b	$23, nRst, $0C, nRst, $60
 	smpsSetvoice        $11
 	smpsAlterPitch      $F4
@@ -848,6 +981,8 @@ Credits_Loop0B:
 	dc.b	nRst, $60, nRst, $30, nF5, $06, nF5, nC6, nA5, $1E, nRst, $60
 	dc.b	nRst, $06, nD6, nRst, nD6, nC6, nRst, nC6, nRst, nBb5, nRst, nBb5
 	dc.b	nRst, nA5, $03, nRst, nA5, nRst, $09, nRst, $06, nRst, $60, nRst
+
+	; Mystic Cave Zone
 	dc.b	$30, nF5, $06, nF5, nC6, nA5, $1E, nRst, $60
 	smpsSetvoice        $16
 	smpsAlterPitch      $0C
@@ -860,6 +995,8 @@ Credits_Loop0B:
 	smpsCall            Credits_Call08
 	dc.b	nRst, $30
 	smpsCall            Credits_Call08
+
+	; Transition: Mystic Cave Zone to Emerald Hill Zone (2-player)
 	dc.b	nRst, $60
 	smpsSetvoice        $19
 	smpsAlterPitch      $F4
@@ -868,6 +1005,8 @@ Credits_Loop0B:
 	dc.b	nRst, $27, nC4, $03
 	smpsCall            Credits_Call09
 	dc.b	nRst, $2A, nRst, $60
+
+	; Emerald Hill Zone (2-player)
 	smpsSetvoice        $1E
 	smpsAlterPitch      $F4
 	smpsNoteFill        $06
@@ -876,13 +1015,20 @@ Credits_Loop0C:
 	dc.b	nRst, $0C, nG5, $06, $12, $18, nB5, $06, $12, $0C, nRst, nA5
 	dc.b	$06, $12, $18, nB5, $06, $12, $0C
 	smpsLoop            $00, $02, Credits_Loop0C
+
+	; Transition: Emerald Hill Zone (2-player) to Hill Top Zone
+	; Hill Top Zone
 	dc.b	nRst, $60
 	smpsSetvoice        $20
 	smpsNoteFill        $00
 	smpsAlterPitch      $18
 	smpsAlterVol        $FA
 	dc.b	nG4, $03, smpsNoAttack, nA4, $5D, nF4, $03, smpsNoAttack, nG4, $5D, nEb4, $03
+
+	; Transition: Hill Top Zone to Casino Night Zone
 	dc.b	smpsNoAttack, nF4, $5D, nF4, $03, smpsNoAttack, nG4, $5D, nRst, $60
+
+	; Casino Night Zone
 	smpsSetvoice        $22
 	smpsAlterPitch      $F4
 	smpsAlterVol        $05
@@ -900,6 +1046,8 @@ Credits_Loop0C:
 	dc.b	nF4, $04, nRst, $08, nE4, $18, nC4, nA3, nB3, $0C
 	smpsAlterVol        $F8
 	dc.b	nF4, $04, nRst, $08, nE4, $18, nC4, nA3, nF3, $14, nE3, $04
+
+	; Credits outro
 	smpsAlterVol        $0C
 	smpsSetvoice        $23
 	smpsAlterNote       $03
@@ -936,22 +1084,32 @@ Credits_Call09:
 
 ; PSG1 Data
 Credits_PSG1:
+	; Credits intro
 	dc.b	nRst, $30
 	smpsLoop            $00, $1A, Credits_PSG1
 
+	; Metropolis Zone
+	; Emerald Hill Zone
 Credits_Loop3C:
 	dc.b	nG5, $30, smpsNoAttack, $30, nA5, smpsNoAttack, $30, nF5, smpsNoAttack, $30, nE5, smpsNoAttack
 	dc.b	$30
 	smpsLoop            $00, $02, Credits_Loop3C
 
+	; Chemical Plant Zone
 Credits_Loop3D:
 	dc.b	nRst, $30
 	smpsLoop            $00, $10, Credits_Loop3D
+
+	; Transition: Chemical Plant Zone to Mystic Cave Zone (2-player)
+	; Mystic Cave Zone (2-player)
 	dc.b	nRst, $60
 
 Credits_Loop3E:
 	dc.b	nRst, $30
 	smpsLoop            $00, $0A, Credits_Loop3E
+
+	; Transition: Mystic Cave Zone (2-player) to Aquatic Ruin Zone
+	; Aquatic Ruin Zone
 	dc.b	nRst, $60
 	smpsAlterPitch      $F4
 	smpsPSGAlterVol     $FE
@@ -960,11 +1118,15 @@ Credits_Loop3E:
 	dc.b	nA3, nD4, $06, nG3, $0C, nA3, nA3, nD4, $06, nRst, nD4, nFs3
 	dc.b	$0C, nA3
 	smpsCall            Credits_Call28
+
+	; Mystic Cave Zone
 	smpsPSGvoice        fTone_0B
 	dc.b	nRst, $04, nRst, $60
 	smpsCall            Credits_Call24
 	dc.b	smpsNoAttack, $20, smpsNoAttack, nAb5, $01, smpsNoAttack, nG5, smpsNoAttack, nFs5, smpsNoAttack, nF5, smpsNoAttack
 	dc.b	nE5, smpsNoAttack, nEb5, smpsNoAttack, nD5, smpsNoAttack, nCs5, smpsNoAttack, nC5, smpsNoAttack, nB4, smpsNoAttack
+
+	; Transition: Mystic Cave Zone to Emerald Hill Zone (2-player)
 	dc.b	nBb4, smpsNoAttack, nA4, nRst, $60
 	smpsPSGvoice        $00
 	smpsNoteFill        $06
@@ -973,6 +1135,8 @@ Credits_Loop3E:
 	dc.b	nF5, nRst, nF5
 	smpsCall            Credits_Call29
 	dc.b	nF5, $04, nRst, nF5, nRst, $0C, nF5, nRst, $60
+
+	; Emerald Hill Zone (2-player)
 	smpsPSGvoice        fTone_08
 	smpsAlterPitch      $04
 	smpsPSGAlterVol     $02
@@ -982,10 +1146,17 @@ Credits_Loop3F:
 	smpsCall            Credits_Call27
 	smpsLoop            $00, $02, Credits_Loop3F
 
+	; Transition: Emerald Hill Zone (2-player) to Hill Top Zone
 Credits_Loop40:
 	dc.b	nRst, $30
+
+	; Hill Top Zone
 	smpsLoop            $00, $0A, Credits_Loop40
+
+	; Transition: Hill Top Zone to Casino Night Zone
 	dc.b	nRst, $60
+
+	; Casino Night Zone
 	smpsPSGvoice        $00
 	smpsAlterPitch      $F0
 	smpsPSGAlterVol     $FF
@@ -1000,6 +1171,8 @@ Credits_Loop40:
 	dc.b	nG5, $18, nE5, nC5, nD5, $0C, nRst
 	smpsPSGAlterVol     $FC
 	dc.b	nRst, nG4, nRst, nG4, nRst, nA4, $18, $08, nG4, $04
+
+	; Credits outro
 	smpsAlterPitch      $F4
 	smpsPSGAlterVol     $01
 	smpsPSGvoice        fTone_05
@@ -1033,17 +1206,24 @@ Credits_Call28:
 
 ; PSG2 Data
 Credits_PSG2:
+	; Credits intro
 	dc.b	nRst, $30
 	smpsLoop            $00, $1A, Credits_PSG2
 
+	; Metropolis Zone
+	; Emerald Hill Zone
 Credits_Loop34:
 	dc.b	nE5, $30, smpsNoAttack, $30, nFs5, smpsNoAttack, $30, nD5, smpsNoAttack, $30, nC5, smpsNoAttack
 	dc.b	$30
 	smpsLoop            $00, $02, Credits_Loop34
 
+	; Chemical Plant Zone
 Credits_Loop35:
 	dc.b	nRst, $30
 	smpsLoop            $00, $10, Credits_Loop35
+
+	; Transition: Chemical Plant Zone to Mystic Cave Zone (2-player)
+	; Mystic Cave Zone (2-player)
 	dc.b	nRst, $60
 	smpsAlterPitch      $0C
 	smpsPSGAlterVol     $FD
@@ -1053,6 +1233,9 @@ Credits_Loop35:
 Credits_Loop36:
 	smpsCall            Credits_Call15
 	smpsLoop            $00, $02, Credits_Loop36
+
+	; Transition: Mystic Cave Zone (2-player) to Aquatic Ruin Zone
+	; Aquatic Ruin Zone
 	dc.b	nRst, $60
 	smpsModSet          $03, $02, $01, $05
 	smpsPSGvoice        fTone_0A
@@ -1062,27 +1245,39 @@ Credits_Loop36:
 	dc.b	nRst, $06, nA5, nRst, nA5, nG5, nRst, nG5, nRst, nFs5, nRst, nFs5
 	dc.b	nRst, nD5, $03, nRst, nD5, nRst, $09, nRst, $06, nRst, $30, nRst
 	dc.b	nRst, nC5, $06, nD5, nA5, nF5, $1E, nRst, $60
+
+	; Mystic Cave Zone
 	smpsModOff
 
 Credits_Loop37:
 	dc.b	nRst, $30
 	smpsLoop            $00, $0C, Credits_Loop37
+
+	; Transition: Mystic Cave Zone to Emerald Hill Zone (2-player)
 	smpsPSGvoice        $00
 	smpsPSGAlterVol     $FE
 	smpsNoteFill        $06
 	dc.b	nRst, $60, nRst, $0C, nD5, nRst, nD5, nRst, nD5, nRst, nD5, nRst
 	dc.b	$60, nRst, $0C, nD5, nRst, nD5, nRst, nD5, $04, nRst, nD5, nRst
 	dc.b	$0C, nD5, nRst, $60
+
+	; Emerald Hill Zone (2-player)
 	smpsPSGAlterVol     $02
 
 Credits_Loop38:
 	smpsCall            Credits_Call27
 	smpsLoop            $00, $02, Credits_Loop38
 
+	; Transition: Emerald Hill Zone (2-player) to Hill Top Zone
 Credits_Loop39:
 	dc.b	nRst, $30
+
+	; Hill Top Zone
 	smpsLoop            $00, $0A, Credits_Loop39
 	dc.b	nRst, $60
+
+	; Transition: Hill Top Zone to Casino Night Zone
+	; Casino Night Zone
 	smpsPSGvoice        $00
 	; This is wrong: it should convert from EHZ 2P's PSG2 transpose ($D0)
 	; to CNZ's PSG2 transpose ($DC), but instead of adding $C, it subtracts
@@ -1103,6 +1298,8 @@ Credits_Loop39:
 	dc.b	nRst, nC4, nRst, nC4, nRst, nC4, nRst, nC4
 	smpsPSGAlterVol     $FC
 	dc.b	nRst, nC4, nRst, nC4, nRst, nC4, $18, $08, nC4, $04
+
+	; Credits outro
 	smpsPSGAlterVol     $01
 	; If the above bug is fixed, then this line needs removing (the track
 	; will already be two octaves higher).
@@ -1134,6 +1331,7 @@ Credits_Loop3B:
 
 ; PSG3 Data
 Credits_PSG3:
+	; Credits intro
 	smpsPSGform         $E7
 	dc.b	nRst, $60
 	smpsPSGvoice        fTone_02
@@ -1142,14 +1340,18 @@ Credits_Loop27:
 	dc.b	nMaxPSG, $0C, $0C, $0C, $06, $06, $0C, $0C, $06, $06, $0C
 	smpsLoop            $00, $08, Credits_Loop27
 
+	; Metropolis Zone
 Credits_Loop28:
 	dc.b	nRst, $30
 	smpsLoop            $00, $08, Credits_Loop28
 
+	; Emerald Hill Zone
 Credits_Loop29:
 	dc.b	nMaxPSG, $0C, $06, $06
 	smpsLoop            $00, $1F, Credits_Loop29
 	dc.b	$0C
+
+	; Chemical Plant Zone
 	smpsPSGvoice        fTone_03
 	dc.b	nMaxPSG
 	smpsPSGvoice        fTone_02
@@ -1160,9 +1362,14 @@ Credits_Loop2A:
 	dc.b	$06, $06, $06, $06
 	smpsLoop            $01, $04, Credits_Loop2A
 
+	; Transition: Chemical Plant Zone to Mystic Cave Zone (2-player)
 Credits_Loop2B:
 	dc.b	nRst, $30
+
+	; Mystic Cave Zone (2-player)
 	smpsLoop            $00, $0C, Credits_Loop2B
+
+	; Transition: Mystic Cave Zone (2-player) to Aquatic Ruin Zone
 	smpsPSGvoice        fTone_04
 	smpsPSGAlterVol     $02
 
@@ -1171,6 +1378,8 @@ Credits_Loop2C:
 	dc.b	nMaxPSG, $06, $06
 	smpsNoteFill        $00
 	dc.b	$0C
+
+	; Aquatic Ruin Zone
 	smpsLoop            $00, $04, Credits_Loop2C
 	smpsPSGvoice        fTone_02
 	smpsPSGAlterVol     $FD
@@ -1179,12 +1388,15 @@ Credits_Loop2D:
 	dc.b	nRst, $0C, nMaxPSG, $06, nRst, $07, nMaxPSG, $06, nRst, $11, nMaxPSG, $0C
 	dc.b	nRst, $06, nMaxPSG, $0C, nRst, $06, nMaxPSG, nRst
 	smpsLoop            $00, $07, Credits_Loop2D
+
+	; Mystic Cave Zone
 	smpsPSGAlterVol     $02
 
 Credits_Loop2E:
 	dc.b	nMaxPSG, $0C, $08, $04
 	smpsLoop            $00, $18, Credits_Loop2E
 
+	; Transition: Mystic Cave Zone to Emerald Hill Zone (2-player)
 Credits_Loop2F:
 	dc.b	nMaxPSG, $0C, $0C, $0C, $08, $04
 	smpsLoop            $00, $08, Credits_Loop2F
@@ -1194,17 +1406,26 @@ Credits_Loop2F:
 
 Credits_Loop30:
 	dc.b	nMaxPSG, $06, $06, $0C
+
+	; Emerald Hill Zone (2-player)
 	smpsLoop            $00, $10, Credits_Loop30
 
+	; Transition: Emerald Hill Zone (2-player) to Hill Top Zone
 Credits_Loop31:
 	dc.b	nRst, $30
+
+	; Hill Top Zone
 	smpsLoop            $00, $0A, Credits_Loop31
 	dc.b	nRst, $60
+
+	; Transition: Hill Top Zone to Casino Night Zone
 	smpsPSGAlterVol     $FF
 
 Credits_Loop32:
 	smpsPSGvoice        fTone_01
 	dc.b	nMaxPSG, $0C
+
+	; Casino Night Zone
 	smpsPSGvoice        fTone_02
 	smpsPSGAlterVol     $FF
 	dc.b	$08
@@ -1220,6 +1441,8 @@ Credits_Loop33:
 	dc.b	nMaxPSG, $0C
 	smpsNoteFill        $0C
 	dc.b	$0C
+
+	; Credits outro
 	smpsLoop            $00, $1E, Credits_Loop33
 	smpsNoteFill        $03
 	dc.b	nMaxPSG, $06
@@ -1233,6 +1456,7 @@ Credits_Loop33:
 
 ; DAC Data
 Credits_DAC:
+	; Credits intro
 	dc.b	dSnare, $06, dSnare, dSnare, dSnare, dSnare, $0C, $06, $0C, $06, $0C, $0C
 	dc.b	$0C
 
@@ -1244,22 +1468,31 @@ Credits_Loop00:
 Credits_Loop01:
 	dc.b	dSnare
 	smpsLoop            $00, $07, Credits_Loop01
+
+	; Metropolis Zone
 	smpsSetTempoMod     $EA
 	smpsCall            Credits_Call00
 	dc.b	dKick, $0C, dLowTom, dSnare, dKick, dKick, dFloorTom, dSnare, dScratch, $04, $06, $02
 	dc.b	dKick, $0C, dSnare, $06, dSnare, dSnare, dSnare, dKick, $0C, dSnare, $06, dSnare
 	dc.b	dKick, dKick, dSnare, dSnare, dSnare, dSnare
 
+	; Emerald Hill Zone
 Credits_Loop02:
 	dc.b	dKick, $18, dSnare, dKick, dSnare
 	smpsLoop            $00, $07, Credits_Loop02
 	dc.b	dKick, $0C, dSnare, dSnare, dSnare, dSnare, $06, dSnare, dMidTom, dMidTom, dLowTom, dLowTom
+
+	; Chemical Plant Zone
 	dc.b	dFloorTom, dFloorTom
 	smpsCall            Credits_Call01
 	dc.b	dKick, $18, dSnare, $0C, dKick, $18, dSnare, $0C, dSnare, dSnare, $06, dSnare
 	smpsCall            Credits_Call01
 	dc.b	dKick, $0C, dSnare, dSnare, dSnare, dLowTom, $06, dLowTom, dFloorTom, dFloorTom, dSnare, $06
+
+	; Transition: Chemical Plant Zone to Mystic Cave Zone (2-player)
 	dc.b	dSnare, dLowTom, $0C, dSnare, $0C, dSnare, $06, dSnare, nRst, dSnare, dSnare, $0C
+
+	; Mystic Cave Zone (2-player)
 	dc.b	dSnare, $0C, dSnare, dSnare, $06, dSnare, dLowTom, dLowTom
 
 Credits_Loop03:
@@ -1268,6 +1501,9 @@ Credits_Loop03:
 	smpsLoop            $00, $04, Credits_Loop03
 	dc.b	dKick, $0C, dHiClap, $06, dLowClap, dSnare, $0C, dHiClap, $06, dLowClap, dMidTom, $06
 	dc.b	$03, $03, dLowTom, $06, dLowTom, dLowTom, dFloorTom, dFloorTom, dFloorTom, dKick, $06, $0C
+
+	; Transition: Mystic Cave Zone (2-player) to Aquatic Ruin Zone
+	; Aquatic Ruin Zone
 	dc.b	dSnare, $06, nRst, $0C, dKick, dSnare, dFloorTom, dSnare, $06, dSnare, dSnare, dSnare
 
 Credits_Loop04:
@@ -1276,11 +1512,15 @@ Credits_Loop04:
 	smpsLoop            $00, $06, Credits_Loop04
 	dc.b	dKick, $0C, dSnare, $06, dKick, $12, dKick, $06, dKick, $06, dSnare, $06
 	dc.b	dKick, $0C, $06, dSnare, $0C, $08, $04
+
+	; Mystic Cave Zone
 	smpsSetTempoMod     $CD
 	dc.b	dSnare, $30, dSnare, $0C, dSnare, dSnare, dSnare, $08, $04
 	smpsCall            Credits_Call02
 	smpsCall            Credits_Call02
 	dc.b	dKick, $08, $0C, $04, dSnare, $0C, dKick, $08, $04, dSnare, $08, $04
+
+	; Transition: Mystic Cave Zone to Emerald Hill Zone (2-player)
 	dc.b	$08, $04, $04, $04, $04, $08, $04
 	smpsSetTempoMod     $C5
 
@@ -1293,16 +1533,26 @@ Credits_Loop05:
 
 Credits_Loop06:
 	dc.b	dKick, $0C, dKick, dSnare, nRst, dKick, dKick, dSnare, dClap
+
+	; Emerald Hill Zone (2-player)
 	smpsLoop            $00, $03, Credits_Loop06
 	dc.b	dKick, dSnare, dSnare, dSnare, dSnare, $06, $06, $06, $06, $0C, $06, $06
+
+	; Transition: Emerald Hill Zone (2-player) to Hill Top Zone
 	dc.b	dKick, $06, dKick, dSnare, dSnare, dKick, dSnare, dKick, dKick, dSnare, $02, dSnare
 	dc.b	$04, dKick, $0C, $06, dSnare, $0C, $06, $06, dKick, $18, dSnare, $0C
+
+	; Hill Top Zone
 	dc.b	dKick, dKick, $18, dSnare, dKick, $06, dKick, $12, dSnare, $0C, dKick, dKick
 	dc.b	$18, dSnare, dKick, $18, dSnare, $0C, dKick, dKick, $18, dSnare, dKick, $06
 	dc.b	dKick, $12, dSnare, $0C, $0C, $06, $06, $06, $06, $0C, $06, $06
 	dc.b	dSnare, $02, $04, dKick, $0C, $06, $0C, dSnare, $02, $04, dKick, $0C
+
+	; Transition: Hill Top Zone to Casino Night Zone
 	dc.b	$06, $0C, dSnare, $06, dSnare, dSnare, dSnare
 	smpsSetTempoMod     $C0
+
+	; Casino Night Zone
 	dc.b	dKick, $0C, dSnare, dKick, dSnare, dKick, dSnare, dKick, $08, dSnare, $04, $0C
 
 Credits_Loop07:
@@ -1314,6 +1564,8 @@ Credits_Loop08:
 	dc.b	dKick, $0C, dSnare
 	smpsLoop            $00, $13, Credits_Loop08
 	dc.b	dSnare, $08, $0C, $04, dKick, $0C, dSnare, dKick, dSnare, dKick, $0C, dSnare
+
+	; Credits outro
 	dc.b	dKick, $06, nRst, $02, dSnare, dSnare, dSnare, $09, dSnare, $03
 
 Credits_Loop09:

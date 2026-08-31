@@ -14,14 +14,20 @@ Mus91_Credits_Header:
 	smpsHeaderPSG       Mus91_Credits_PSG2,	$D0, $03, $00, $00
 	smpsHeaderPSG       Mus91_Credits_PSG3,	$00, $03, $00, fTone_04
 
+; Section boundaries are marked per channel. Adjacent labels mean that a
+; sustained or repeated passage crosses a boundary without a unique source position.
+
 ; FM1 Data
 Mus91_Credits_FM1:
+	; Credits intro
 	smpsSetCommByte     $01
 	dc.b	nRst, $60
 	smpsSetvoice        $1C
 	smpsAlterVol        $F8
 	smpsNoteFill        $06
 	smpsCall            Mus91_Credits_Call11
+
+	; Green Hill Zone
 	smpsPan             panCenter, $00
 	smpsNoteFill        $00
 	smpsSetvoice        $03
@@ -32,8 +38,13 @@ Mus91_Credits_FM1:
 	dc.b	$54
 	smpsCall            Mus91_Credits_Call12
 	dc.b	$0C, nF5, $18, nA5, $0C, nG5, $18, nA5, $0C, nG5, $18, nC5
-	dc.b	$24, nRst, $60, nRst, nRst, nRst
+	dc.b	$24
+
+	; Transition: Green Hill Zone to Labyrinth Zone
+	dc.b	nRst, $60, nRst, nRst, nRst
 	smpsModOff
+
+	; Labyrinth Zone
 	smpsSetCommByte     $01
 	smpsSetTempoMod     $0F
 	smpsSetvoice        $05
@@ -42,22 +53,30 @@ Mus91_Credits_FM1:
 	dc.b	nB5, nA5, nG5, $09, nA5, $06, nG5, $03, nE5, $06, nRst, $06
 	dc.b	nA5, nC6, nA5, nC6, $09, nD6, nE6, $0C, nF6, $06, nE6, nD6
 	dc.b	nC6, $0C, nA5, $0C, nD6, $04, nC6, nD6, nC6, $24
+
+	; Marble Zone
 	smpsAlterPitch      $F4
 	smpsAlterVol        $09
 	smpsSetvoice        $08
 	dc.b	nRst, $18, nA5, $06, nB5, nC6, nE6
 	smpsCall            Mus91_Credits_Call0C
+
+	; Star Light Zone
 	smpsSetvoice        $0B
 	smpsAlterVol        $EB
 	dc.b	nRst, $0C, nG5, nA5, nG6
 	smpsCall            Mus91_Credits_Call0D
 	dc.b	nE6, $1E, nE7, $06, nC7, $18, nRst, $24
+
+	; Scrap Brain Zone
 	smpsSetCommByte     $01
 	smpsSetTempoMod     $0A
 	smpsSetvoice        $0F
 	smpsAlterPitch      $0C
 	smpsAlterVol        $0B
 	smpsCall            Mus91_Credits_Call0E
+
+	; Transition: Scrap Brain Zone to credits outro
 	smpsSetCommByte     $01
 	smpsSetTempoMod     $07
 	dc.b	nRst, $60
@@ -70,6 +89,8 @@ Mus91_Credits_FM1:
 	dc.b	nRst, nC6, $04, nA5, nRst, $02, nBb5, nRst, $04, nBb5, $08, nC6
 	dc.b	$03, nRst, nBb5, nRst, nA5, $04, nBb5, nRst, $02, nC6, $0E, nRst
 	dc.b	$06, nE6, $02, nRst, $04, nE6, $0C, nF6, nE6, $0A, nD6, $02
+
+	; Credits outro
 	smpsSetCommByte     $01
 	smpsSetTempoMod     $04
 	smpsAlterVol        $F5
@@ -102,6 +123,7 @@ Mus91_Credits_Call07:
 
 ; FM2 Data
 Mus91_Credits_FM2:
+	; Credits intro
 	dc.b	nRst, $60
 	smpsSetvoice        $1D
 
@@ -110,6 +132,8 @@ Mus91_Credits_Loop0F:
 	dc.b	nA3, nFs3, nFs3, nG3, nG3, nC3, nC3, nG3, nG3, nFs3, nFs3, nG3
 	dc.b	nG3, nA2, nA2, nA2, nA2, nD3, nD3, nD3, nE3
 	smpsLoop            $00, $02, Mus91_Credits_Loop0F
+
+	; Green Hill Zone
 	smpsSetvoice        $00
 
 Mus91_Credits_Loop10:
@@ -136,12 +160,15 @@ Mus91_Credits_Loop10:
 	dc.b	nG2, nA2, nB2
 	smpsNoteFill        $05
 
+	; Transition: Green Hill Zone to Labyrinth Zone
 Mus91_Credits_Loop11:
 	dc.b	nC3
 	smpsLoop            $00, $18, Mus91_Credits_Loop11
 	smpsNoteFill        $00
 	dc.b	nC3, $06, nRst, nC3, $0C, nA2, $06, nRst, nA2, $0C, nBb2, $06
 	dc.b	nRst, nBb2, $0C, nB2, $06, nRst, nB2, $0C
+
+	; Labyrinth Zone
 	smpsSetvoice        $06
 	smpsAlterPitch      $E8
 	smpsAlterVol        $02
@@ -154,6 +181,8 @@ Mus91_Credits_Loop12:
 	smpsLoop            $00, $02, Mus91_Credits_Loop12
 	smpsAlterPitch      $F6
 	dc.b	nC4, $0F, nRst, $03, nE4, nRst, nG4, $09, nRst, $03, nE4, $09
+
+	; Marble Zone
 	dc.b	nRst, $03, nC4, $06, nRst, $12, nE4, $18
 	smpsAlterVol        $01
 	smpsSetvoice        $09
@@ -172,6 +201,8 @@ Mus91_Credits_Loop14:
 	dc.b	$06, nB4, $03, nRst, nB4, $06, nAb4, $03, nRst, nAb4, $06, nB4
 	dc.b	$03, nRst, nB4, $06, nA3, $03, nRst, nA3, $06, nE4, $03, nRst
 	dc.b	nE4, $06, nC4, $03, nRst, nC4, $06, nE4, $03, nRst, nE4, $06
+
+	; Star Light Zone
 	dc.b	nA3, $03, nRst, $09, nRst, $24
 	smpsAlterVol        $F8
 	dc.b	nC4, $06, nRst, $03, nC4, nRst, $06, nC4, $12, nRst, $06, nC4
@@ -191,6 +222,8 @@ Mus91_Credits_Loop15:
 	dc.b	nRst, $01, nC4, $06, nRst, $03, nC4, nRst, $06, nC4, $12, nRst
 	dc.b	$06, nE4, $02, nRst, $01, nF4, $02, nRst, $01, nG4, $06, nRst
 	dc.b	nG3, $24
+
+	; Scrap Brain Zone
 	smpsSetvoice        $10
 	smpsAlterPitch      $0C
 	smpsAlterVol        $07
@@ -206,6 +239,8 @@ Mus91_Credits_Loop16:
 	smpsCall            Mus91_Credits_Call10
 	smpsAlterPitch      $F9
 	smpsLoop            $02, $02, Mus91_Credits_Loop16
+
+	; Transition: Scrap Brain Zone to credits outro
 	smpsNoteFill        $00
 	smpsAlterPitch      $F4
 	smpsAlterVol        $FC
@@ -218,6 +253,8 @@ Mus91_Credits_Loop16:
 	dc.b	nRst, nG4, nRst, nF4, nRst, nF4, nRst, nG4, $04, nF4, nRst, $02
 	dc.b	nE4, nRst, $04, nE4, $08, nE4, $03, nRst, nE4, nRst, nA4, $09
 	dc.b	nRst, $03, nA4, $0A, nD4, $02
+
+	; Credits outro
 	smpsAlterPitch      $0C
 	smpsAlterVol        $FE
 	smpsSetvoice        $19
@@ -254,6 +291,7 @@ Mus91_Credits_Call10:
 
 ; FM3 Data
 Mus91_Credits_FM3:
+	; Credits intro
 	dc.b	nRst, $60
 	smpsLoop            $00, $08, Mus91_Credits_FM3
 	smpsSetvoice        $1F
@@ -264,6 +302,8 @@ Mus91_Credits_FM3:
 
 Mus91_Credits_Loop0C:
 	smpsPan             panLeft, $00
+
+	; Green Hill Zone
 	dc.b	nE7
 	smpsPan             panRight, $00
 	dc.b	nC7
@@ -278,6 +318,8 @@ Mus91_Credits_Loop0C:
 	dc.b	nRst, $36, nRst, nC7, $06, nRst, $12, nA6, $18, nG6, $06, nRst
 	dc.b	nA6, nRst, nC7, nRst
 	smpsModOff
+
+	; Transition: Green Hill Zone to Labyrinth Zone
 	smpsSetvoice        $04
 	smpsAlterVol        $FE
 
@@ -288,8 +330,12 @@ Mus91_Credits_Loop0D:
 	dc.b	nC6, $01, smpsNoAttack, nB5, $0B, nRst, $0C, nBb5, $01, smpsNoAttack, nA5, $0B
 	dc.b	nRst, $0C, nCs6, $01, smpsNoAttack, nC6, $1B, nRst, $08, nC6, $01, smpsNoAttack
 	dc.b	nB5, $24, smpsNoAttack, $18, smpsNoAttack, $5A, nRst, $06
+
+	; Labyrinth Zone
 	smpsAlterPitch      $18
 	dc.b	nRst, $60, nRst, nRst, $30
+
+	; Marble Zone
 	smpsAlterPitch      $E8
 	smpsSetvoice        $08
 	smpsAlterPitch      $0C
@@ -297,6 +343,8 @@ Mus91_Credits_Loop0D:
 	smpsAlterNote       $02
 	dc.b	nRst, $18, nA5, $06, nB5, nC6, nE6
 	smpsCall            Mus91_Credits_Call0C
+
+	; Star Light Zone
 	smpsSetvoice        $0D
 	smpsAlterPitch      $0C
 	smpsAlterVol        $0B
@@ -332,11 +380,15 @@ Mus91_Credits_Loop0D:
 	smpsAlterNote       $00
 	smpsModSet          $2C, $01, $04, $04
 	dc.b	nC7, $23
+
+	; Scrap Brain Zone
 	smpsModOff
 	smpsSetvoice        $0F
 	smpsAlterVol        $FF
 	smpsAlterNote       $03
 	smpsCall            Mus91_Credits_Call0E
+
+	; Transition: Scrap Brain Zone to credits outro
 	smpsAlterNote       $00
 	smpsSetvoice        $15
 	smpsAlterVol        $09
@@ -344,6 +396,8 @@ Mus91_Credits_Loop0D:
 	dc.b	nF5, $03, nRst, nF5, nRst, nE5, $03, nRst, $13, nD5, $02, nRst
 	dc.b	$04, nD5, $08, nD5, $03, nRst, nD5, nRst, nC5, $03, nRst, $15
 	dc.b	nRst, $04, nA6, $08, nG6, $03, nRst, nG6, nRst, nF6, nRst, nF6
+
+	; Credits outro
 	dc.b	nRst, nE6, $04, nF6, $02, nE6, $04, nD6, $02
 	smpsSetvoice        $0A
 	smpsAlterVol        $F9
@@ -370,6 +424,7 @@ Mus91_Credits_Call14:
 
 ; FM4 Data
 Mus91_Credits_FM4:
+	; Credits intro
 	smpsSetvoice        $20
 	dc.b	nRst, $60
 	smpsAlterVol        $08
@@ -377,8 +432,12 @@ Mus91_Credits_FM4:
 	dc.b	nFs5, $0C, nFs5, nRst, nRst, nA5, nA5, nRst, nRst
 	smpsCall            Mus91_Credits_Call08
 	dc.b	nA5, $24, $24, $18
+
+	; Green Hill Zone
 	smpsPan             panLeft, $00
 	smpsCall            Mus91_Credits_Call03
+
+	; Transition: Green Hill Zone to Labyrinth Zone
 	smpsAlterVol        $F2
 
 Mus91_Credits_Loop09:
@@ -388,8 +447,12 @@ Mus91_Credits_Loop09:
 	dc.b	nAb5, $01, smpsNoAttack, nG5, $0B, nRst, $0C, nFs5, $01, smpsNoAttack, nF5, $0B
 	dc.b	nRst, $0C, nBb5, $01, smpsNoAttack, nA5, $1B, nRst, $08, nAb5, $01, smpsNoAttack
 	dc.b	nG5, $24, smpsNoAttack, $18, smpsNoAttack, $5A, nRst, $06
+
+	; Labyrinth Zone
 	smpsAlterPitch      $18
 	dc.b	nRst, $60, nRst, nRst, $5A
+
+	; Marble Zone
 	smpsPan             panCenter, $00
 	smpsSetvoice        $0A
 	smpsAlterPitch      $F4
@@ -403,12 +466,16 @@ Mus91_Credits_Loop0A:
 	dc.b	nRst, $0F, nC7, $03, nRst, $09, nF6, $09, nRst, $03, nF6, nRst
 	dc.b	nA6, $06, nRst, nF6, $0C, nRst, $06, nAb6, $09, nRst, $03, nAb6
 	dc.b	nRst, nB6, $06, nRst, nAb6, $0C, nRst, $06, nRst, nRst, $0C, nC7
+
+	; Star Light Zone
 	dc.b	$03, nRst, $0F, nC7, $03, nRst, $0F, nC7, $03, nRst, $2D
 	smpsAlterPitch      $F4
 	smpsAlterVol        $03
 	smpsSetvoice        $0C
 	smpsPan             panLeft, $00
 	smpsCall            Mus91_Credits_Call09
+
+	; Scrap Brain Zone
 	smpsSetvoice        $11
 	smpsAlterVol        $F6
 	smpsAlterPitch      $18
@@ -428,9 +495,13 @@ Mus91_Credits_Loop0A:
 	dc.b	nA5, $02, smpsNoAttack
 	smpsAlterNote       $00
 	dc.b	$1C
+
+	; Transition: Scrap Brain Zone to credits outro
 	smpsAlterNote       $00
 	smpsAlterNote       $03
 	smpsCall            Mus91_Credits_Call06
+
+	; Credits outro
 	smpsAlterNote       $00
 	smpsPan             panCenter, $00
 	smpsSetvoice        $0A
@@ -527,6 +598,7 @@ Mus91_Credits_Call0B:
 
 ; FM5 Data
 Mus91_Credits_FM5:
+	; Credits intro
 	smpsSetvoice        $20
 	dc.b	nRst, $60
 	smpsAlterVol        $F0
@@ -534,8 +606,12 @@ Mus91_Credits_FM5:
 	dc.b	nD5, $0C, $0C, nRst, $18, nFs5, $0C, $0C, nRst, $18
 	smpsCall            Mus91_Credits_Call02
 	dc.b	nFs5, $24, $24, $18
+
+	; Green Hill Zone
 	smpsPan             panRight, $00
 	smpsCall            Mus91_Credits_Call03
+
+	; Transition: Green Hill Zone to Labyrinth Zone
 	smpsAlterVol        $F2
 
 Mus91_Credits_Loop07:
@@ -545,6 +621,8 @@ Mus91_Credits_Loop07:
 	dc.b	nF5, $01, smpsNoAttack, nE5, $0B, nRst, $0C, nEb5, $01, smpsNoAttack, nD5, $0B
 	dc.b	nRst, $0C, nFs5, $01, smpsNoAttack, nF5, $1B, nRst, $08, nF5, $01, smpsNoAttack
 	dc.b	nE5, $24, smpsNoAttack, $18, smpsNoAttack, $5A, nRst, $06
+
+	; Labyrinth Zone
 	smpsAlterPitch      $18
 	smpsPan             panCenter, $00
 	smpsAlterVol        $03
@@ -552,6 +630,8 @@ Mus91_Credits_Loop07:
 	smpsSetvoice        $07
 	dc.b	nRst, $4E, nG4, $03, nA4, nC5, nRst, nA4, nRst, $51, nA5, $03
 	dc.b	nF5, nC5, nRst, nF5, nRst, $5D
+
+	; Marble Zone
 	smpsSetvoice        $0A
 	smpsAlterPitch      $E8
 	smpsAlterVol        $02
@@ -564,12 +644,16 @@ Mus91_Credits_Loop08:
 	dc.b	nRst, $0F, nA6, $03, nRst, $09, nD6, $09, nRst, $03, nD6, nRst
 	dc.b	nF6, $06, nRst, nD6, $0C, nRst, $06, nE6, $09, nRst, $03, nE6
 	dc.b	nRst, nAb6, $06, nRst, nE6, $0C, nRst, $18, nA6, $03, nRst, $0F
+
+	; Star Light Zone
 	dc.b	nA6, $03, nRst, $0F, nA6, $03, nRst, $2D
 	smpsSetvoice        $0C
 	smpsPan             panRight, $00
 	smpsAlterPitch      $F4
 	smpsAlterVol        $03
 	smpsCall            Mus91_Credits_Call04
+
+	; Scrap Brain Zone
 	smpsSetvoice        $12
 	smpsAlterPitch      $24
 	smpsAlterVol        $F4
@@ -578,7 +662,11 @@ Mus91_Credits_Loop08:
 	smpsCall            Mus91_Credits_Call05
 	dc.b	nG6, nF6, nE6
 	smpsAlterPitch      $F4
+
+	; Transition: Scrap Brain Zone to credits outro
 	smpsCall            Mus91_Credits_Call06
+
+	; Credits outro
 	smpsPan             panCenter, $00
 	smpsSetvoice        $1A
 	smpsAlterNote       $03
@@ -599,11 +687,14 @@ Mus91_Credits_Call02:
 
 ; PSG1 Data
 Mus91_Credits_PSG1:
+	; Credits intro
 	dc.b	nRst, $60
 	smpsPSGvoice        fTone_08
 	smpsPSGAlterVol     $03
 	smpsNoteFill        $06
 	smpsCall            Mus91_Credits_Call11
+
+	; Green Hill Zone
 	smpsPSGvoice        fTone_01
 	smpsNoteFill        $00
 	smpsPSGAlterVol     $FD
@@ -614,12 +705,16 @@ Mus91_Credits_Loop2A:
 	smpsLoop            $00, $03, Mus91_Credits_Loop2A
 	dc.b	nRst, $18, nA5, $06, nRst, $1E, nA5, $0C, nRst, $18, nRst, $18
 	dc.b	nG5, $06, nRst, $1E, nG5, $0C, nRst, $18
+
+	; Transition: Green Hill Zone to Labyrinth Zone
 	smpsPSGvoice        fTone_05
 	smpsModSet          $0E, $01, $01, $03
 	smpsNoteFill        $10
 	dc.b	nE5, $24, nD5, nE5, nD5, nE5, $0C, nRst, nD5, nRst, nF5, $24
 	smpsNoteFill        $00
 	dc.b	nE5, $60, smpsNoAttack, $3C
+
+	; Labyrinth Zone
 	smpsModOff
 	smpsPSGvoice        fTone_09
 	smpsPSGAlterVol     $01
@@ -629,16 +724,22 @@ Mus91_Credits_Loop2B:
 	dc.b	nE6, $03, $09, $06
 	smpsAlterPitch      $05
 	smpsLoop            $00, $02, Mus91_Credits_Loop2B
+
+	; Marble Zone
 	smpsAlterPitch      $F6
 	dc.b	nRst, $06, nE6, $0C, nE6, nE6, nE6, $06, nRst, $30
 	smpsPSGvoice        fTone_08
 	smpsPSGAlterVol     $01
 	smpsCall            Mus91_Credits_Call15
+
+	; Star Light Zone
 	dc.b	nRst, $02, nRst, $30
 	smpsPSGAlterVol     $03
 	smpsAlterPitch      $F4
 	smpsPSGvoice        fTone_05
 	smpsCall            Mus91_Credits_Call09
+
+	; Scrap Brain Zone
 	smpsAlterPitch      $0C
 	smpsPSGAlterVol     $FC
 	smpsPSGvoice        $00
@@ -646,6 +747,8 @@ Mus91_Credits_Loop2B:
 	dc.b	nRst, $0C, nF5, nRst, $03, nF5, nRst, nRst, nF5, nRst, $09
 	smpsCall            Mus91_Credits_Call16
 	dc.b	nF5, $0C, nRst, $06, nF5, $1E
+
+	; Transition: Scrap Brain Zone to credits outro
 	smpsPSGvoice        fTone_06
 	smpsPSGAlterVol     $04
 	dc.b	nRst, $30, nRst, $30
@@ -654,6 +757,8 @@ Mus91_Credits_Loop2B:
 	smpsChanTempoDiv    $02
 	dc.b	nD6, $02, nRst, $04, nD6, $08, nD6, $03, nRst, nD6, nRst, nC6
 	dc.b	nRst, nA6, nRst, nF6, nRst, $07, nBb5, $02, nRst, $04, nBb5, $08
+
+	; Credits outro
 	dc.b	nBb5, $03, nRst, nBb5, nRst, nA5, $03, nRst, $13, nA5, $0E, nCs6
 	dc.b	$0C, nE6, nCs7, $0A, nD7, $02, nRst, $60, nRst, nRst, nRst, nRst
 	smpsPSGAlterVol     $FF
@@ -670,10 +775,13 @@ Mus91_Credits_Call16:
 
 ; PSG2 Data
 Mus91_Credits_PSG2:
+	; Credits intro
 	dc.b	nRst, $60
 	smpsLoop            $00, $08, Mus91_Credits_PSG2
 	dc.b	nRst, $02
 	smpsCall            Mus91_Credits_Call14
+
+	; Green Hill Zone
 	smpsPSGAlterVol     $FE
 	smpsPSGvoice        fTone_01
 	dc.b	nRst, $16, nE6, $06, nRst, $1E, nE6, $0C, nRst, $18, nRst, $18
@@ -685,12 +793,16 @@ Mus91_Credits_Loop24:
 	smpsLoop            $00, $02, Mus91_Credits_Loop24
 	dc.b	nRst, $18, nC6, $06, nRst, $1E, nC6, $0C, nRst, $18, nRst, $18
 	dc.b	nB5, $06, nRst, $1E, nB5, $0C, nRst, $18
+
+	; Transition: Green Hill Zone to Labyrinth Zone
 	smpsNoteFill        $06
 	smpsPSGvoice        fTone_06
 
 Mus91_Credits_Loop25:
 	dc.b	nC7, $0C, nB6, nA6, nG6
 	smpsLoop            $00, $08, Mus91_Credits_Loop25
+
+	; Labyrinth Zone
 	smpsNoteFill        $00
 	smpsPSGvoice        fTone_09
 	smpsPSGAlterVol     $01
@@ -700,17 +812,23 @@ Mus91_Credits_Loop26:
 	dc.b	nG6, $03, $09, $06
 	smpsAlterPitch      $05
 	smpsLoop            $00, $02, Mus91_Credits_Loop26
+
+	; Marble Zone
 	smpsAlterPitch      $F6
 	dc.b	nRst, $06, nG6, $0C, nG6, nG6, nG6, $06, nRst, $30, nRst, $02
 	smpsAlterNote       $01
 	smpsPSGAlterVol     $03
 	smpsCall            Mus91_Credits_Call15
+
+	; Star Light Zone
 	smpsAlterNote       $00
 	dc.b	nRst, $30
 	smpsPSGAlterVol     $01
 	smpsAlterPitch      $F4
 	smpsPSGvoice        fTone_05
 	smpsCall            Mus91_Credits_Call04
+
+	; Scrap Brain Zone
 	smpsAlterPitch      $0C
 	smpsPSGAlterVol     $FD
 	smpsNoteFill        $03
@@ -727,9 +845,13 @@ Mus91_Credits_Loop29:
 	dc.b	nA6, nA6, nE7, nA6, nD7, nA6, nC7, nA6
 	smpsLoop            $00, $04, Mus91_Credits_Loop29
 	smpsLoop            $01, $02, Mus91_Credits_Loop27
+
+	; Transition: Scrap Brain Zone to credits outro
 	dc.b	nRst, $60, nRst, nRst, nRst, nRst, nRst
 	; These rests are unnecessary, and cause the following notes to play way too late.
 	; Delete these three notes to fix this.
+
+	; Credits outro
 	dc.b	nRst, nRst, nRst
 	; This erroneous FM-only command causes the following notes to be inaudible.
 	smpsAlterVol        $0C
@@ -741,17 +863,23 @@ Mus91_Credits_Loop29:
 
 ; PSG3 Data
 Mus91_Credits_PSG3:
+	; Credits intro
 	smpsPSGform         $E7
 	smpsNoteFill        $04
 
 Mus91_Credits_Loop18:
 	dc.b	nMaxPSG, $0C
 	smpsLoop            $00, $48, Mus91_Credits_Loop18
+
+	; Green Hill Zone
 	smpsNoteFill        $06
 
 Mus91_Credits_Loop19:
 	dc.b	$0C
 	smpsLoop            $00, $60, Mus91_Credits_Loop19
+
+	; Transition: Green Hill Zone to Labyrinth Zone
+	; Labyrinth Zone
 	smpsPSGAlterVol     $FF
 	smpsCall            Mus91_Credits_Call13
 	smpsNoteFill        $0E
@@ -762,6 +890,8 @@ Mus91_Credits_Loop19:
 Mus91_Credits_Loop1A:
 	smpsCall            Mus91_Credits_Call13
 	smpsLoop            $00, $04, Mus91_Credits_Loop1A
+
+	; Marble Zone
 	smpsPSGvoice        fTone_09
 	smpsPSGAlterVol     $01
 	smpsAlterPitch      $0B
@@ -775,6 +905,8 @@ Mus91_Credits_Loop1C:
 	smpsLoop            $00, $02, Mus91_Credits_Loop1C
 	dc.b	nB3, nB3, nF4, nF4, nD4, nD4, nF4, nF4, nE4, nE4, nB4, nB4
 	dc.b	nAb4, nAb4, nB4, nB4, nA3, nA3, nE4, nE4, nC4, nC4, nE4, nE4
+
+	; Star Light Zone
 	dc.b	nA3, $06, nRst, $1E
 	smpsNoteFill        $02
 	smpsAlterPitch      $F5
@@ -794,6 +926,8 @@ Mus91_Credits_Loop1D:
 Mus91_Credits_Loop1E:
 	smpsPSGvoice        fTone_04
 	dc.b	$03, $03
+
+	; Scrap Brain Zone
 	smpsPSGAlterVol     $02
 	smpsPSGvoice        fTone_08
 	smpsNoteFill        $08
@@ -801,6 +935,8 @@ Mus91_Credits_Loop1E:
 	smpsNoteFill        $03
 	smpsPSGAlterVol     $FE
 	smpsLoop            $00, $20, Mus91_Credits_Loop1E
+
+	; Transition: Scrap Brain Zone to credits outro
 	dc.b	nRst, $30
 	smpsNoteFill        $01
 	smpsPSGvoice        fTone_04
@@ -822,6 +958,8 @@ Mus91_Credits_Loop21:
 
 Mus91_Credits_Loop22:
 	dc.b	nMaxPSG, $04, nRst, nMaxPSG
+
+	; Credits outro
 	smpsLoop            $00, $08, Mus91_Credits_Loop22
 
 Mus91_Credits_Loop23:
@@ -846,6 +984,7 @@ Mus91_Credits_Loop23:
 
 ; DAC Data
 Mus91_Credits_DAC:
+	; Credits intro
 	dc.b	dSnare, $06, dSnare, dSnare, dSnare, dSnare, $0C, $06, $0C, $06, $0C, $0C
 	dc.b	$0C
 	smpsCall            Mus91_Credits_Call00
@@ -853,36 +992,47 @@ Mus91_Credits_DAC:
 	smpsCall            Mus91_Credits_Call00
 	dc.b	dKick, $0C, dSnare, dSnare, dSnare, dSnare, dSnare, dSnare, dSnare
 
+	; Green Hill Zone
 Mus91_Credits_Loop00:
 	dc.b	dKick, $18, dSnare, $0C, dKick, $18, $0C, dSnare, $18
 	smpsLoop            $00, $07, Mus91_Credits_Loop00
 	dc.b	dKick, $18, dSnare, $0C, dKick, $18, dSnare, $0C, $0C, $0C
 
+	; Transition: Green Hill Zone to Labyrinth Zone
 Mus91_Credits_Loop01:
 	dc.b	dKick, $18, dSnare, $0C, dKick, $18, $0C, dSnare, $18
 	smpsLoop            $00, $03, Mus91_Credits_Loop01
 	dc.b	dKick, $18, dSnare, $0C, dKick, $18, dSnare, $0C, dSnare, dSnare
 	smpsSetTempoDiv     $02
 
+	; Labyrinth Zone
 Mus91_Credits_Loop02:
 	dc.b	dKick, $12, dKick, $06, dKick, $0C, dSnare
 	smpsLoop            $00, $05, Mus91_Credits_Loop02
+
+	; Marble Zone
 	dc.b	dKick, $12, dKick, $06, dKick, $06, dSnare, dSnare, dSnare
 
 Mus91_Credits_Loop03:
 	dc.b	dKick, $0C
 	smpsLoop            $00, $18, Mus91_Credits_Loop03
 	dc.b	dKick, $0C, dKick, dKick, dKick, $06, dKick, $02, dKick, dSnare, dSnare, $0C
+
+	; Star Light Zone
 	dc.b	nRst, $24
 
 Mus91_Credits_Loop04:
 	dc.b	dKick, $0C, dKick, dKick, dKick
 	smpsLoop            $00, $07, Mus91_Credits_Loop04
 	dc.b	dKick, $0C, dKick, dSnare, $03, dSnare, dSnare, dSnare, dSnare, dSnare, dSnare, dSnare
+
+	; Scrap Brain Zone
 	smpsCall            Mus91_Credits_Call01
 	dc.b	dHiTimpani, $02, dKick, $01, dMidTimpani, $05, dSnare, $01, dHiTimpani, $05, dMidTimpani, $06
 	smpsCall            Mus91_Credits_Call01
 	dc.b	dMidTimpani, $02, dSnare, $01, dHiTimpani, $05, dSnare, $01, dMidTimpani, $05, dSnare, $01
+
+	; Transition: Scrap Brain Zone to credits outro
 	dc.b	dHiTimpani, $02, dSnare, $03, dSnare, $03, dSnare, dKick, dKick, dSnare, dSnare, dKick
 	dc.b	dKick, dKick, dSnare, $09, dSnare, $06, $03, $03, dKick, $09, $03, dSnare
 	dc.b	$09, dKick, $06, $06, $03, dSnare, $06, $03, $03, dSnare, $06, dSnare
@@ -892,6 +1042,8 @@ Mus91_Credits_Loop05:
 	dc.b	nRst, $04, dKick, $08, dSnare, $06, dKick, dKick, $0C, dSnare, $0A, dKick
 	dc.b	$02
 	smpsLoop            $00, $03, Mus91_Credits_Loop05
+
+	; Credits outro
 	smpsSetTempoDiv     $01
 	dc.b	nRst, $18, dSnare, $14, dKick, $04, dSnare, $0C, dSnare, dSnare, $0C, $08
 	dc.b	dKick, $04
