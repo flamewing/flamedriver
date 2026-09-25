@@ -1,0 +1,333 @@
+Sonic-series volume-envelope usage survey
+=========================================
+
+Scope and counting
+------------------
+Tone IDs are the one-based values used in song/SFX data. Tone 01 selects
+pointer-table entry 00, tone 27 selects entry 26, and 00 means no envelope.
+Each M/S cell counts distinct music/SFX sequence assets that select a tone
+in a PSG header or PSG track. It does not count notes or loop iterations.
+Both initial header tones and reachable in-track F5 tone changes count.
+Explicitly marked Unreachable blocks were excluded. A song can appear in
+several tone rows. A dash means the driver has no entry for that tone.
+
+S1/S2 and S3/S&K: public Sonic Retro music and SFX disassemblies. The S3
+and S&K columns include their respective named variants plus shared assets
+from the combined disassembly. This is a driver asset catalog, not a claim
+that every listed song is encountered in standalone gameplay.
+S3D: original retail-song .s3k rips (28 listed tracks) and 169 SFX entries
+decoded from the retail ROM using the public driver pointer table and
+command lengths. The unreferenced 0Eb Gumball Machine rip is excluded.
+SC: six Sonic and Crackers song rips and 16 SFX rip files. The research
+pack notes that this prototype has broken SFX pointers; its SFX column
+describes stored data, not confirmed audible playback.
+Flamedriver is omitted because it is a cross-game port, not another game.
+
+Sources:
+https://github.com/sonicretro/s1disasm/blob/AS/s1.sounddriver.asm
+https://github.com/sonicretro/s2disasm/blob/master/s2.sounddriver.asm
+https://github.com/sonicretro/skdisasm/blob/master/Sound/Z80%20Sound%20Driver.asm
+https://github.com/sonicretro/s3ddisasm/blob/master/smps_s3d.asm
+Local SMPS_Research_Pack_v5/Rips/Z80/{Sonic 3D Blast,Sonic and Crackers}
+
+Summary
+-------
+S1   19 music /  49 SFX;  9 of  9 tones referenced; unused: none
+S2   31 music /  81 SFX; 12 of 13 tones referenced; unused: 0D
+S3   49 music / 169 SFX; 25 of 39 tones referenced; unused: 07,0B,10,14,18,19,1A,1C,20,21,23,24,25,27
+SK   49 music / 169 SFX; 24 of 39 tones referenced; unused: 07,0B,10,14,18,19,1A,1C,20,21,22,23,24,25,27
+S3D  28 music / 169 SFX; 24 of 39 tones referenced; unused: 07,08,0B,10,13,14,18,19,1A,1B,1C,1F,20,21,25
+SC    6 music /  16 SFX;  5 of 12 tones referenced; unused: 01,06,07,08,09,0A,0B
+
+Tone/idx | S1 M/S | S2 M/S | S3 M/S | S&K M/S | S3D M/S | SC M/S
+---------+--------+--------+--------+---------+---------+-------
+01/00    | 2/1   | 7/1   | 18/0  | 20/0   | 5/0    | 0/0  |
+02/01    | 0/1   | 7/2   | 21/0  | 17/0   | 2/0    | 5/1  |
+03/02    | 1/0   | 5/2   | 5/1   | 5/1    | 12/1   | 5/0  |
+04/03    | 16/0  | 16/3  | 9/0   | 10/0   | 9/0    | 1/0  |
+05/04    | 14/0  | 8/0   | 4/0   | 4/0    | 1/0    | 5/0  |
+06/05    | 4/0   | 0/2   | 2/0   | 2/0    | 7/0    | 0/0  |
+07/06    | 0/1   | 1/1   | 0/0   | 0/0    | 0/0    | 0/0  |
+08/07    | 6/0   | 7/0   | 6/0   | 7/0    | 0/0    | 0/0  |
+09/08    | 3/0   | 1/1   | 5/0   | 5/0    | 1/0    | 0/0  |
+0A/09    | --    | 2/0   | 10/0  | 12/0   | 2/0    | 0/0  |
+0B/0A    | --    | 5/0   | 0/0   | 0/0    | 0/0    | 0/0  |
+0C/0B    | --    | 4/0   | 12/0  | 14/0   | 2/0    | 2/0  |
+0D/0C    | --    | 0/0   | 1/8   | 1/8    | 0/8    | --   |
+0E/0D    | --    | --    | 0/1   | 0/1    | 0/1    | --   |
+0F/0E    | --    | --    | 1/1   | 1/1    | 20/1   | --   |
+10/0F    | --    | --    | 0/0   | 0/0    | 0/0    | --   |
+11/10    | --    | --    | 4/1   | 4/1    | 10/1   | --   |
+12/11    | --    | --    | 2/0   | 2/0    | 14/0   | --   |
+13/12    | --    | --    | 1/0   | 1/0    | 0/0    | --   |
+14/13    | --    | --    | 0/0   | 0/0    | 0/0    | --   |
+15/14    | --    | --    | 0/2   | 0/2    | 0/2    | --   |
+16/15    | --    | --    | 2/3   | 2/3    | 0/3    | --   |
+17/16    | --    | --    | 0/1   | 0/1    | 3/1    | --   |
+18/17    | --    | --    | 0/0   | 0/0    | 0/0    | --   |
+19/18    | --    | --    | 0/0   | 0/0    | 0/0    | --   |
+1A/19    | --    | --    | 0/0   | 0/0    | 0/0    | --   |
+1B/1A    | --    | --    | 1/0   | 1/0    | 0/0    | --   |
+1C/1B    | --    | --    | 0/0   | 0/0    | 0/0    | --   |
+1D/1C    | --    | --    | 1/4   | 0/4    | 7/4    | --   |
+1E/1D    | --    | --    | 1/0   | 1/0    | 1/0    | --   |
+1F/1E    | --    | --    | 1/0   | 1/0    | 0/0    | --   |
+20/1F    | --    | --    | 0/0   | 0/0    | 0/0    | --   |
+21/20    | --    | --    | 0/0   | 0/0    | 0/0    | --   |
+22/21    | --    | --    | 1/0   | 0/0    | 1/0    | --   |
+23/22    | --    | --    | 0/0   | 0/0    | 3/0    | --   |
+24/23    | --    | --    | 0/0   | 0/0    | 1/0    | --   |
+25/24    | --    | --    | 0/0   | 0/0    | 0/0    | --   |
+26/25    | --    | --    | 1/0   | 1/0    | 8/0    | --   |
+27/26    | --    | --    | 0/0   | 0/0    | 3/0    | --   |
+
+Observations
+------------
+* S1 uses all nine tones somewhere; tones 02 and 07 occur only in SFX.
+* S2 tone 0D is defined but has no music or SFX selection in the surveyed
+  assets. Tone 06 is SFX-only; the other defined tones are referenced.
+* S3/S&K have many defined but unselected volume envelopes. The one
+  S3-only tone in this catalog is 22, in a Sonic 3 variant song.
+* S3D music favors tone 0F; S3D SFX mostly reuse S3/S&K tone choices,
+  but S3D SFX 6C selects tone 0D whereas S3/S&K SFX 48 does.
+* S3D tone 27 selects the addressable PSGTone_26 and appears in three
+  songs. The unpointed PSGTone_27 is not selected by tone 27.
+* SC music uses five of twelve tones; the stored SFX have one nonzero
+  selection, tone 02 in SFX 21 (Act Clear SFX).
+* No FM volume-envelope command was found in the surveyed S3/S&K song/SFX
+  sources or the decoded S3D and SC sequences. The later drivers support
+  FM volume envelopes, but this catalog does not select them for FM tracks.
+
+Music index: tone -> song assets
+--------------------------------
+
+S1:
+  01: Mus81 - GHZ, Mus91 - Credits
+  03: Mus81 - GHZ
+  04: Mus81 - GHZ, Mus82 - LZ, Mus84 - SLZ, Mus85 - SYZ, Mus86 - SBZ, Mus87 - Invincibility
+    Mus88 - Extra Life, Mus89 - Special Stage, Mus8A - Title Screen, Mus8B - Ending, Mus8D - FZ
+    Mus8E - Sonic Got Through, Mus8F - Game Over, Mus90 - Continue Screen, Mus91 - Credits
+    Mus93 - Get Emerald
+  05: Mus81 - GHZ, Mus84 - SLZ, Mus86 - SBZ, Mus87 - Invincibility, Mus88 - Extra Life
+    Mus8A - Title Screen, Mus8B - Ending, Mus8C - Boss, Mus8D - FZ, Mus8E - Sonic Got Through
+    Mus8F - Game Over, Mus90 - Continue Screen, Mus91 - Credits, Mus93 - Get Emerald
+  06: Mus81 - GHZ, Mus85 - SYZ, Mus86 - SBZ, Mus91 - Credits
+  08: Mus83 - MZ, Mus84 - SLZ, Mus86 - SBZ, Mus89 - Special Stage, Mus8C - Boss, Mus91 - Credits
+  09: Mus82 - LZ, Mus83 - MZ, Mus91 - Credits
+
+S2:
+  01: 82 - EHZ, 84 - OOZ, 87 - ARZ, 89 - CNZ, 8A - DEZ, 8B - MCZ, 9E - Credits
+  02: 81 - 2 Player Menu, 82 - EHZ, 87 - ARZ, 89 - CNZ, 8B - MCZ, 8E - CPZ, 9E - Credits
+  03: 82 - EHZ, 85 - MTZ, 91 - Options, 99 - Title Screen, 9E - Credits
+  04: 81 - 2 Player Menu, 83 - MCZ 2P, 8C - EHZ 2P, 8D - SCZ, 92 - Special Stage, 93 - Boss
+    94 - Final Boss, 96 - Super Sonic, 97 - Invincible, 98 - Extra Life, 99 - Title Screen
+    9A - End of Act, 9B - Game Over, 9C - Continue, 9D - Got Emerald, 9E - Credits
+  05: 95 - Ending, 97 - Invincible, 98 - Extra Life, 9A - End of Act, 9B - Game Over, 9C - Continue
+    9D - Got Emerald, 9E - Credits
+  07: 91 - Options
+  08: 82 - EHZ, 8C - EHZ 2P, 8D - SCZ, 90 - HPZ, 94 - Final Boss, 97 - Invincible, 9E - Credits
+  09: 96 - Super Sonic
+  0A: 87 - ARZ, 9E - Credits
+  0B: 82 - EHZ, 8B - MCZ, 8C - EHZ 2P, 92 - Special Stage, 9E - Credits
+  0C: 83 - MCZ 2P, 84 - OOZ, 93 - Boss, 95 - Ending
+
+S3:
+  01: AIZ1, AIZ2, Chrome Gadget, CNZ1, CNZ2, Continue (Sonic 3), Desert Palace, Game Over
+    Gum Ball Machine, HCZ1, HCZ2, ICZ1, ICZ2, LRZ1, LRZ2, Slots, Special Stage, SSZ (Sonic 3)
+  02: 1UP (Sonic 3), AIZ1, AIZ2, Chrome Gadget, Desert Palace, Game Complete (Sonic 3), Game Over
+    Gum Ball Machine, HCZ1, HCZ2, ICZ1, ICZ2, LBZ2, Level Outro, LRZ1, LRZ2, Menu (Sonic 3)
+    Miniboss (Sonic 3), Slots, Special Stage, Title (Sonic 3)
+  03: Balloon Park, Game Over, Gum Ball Machine, Level Outro, Slots
+  04: AIZ1, Chaos Emerald, Chrome Gadget, CNZ1, CNZ2, Continue (Sonic 3), LRZ1, Menu (Sonic 3)
+    SSZ (Sonic 3)
+  05: AIZ2, Chaos Emerald, CNZ1, CNZ2
+  06: ICZ1, ICZ2
+  08: Chrome Gadget, Desert Palace, HCZ1, HCZ2, LRZ1, LRZ2
+  09: Balloon Park, Game Over, Gum Ball Machine, Slots, Special Stage
+  0A: 1UP (Sonic 3), AIZ2, Chrome Gadget, Desert Palace, Game Complete (Sonic 3), HCZ1, HCZ2
+    Invincible (Sonic 3), LRZ2, Title (Sonic 3)
+  0C: AIZ1, AIZ2, Chrome Gadget, Continue (Sonic 3), Desert Palace, HCZ1, HCZ2, Level Outro, LRZ1, LRZ2
+    Menu (Sonic 3), Special Stage
+  0D: Competition Menu
+  0F: Competition Menu
+  11: CNZ1, CNZ2, LBZ1, LBZ2
+  12: CNZ1, CNZ2
+  13: LBZ2
+  16: ICZ1, ICZ2
+  1B: Credits (Sonic 3)
+  1D: Miniboss (Sonic 3)
+  1E: Competition Menu
+  1F: Competition Menu
+  22: Miniboss (Sonic 3)
+  26: Miniboss (Sonic 3)
+
+SK:
+  01: AIZ1, AIZ2, Chrome Gadget, CNZ1, CNZ2, Continue (Sonic & Knuckles), Credits (Sonic & Knuckles)
+    Desert Palace, Game Over, Gum Ball Machine, HCZ1, HCZ2, ICZ1, ICZ2, Knuckles (Sonic & Knuckles)
+    LRZ1, LRZ2, Slots, Special Stage, SSZ (Sonic & Knuckles)
+  02: AIZ1, AIZ2, Chrome Gadget, Desert Palace, Game Over, Gum Ball Machine, HCZ1, HCZ2, ICZ1, ICZ2
+    LBZ2, Level Outro, LRZ1, LRZ2, Menu (Sonic & Knuckles), Slots, Special Stage
+  03: Balloon Park, Game Over, Gum Ball Machine, Level Outro, Slots
+  04: AIZ1, Chaos Emerald, Chrome Gadget, CNZ1, CNZ2, Continue (Sonic & Knuckles)
+    Credits (Sonic & Knuckles), LRZ1, Menu (Sonic & Knuckles), SSZ (Sonic & Knuckles)
+  05: AIZ2, Chaos Emerald, CNZ1, CNZ2
+  06: ICZ1, ICZ2
+  08: Chrome Gadget, Credits (Sonic & Knuckles), Desert Palace, HCZ1, HCZ2, LRZ1, LRZ2
+  09: Balloon Park, Game Over, Gum Ball Machine, Slots, Special Stage
+  0A: 1UP (Sonic & Knuckles), AIZ2, Chrome Gadget, Credits (Sonic & Knuckles), Desert Palace
+    Game Complete (Sonic & Knuckles), HCZ1, HCZ2, Invincible (Sonic & Knuckles)
+    Knuckles (Sonic & Knuckles), LRZ2, Title (Sonic & Knuckles)
+  0C: AIZ1, AIZ2, Chrome Gadget, Continue (Sonic & Knuckles), Credits (Sonic & Knuckles), Desert Palace
+    Game Complete (Sonic & Knuckles), HCZ1, HCZ2, Level Outro, LRZ1, LRZ2, Menu (Sonic & Knuckles)
+    Special Stage
+  0D: Competition Menu
+  0F: Competition Menu
+  11: CNZ1, CNZ2, LBZ1, LBZ2
+  12: CNZ1, CNZ2
+  13: LBZ2
+  16: ICZ1, ICZ2
+  1B: Credits (Sonic & Knuckles)
+  1E: Competition Menu
+  1F: Competition Menu
+  26: Knuckles (Sonic & Knuckles)
+
+S3D:
+  01: 02 Green Grove 2, 0E The Final Fight, 12 Boss Theme 2, 16 Game Over
+    17 Cheat Message (S3K Results).827F
+  02: 02 Green Grove 2, 16 Game Over
+  03: 01 Green Grove 1, 02 Green Grove 2, 03 Rusty Ruin 1, 08 Spring Stadium 2, 0E The Final Fight
+    0F Ending, 10 Special Stage, 11 Panic Puppet 1, Level Select Screen, 14 Intro, 16 Game Over
+    1B Invincibility, 1C Main Menu
+  04: 01 Green Grove 1, 04 Rusty Ruin 2, 08 Spring Stadium 2, 10 Special Stage
+    11 Panic Puppet 1, Level Select Screen, 17 Cheat Message (S3K Results).827F, 1A Chaos Emerald
+    1B Invincibility, 1C Main Menu
+  05: 1A Chaos Emerald
+  06: 01 Green Grove 1, 08 Spring Stadium 2, 10 Special Stage, 11 Panic Puppet 1, Level Select Screen
+    15 Credits, 1B Invincibility, 1C Main Menu
+  09: 16 Game Over
+  0A: 12 Boss Theme 2, 19 Extra Life
+  0C: 17 Cheat Message (S3K Results).827F, 18 Act Clear.8698
+  0F: 01 Green Grove 1, 02 Green Grove 2, 03 Rusty Ruin 1, 04 Rusty Ruin 2, 05 Volcano Valley 2
+    06 Volcano Valley 1, 07 Spring Stadium 1, 08 Spring Stadium 2, 09 Diamond Dust 1, 0A Diamond Dust 2
+    0B Gene Gadget 1, 0C Gene Gadget 2, 0D Panic Puppet 2, 0F Ending, 10 Special Stage
+    11 Panic Puppet 1, Level Select Screen, 13 Boss Theme 1, 14 Intro, 15 Credits, 1C Main Menu
+  11: 05 Volcano Valley 2, 06 Volcano Valley 1, 07 Spring Stadium 1, 09 Diamond Dust 1
+    0A Diamond Dust 2, 0B Gene Gadget 1, 0C Gene Gadget 2, 0D Panic Puppet 2, 13 Boss Theme 1
+    1C Main Menu
+  12: 01 Green Grove 1, 02 Green Grove 2, 05 Volcano Valley 2, 06 Volcano Valley 1, 07 Spring Stadium 1
+    08 Spring Stadium 2, 09 Diamond Dust 1, 0A Diamond Dust 2, 0F Ending, 10 Special Stage
+    11 Panic Puppet 1, Level Select Screen, 14 Intro, 15 Credits, 1C Main Menu
+  17: 05 Volcano Valley 2, 0D Panic Puppet 2, 13 Boss Theme 1
+  1D: 02 Green Grove 2, 03 Rusty Ruin 1, 04 Rusty Ruin 2, 08 Spring Stadium 2, 0B Gene Gadget 1
+    0C Gene Gadget 2, 13 Boss Theme 1
+  1E: 1B Invincibility
+  22: 15 Credits
+  23: 02 Green Grove 2, 04 Rusty Ruin 2, 09 Diamond Dust 1
+  24: 1B Invincibility
+  26: 04 Rusty Ruin 2, 06 Volcano Valley 1, 09 Diamond Dust 1, 0B Gene Gadget 1, 0C Gene Gadget 2
+    0D Panic Puppet 2, 13 Boss Theme 1, 1B Invincibility
+  27: 02 Green Grove 2, 0E The Final Fight, 10 Special Stage
+
+SC:
+  02: 01 Electoria, 02 Walkin, 03 Hyper-Hyper, 04 Evening Star, 05 Moonrise
+  03: 01 Electoria, 02 Walkin, 03 Hyper-Hyper, 05 Moonrise, 06 Game Over
+  04: 04 Evening Star
+  05: 01 Electoria, 02 Walkin, 03 Hyper-Hyper, 04 Evening Star, 05 Moonrise
+  0C: 01 Electoria, 02 Walkin
+
+SFX index: asset -> selected tones
+-----------------------------------
+
+S1:
+  SndBC - Teleport: 07
+  SndC1 - Break Item: 01
+  SndC5 - Cash Register: 02
+
+S2:
+  A8 - Beep: 04
+  BC - Spin Dash Release: 07
+  C1 - Explosion: 01
+  C5 - Tally End: 02
+  D1 - Unknown (Unused): 02
+  D4 - OOZ Lid Pop: 04
+  DF - Super Transform: 03
+  E5 - Leaves: 03, 06
+  E6 - Mega Mack Drop: 09
+  E7 - Drawbridge Move: 06
+  E9 - Drawbridge Down: 04
+
+S3:
+  36 - Skid: 0D
+  39 - Splash: 0D
+  3D - Break: 0E
+  42 - Insta Shield Attack: 17
+  47 - Sand Wall Rise: 0D
+  48 - Blast: 0D
+  54 - Boss Laser: 0D
+  58 - Fan Latch: 0F
+  62 - Jump: 0D
+  66 - All Spheres Collected: 1D
+  6D - Unknown Shift: 0D
+  70 - Lava Ball: 0D
+  8D - Unknown Flutter: 16
+  97 - Enemy Breath: 11
+  9A - Spring Latch: 15
+  9E - Clank: 15
+  A0 - Missile Shoot: 1D
+  A4 - Mecha Transform: 16
+  A6 - Launch Grab: 1D
+  B6 - Dash: 1D
+  B8 - Signpost: 03
+  D1 - Unknown Flutter 2: 16
+
+SK:
+  36 - Skid: 0D
+  39 - Splash: 0D
+  3D - Break: 0E
+  42 - Insta Shield Attack: 17
+  47 - Sand Wall Rise: 0D
+  48 - Blast: 0D
+  54 - Boss Laser: 0D
+  58 - Fan Latch: 0F
+  62 - Jump: 0D
+  66 - All Spheres Collected: 1D
+  6D - Unknown Shift: 0D
+  70 - Lava Ball: 0D
+  8D - Unknown Flutter: 16
+  97 - Enemy Breath: 11
+  9A - Spring Latch: 15
+  9E - Clank: 15
+  A0 - Missile Shoot: 1D
+  A4 - Mecha Transform: 16
+  A6 - Launch Grab: 1D
+  B6 - Dash: 1D
+  B8 - Signpost: 03
+  D1 - Unknown Flutter 2: 16
+
+S3D:
+  36: 0D
+  39: 0D
+  3D: 0E
+  42: 17
+  47: 0D
+  54: 0D
+  58: 0F
+  62: 0D
+  66: 1D
+  6C: 0D
+  6D: 0D
+  70: 0D
+  8D: 16
+  97: 11
+  9A: 15
+  9E: 15
+  A0: 1D
+  A4: 16
+  A6: 1D
+  B6: 1D
+  B8: 03
+  D1: 16
+
+SC:
+  21 Act Clear SFX: 02
+

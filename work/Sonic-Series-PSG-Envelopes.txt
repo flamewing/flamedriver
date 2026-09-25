@@ -1,38 +1,113 @@
-S3K <-> SC Differences
-----------------------
-Envelope 02 is shorter in SC (S3K has 18h, SC 07h bytes)
-Envelope 03 is completely different
+Sonic-series envelope comparison
+================================
 
-SC has only 0Ch Envelopes, S3K has 27h
-
-
-S3K <-> S3D Differences
+Conventions and sources
 -----------------------
-Envelope 04 is longer in S3D (S3K has 0Bh, S3D 23h bytes)
-Envelope 26 is shorter in S3D (S3K has 64h, S3D 62h bytes)
-S3D has an additional envelope 28
+All indices below are zero-based hexadecimal pointer-table indices. A song's
+volume-envelope number is one higher (table index 00 is tone 01). Byte lengths
+include the ending control byte unless explicitly called "payload". The old
+notes sometimes mixed zero-based indices with one-based tone numbers.
 
+Public Sonic Retro disassemblies:
+S1: https://github.com/sonicretro/s1disasm/blob/AS/s1.sounddriver.asm
+S2: https://github.com/sonicretro/s2disasm/blob/master/s2.sounddriver.asm
+S3/S&K: https://github.com/sonicretro/skdisasm/blob/master/Sound/Z80%20Sound%20Driver.asm
+S3D: https://github.com/sonicretro/s3ddisasm/blob/master/smps_s3d.asm
 
-S1 <-> S2 Differences
----------------------
-S2 has 3 additional envelopes (S1 has 0Ah, S2 has 0Dh envelopes)
+Cross-checked against the local SMPS_Research_Pack_v5 PSG.lst and Modulat.lst
+rips, and this repository's Envelopes.a80. The S3/S&K disassembly has a
+SonicDriverVer==3 branch for the S3-specific end of VolEnv_25. The public
+smps-rips repository documents the rip files:
+https://github.com/sonicretro/smps-rips
 
+SC identification
+-----------------
+The old "SC" set exactly matches the pack's Sonic and Crackers PSG.lst:
+0Ch entries, differing from S3/S&K at indices 02 and 03. "SC" therefore
+means Sonic and Crackers (Sonic Crackers).
 
-S2 <-> S3K
-----------
-The envelopes are completely different, so they aren't compareable.
-Here is a conversion table:
-S2	S3K
-01	0A (close, but shorter and with small fade-in)
-02	02
-03	0C?
-04	27 (close)
-05	1C (close)
-06	26 (S3K one is longer)
-07	1D (S3K one is longer)
-08	1D (more is less close)
-09	08/15 (close)
-0A	-
-0B	-
-0C	-
+Volume envelopes
+----------------
+Driver              Pointer entries   Indices       Relation
+Sonic 1             09h               00-08         Original 68k table
+Sonic 2             0Dh               00-0C         First 09h identical to S1
+Sonic 3             27h               00-26         Later Z80 table
+Sonic & Knuckles    27h               00-26         S3 except 25
+Sonic 3D Blast      27h               00-26         S&K except 03
+Sonic and Crackers  0Ch               00-0B         S3 except 02 and 03
+Flamedriver         34h               00-33         S&K base plus S1/S2 profiles
 
+S1 -> S2: All 9 S1 envelopes are byte-identical at the same indices in S2.
+S2 appends four entries, 09-0C. The old note's S1 count of 0Ah and "three
+additional" S2 envelopes were both off by one.
+
+S3 -> S&K: Only index 25 differs. The final attenuation value 09h is repeated
+ten times in S3 and eight times in S&K. Total sizes are 65h vs 63h bytes,
+or 64h vs 62h payload bytes before the shared 83h control.
+
+S&K -> S3D: Only addressable index 03 differs. S3D extends the ending of the
+same initial ramp. Sizes are 0Ch vs 24h bytes, or 0Bh vs 23h payload bytes,
+both ending in 81h. Relative to S3, S3D also has S&K's shorter index 25.
+
+S3D has an additional 2Ah-byte data block, PSGTone_27, after the table.
+Its pointer table ends at PSGTone_26. The pack rip includes the block as a
+28th entry, but ordinary envelope selection cannot address it. This is
+unreferenced envelope data, not a 28th selectable envelope.
+
+Sonic and Crackers -> S3/S&K: Indices 00-01 and 04-0B are byte-identical.
+Index 02 has 08h vs 19h bytes (07h vs 18h payload), and diverges after
+the first five bytes, so it is not merely shorter. Index 03 is a completely
+different 0Ch-byte sequence. S3/S&K add indices 0C-26 (1Bh entries).
+
+S2 -> S3/S&K/S3D: Numeric IDs do not generally carry across. Ignoring the
+ending control, S2 index 01 (tone 02) exactly matches later indices 01
+(tone 02) and 0E (tone 0F): 00 02 04 06 08 10. S2 index 03 (tone 04)
+is the first ten attenuation bytes of later index 03 (tone 04), which adds
+one 06. No other S2 entry has an exact attenuation sequence
+in the later table. The old S2-to-S3K guesses were qualitative and mixed
+indexing conventions; they are not byte-accurate conversion IDs. Those 11
+tones require choosing replacement envelopes by sound and ending behavior.
+S2 index 01 ends in 80h, while its later sample matches end in 83h; matching
+samples alone does not imply matching behavior. Flamedriver has matching samples for every S2 tone at VolEnv_27-VolEnv_33;
+see below for the provenance distinction at VolEnv_27.
+
+FM volume envelopes
+-------------------
+S1 and S2 have no preset FM volume-envelope pointer table. S3, S&K and S3D
+use the SAME volume-envelope pointer table above for PSG and FM. FM envelope
+commands select an entry and apply its values to masked YM2612 operator TLs.
+Thus the S3/S&K index 25 and S&K/S3D index 03 differences also apply to FM
+tracks that select these envelopes. The original S3/S&K source notes that
+VolEnv_0A contains F0h (-16), an erroneous negative attenuation which the
+FM volume handler interprets as a control byte.
+
+Pitch/modulation envelopes
+--------------------------
+S1/S2 have command-driven, per-track pitch modulation, but no preset pitch-
+envelope pointer table. S3, S&K and S3D each have eight such entries, 00-07.
+All eight byte streams match exactly across these three drivers. S3D labels
+the table z80_PSGNoisePointers/PSG_Noise*, while S3/S&K label it
+z80_ModEnvPointers/ModEnv_*; their modulation routines use those tables for
+frequency effects. Sonic and Crackers has 0Ah modulation entries and none
+of its first eight is byte-identical to S3/S&K. These tables are separate
+from the inline modulation parameters in music tracks.
+
+Flamedriver
+-----------
+Flamedriver's VolEnv_00-VolEnv_26 match S&K bytes except VolEnv_17: S&K
+stores three cycles of the eight-sample waveform before 80h; Flamedriver
+stores one cycle before 80h. The reset command makes the intended looping
+waveform the same. VolEnv_0A's written -16 is the same F0h byte as S&K.
+Flamedriver's VolEnv_28-VolEnv_33 reproduce S2 pointer indices 01-0C
+(song tones 02-0D) in order. VolEnv_27 also matches the samples of tone 01
+in both S1 and S2, which are identical; the bytes alone do not establish
+which game supplied it. All thirteen VolEnv_27-VolEnv_33 attenuation sequences
+match S2, but their ending bytes are 81h instead of S2's 80h, so identical
+end behavior is not implied. Flamedriver's VolEnv_27 is unrelated to S3D's
+unreferenced PSGTone_27.
+Flamedriver's eight ModEnv_00-07 entries match S3/S&K.
+
+Usage survey
+------------
+Per-song and per-SFX tone selections are catalogued in
+work/Sonic-Series-Envelope-Usage.txt.
